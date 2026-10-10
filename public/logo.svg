@@ -1,0 +1,62 @@
+<svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="collabMainGrad" x1="40" y1="200" x2="360" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1D72FE" />
+      <stop offset="35%" stop-color="#2563EB" />
+      <stop offset="70%" stop-color="#6366F1" />
+      <stop offset="100%" stop-color="#A855F7" />
+    </linearGradient>
+
+    <linearGradient id="collabTopGrad" x1="120" y1="200" x2="340" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2563EB" />
+      <stop offset="60%" stop-color="#7C3AED" />
+      <stop offset="100%" stop-color="#A855F7" />
+    </linearGradient>
+
+    <linearGradient id="collabBottomGrad" x1="120" y1="200" x2="340" y2="340" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2563EB" />
+      <stop offset="60%" stop-color="#7C3AED" />
+      <stop offset="100%" stop-color="#A855F7" />
+    </linearGradient>
+
+    <linearGradient id="headLeftGrad" x1="30" y1="175" x2="90" y2="225" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#1D72FE" />
+    </linearGradient>
+
+    <linearGradient id="headTopGrad" x1="175" y1="35" x2="225" y2="95" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6366F1" />
+      <stop offset="100%" stop-color="#A855F7" />
+    </linearGradient>
+
+    <linearGradient id="headBottomGrad" x1="175" y1="315" x2="225" y2="375" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6366F1" />
+      <stop offset="100%" stop-color="#A855F7" />
+    </linearGradient>
+  </defs>
+
+  <path
+    d="M 305 135 A 135 135 0 1 0 305 265 L 282 245 A 102 102 0 1 1 282 155 Z"
+    fill="url(#collabMainGrad)"
+  />
+
+  <circle cx="200" cy="65" r="26" fill="url(#headTopGrad)" />
+  <circle cx="65" cy="200" r="26" fill="url(#headLeftGrad)" />
+  <circle cx="200" cy="335" r="26" fill="url(#headBottomGrad)" />
+
+  <path
+    d="M 168 85 C 175 98 186 104 200 104 C 214 104 225 98 232 85 C 218 80 182 80 168 85 Z"
+    fill="url(#headTopGrad)"
+  />
+  <path
+    d="M 85 168 C 98 175 104 186 104 200 C 104 214 98 225 85 232 C 80 218 80 182 85 168 Z"
+    fill="url(#headLeftGrad)"
+  />
+  <path
+    d="M 168 315 C 175 302 186 296 200 296 C 214 296 225 302 232 315 C 218 320 182 320 168 315 Z"
+    fill="url(#headBottomGrad)"
+  />
+
+  <circle cx="293.5" cy="145" r="16.5" fill="url(#collabTopGrad)" />
+  <circle cx="293.5" cy="255" r="16.5" fill="url(#collabBottomGrad)" />
+</svg>

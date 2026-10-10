@@ -1,0 +1,6 @@
+{
+  "name": "COLLAB",
+  "description": "Empowering future leaders through collaborative excellence.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
