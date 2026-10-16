@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import AdminPage from './pages/Admin.tsx';
 import QRCode from 'qrcode';
 import officialLogo from './assets/images/logo2.png';
 import {
@@ -28,12 +30,13 @@ import {
   Maximize2,
   Minimize2,
   ArrowUp,
+  Shield,
+  Medal,
   Instagram,
   Facebook,
   Twitter,
   Wifi,
   Phone,
-  Shield,
   Download,
   IdCard,
   RotateCw,
@@ -91,17 +94,25 @@ interface CertificateRecord {
   issuer: string;
 }
 
+interface ParticipantMember {
+  name: string;
+  role: string;
+  email: string;
+}
+
 interface TeamParticipation {
   id: string;
-  name: string;
-  project: string;
-  role: string;
+  projectName: string;
+  teamLeader: string;
+  members: ParticipantMember[];
+  projectDescription: string;
   award?: 'First Place' | 'Second Place' | 'Third Place' | 'Participation';
+  status: 'Pending' | 'Approved' | 'Rejected';
 }
 
 const INITIAL_TEAM_PARTICIPATIONS: TeamParticipation[] = [
-  { id: 'tp-1', name: 'Fatima Zahra', project: 'AI Robotics Sprint', role: 'Team Lead' },
-  { id: 'tp-2', name: 'Ahmad Khan', project: 'Smart Agriculture Tool', role: 'Developer' }
+  { id: 'tp-1', projectName: 'AI Robotics Sprint', teamLeader: 'Fatima Zahra', members: [{name: 'Fatima Zahra', role: 'Team Lead', email: 'fatima@example.com'}, {name: 'Member 2', role: 'Dev', email: 'm2@example.com'}], projectDescription: 'Developing autonomous robots.', award: 'First Place', status: 'Approved' },
+  { id: 'tp-2', projectName: 'Smart Agriculture Tool', teamLeader: 'Ahmad Khan', members: [{name: 'Ahmad Khan', role: 'Developer', email: 'ahmad@example.com'}], projectDescription: 'IoT based solution.', award: 'Second Place', status: 'Approved' }
 ];
 
 
@@ -110,7 +121,7 @@ const INITIAL_EVENTS: EventItem[] = [
     id: 'ev-1',
     title: 'First Mega Event of Collabs',
     category: 'Upcoming',
-    date: '18 October 2026',
+    date: '31 October 2026',
     time: '09:30 AM – 05:30 PM PKT',
     venue: 'Anywhere in Booni, Chitral (Venue TBA)',
     description: 'The landmark first mega gathering of Collabs in Chitral. Bringing together youth innovators, builders, students, and mentors for hands-on collaboration, workshops, and recognition.',
@@ -354,7 +365,7 @@ const INITIAL_CERTIFICATES: CertificateRecord[] = [
     recipientName: 'Jordan Hayes',
     achievementType: 'Excellence',
     eventName: 'First Mega Event of Collabs',
-    issueDate: '18 October 2026',
+    issueDate: '31 October 2026',
     verified: true,
     issuer: 'Collabs. Community Board'
   },
@@ -363,7 +374,7 @@ const INITIAL_CERTIFICATES: CertificateRecord[] = [
     recipientName: 'Samantha Wu',
     achievementType: 'Volunteer Leadership',
     eventName: 'First Mega Event of Collabs Operations',
-    issueDate: '18 October 2026',
+    issueDate: '31 October 2026',
     verified: true,
     issuer: 'Sofia Morales, Volunteer Coordinator'
   },
@@ -372,7 +383,7 @@ const INITIAL_CERTIFICATES: CertificateRecord[] = [
     recipientName: 'Devon Takahashi',
     achievementType: 'Active Participation',
     eventName: 'First Mega Event of Collabs',
-    issueDate: '18 October 2026',
+    issueDate: '31 October 2026',
     verified: true,
     issuer: 'Alex Rivera, Lead Organizer'
   }
@@ -395,7 +406,8 @@ export default function App() {
     teamDirectory: true,
     volunteerNetwork: true,
     certificatePortal: true,
-    awardsShowcase: true
+    awardsShowcase: true,
+    badgeGenerator: true
   });
 
   // Individual Card-Level Expand/Collapse State
@@ -430,7 +442,8 @@ export default function App() {
       teamDirectory: true,
       volunteerNetwork: true,
       certificatePortal: true,
-      awardsShowcase: true
+      awardsShowcase: true,
+      badgeGenerator: true
     });
   };
 
@@ -441,7 +454,8 @@ export default function App() {
       teamDirectory: false,
       volunteerNetwork: false,
       certificatePortal: false,
-      awardsShowcase: false
+      awardsShowcase: false,
+      badgeGenerator: false
     });
   };
 
@@ -473,13 +487,17 @@ export default function App() {
   // Events filter
   const [eventFilter, setEventFilter] = useState<'All' | 'Upcoming' | 'Workshops' | 'Completed'>('All');
 
-  // Real-time Countdown strictly for 18 October 2026
+  // Participation filter
+  const [participationSearch, setParticipationSearch] = useState('');
+  const [participationAwardFilter, setParticipationAwardFilter] = useState<'All' | 'First Place' | 'Second Place' | 'Third Place' | 'Participation'>('All');
+
+  // Real-time Countdown strictly for 31 October 2026
   const [timeLeft, setTimeLeft] = useState({ days: 8, hours: 19, minutes: 48, seconds: 20 });
 
   useEffect(() => {
     const calculateCountdown = () => {
-      // Event Date: 18 October 2026 at 09:30 AM PKT
-      const targetTime = new Date('2026-10-18T09:30:00').getTime();
+      // Event Date: 31 October 2026 at 09:30 AM PKT
+      const targetTime = new Date('2026-10-31T09:30:00').getTime();
       const actualNow = Date.now();
       const diff = targetTime - actualNow;
 
@@ -560,20 +578,24 @@ export default function App() {
     recipientName: 'Ali Ahmad',
     achievementType: 'Excellence' as 'Excellence' | 'Volunteer Leadership' | 'Active Participation',
     eventName: 'First Mega Event of Collabs',
-    issueDate: '18 October 2026'
+    issueDate: '31 October 2026'
   });
   const [teamParticipations, setTeamParticipations] = useState<TeamParticipation[]>(INITIAL_TEAM_PARTICIPATIONS);
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [adminUsername, setAdminUsername] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
   const [adminLoginError, setAdminLoginError] = useState('');
-  const [newParticipant, setNewParticipant] = useState<{name: string, project: string, role: string, award?: 'First Place' | 'Second Place' | 'Third Place' | 'Participation'}>({ name: '', project: '', role: '', award: 'Participation' });
+// ...
+
+  const [activePass, setActivePass] = useState<any>(null);
+  const [badgeSuccessNotice, setBadgeSuccessNotice] = useState<string | null>(null);
 
   const handleAdminLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (adminUsername === 'admin' && adminPassword === 'collabs2026') {
       setIsAdminMode(true);
       setIsAdminModalOpen(false);
+      navigate('/admin');
       setAdminUsername('');
       setAdminPassword('');
       setAdminLoginError('');
@@ -697,21 +719,15 @@ export default function App() {
         name: '',
         email: '',
         department: 'Technical',
+        availability: '4-8 Hours / Week',
         experience: ''
       });
       setVolSubmitted(false);
     }, 4000);
   };
 
-  const handleAddParticipant = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newParticipant.name || !newParticipant.project || !newParticipant.role) return;
-    setTeamParticipations([...teamParticipations, {
-      id: `tp-${Date.now()}`,
-      ...newParticipant
-    }]);
-    setNewParticipant({ name: '', project: '', role: '', award: 'Participation' });
-  };
+// ... rest of code ...
+
 
 
   const handleGenerateCertificate = (e: React.FormEvent) => {
@@ -723,7 +739,7 @@ export default function App() {
       recipientName: certForm.recipientName,
       achievementType: certForm.achievementType,
       eventName: certForm.eventName,
-      issueDate: certForm.issueDate || '18 October 2026',
+      issueDate: certForm.issueDate || '31 October 2026',
       verified: true,
       issuer: 'Collabs. Community Board'
     };
@@ -784,6 +800,22 @@ export default function App() {
     if (volunteerFilter === 'All') return true;
     return vol.department === volunteerFilter;
   });
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  if (location.pathname === '/admin') {
+    return <AdminPage 
+        teamParticipations={teamParticipations} 
+        setTeamParticipations={setTeamParticipations} 
+        volunteers={volunteers}
+        setVolunteers={setVolunteers}
+        certDatabase={certDatabase}
+        setCertDatabase={setCertDatabase}
+        handleVolunteerSubmit={handleVolunteerSubmit}
+        handleGenerateCertificate={handleGenerateCertificate}
+    />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased selection:bg-blue-600 selection:text-white">
@@ -857,12 +889,14 @@ export default function App() {
             >
               <span>Admin</span>
             </button>
-            <button
-              onClick={() => handleOpenRegistration()}
+            <a
+              href="https://docs.google.com/forms/d/e/1FAIpQLSdUwKtlCvMl4JJBpsa6e7xMJ7KirLBU5_B6ram88WUwza-p-g/viewform"
+              target="_blank"
+              rel="noopener noreferrer"
               className="px-3.5 sm:px-5 py-2 text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all shadow-md shadow-blue-600/20 active:scale-95 cursor-pointer flex items-center gap-1.5"
             >
               <span>Register Now</span>
-            </button>
+            </a>
           </div>
 
         </div>
@@ -920,43 +954,40 @@ export default function App() {
           
           {/* Hero Left Content */}
           <div className="lg:col-span-7 text-left space-y-5">
-            <h1 className="font-['Roboto'] text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.08]">
-              First Mega Event of <br className="hidden sm:block" />
-              <span className="text-blue-600 font-bold font-['Roboto']">
-                Collabs.
-              </span>
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-slate-900 tracking-tighter leading-tight mb-6">
+              First Mega Event of <br />
+              <span className="text-blue-600">Collabs.</span>
             </h1>
 
-            <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl">
-              Uniting innovators, students, and community creators from across Booni, Upper Chitral, and beyond. A landmark day of collaboration, interactive workshops, creative problem-solving, and verified achievements.
+            <p className="text-lg sm:text-xl text-slate-600 leading-relaxed max-w-3xl">
+              Empowering the next generation of innovators, builders, and community leaders. Join us in Booni for an extraordinary day of collaboration, hands-on workshops, and creative problem-solving designed to turn bold ideas into tangible, verified impact.
             </p>
 
             {/* Quick Details Bar */}
-            <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-200 space-y-2 text-xs">
+            <div className="inline-flex flex-wrap justify-center gap-6 bg-white p-4 rounded-2xl shadow-sm border border-slate-200 text-sm mt-4">
               <div className="flex items-center gap-2 text-slate-800">
-                <Calendar size={16} className="text-blue-600 shrink-0" />
-                <span className="font-bold">Date:</span>
-                <span className="font-semibold text-blue-900">Sunday, 18 October 2026</span>
+                <Calendar size={18} className="text-blue-600 shrink-0" />
+                <span className="font-bold">31 October 2026</span>
               </div>
-              <div className="flex items-start gap-2 text-slate-800">
-                <MapPin size={16} className="text-blue-600 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-bold">Venue:</span>{' '}
-                  <span className="font-semibold text-blue-900">
-                    Anywhere in Booni, Chitral (Venue To Be Announced Shortly)
-                  </span>
-                </div>
+              <div className="flex items-center gap-2 text-slate-800 border-l border-slate-200 pl-6">
+                <MapPin size={18} className="text-blue-600 shrink-0" />
+                <span className="font-bold">Booni, Upper Chitral</span>
               </div>
+            </div>
+            <div className="pt-6">
+                <button onClick={() => setIsAdminModalOpen(true)} className="px-6 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-all cursor-pointer">
+                    Admin Portal
+                </button>
             </div>
 
             <div className="pt-2 flex flex-wrap items-center gap-3">
-              <button
-                onClick={() => handleOpenRegistration(INITIAL_EVENTS[0])}
+              <a
+                href="https://docs.google.com/forms/d/e/1FAIpQLSdUwKtlCvMl4JJBpsa6e7xMJ7KirLBU5_B6ram88WUwza-p-g/viewform" target="_blank" rel="noopener noreferrer"
                 className="px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-lg shadow-md shadow-blue-600/20 transition-all flex items-center gap-2 cursor-pointer hover:scale-[1.02]"
               >
-                <span>Reserve Seat for 18 Oct</span>
+                <span>Reserve Seat for 31 Oct</span>
                 <ChevronRight size={16} />
-              </button>
+              </a>
               <a
                 href="#events"
                 onClick={(e) => handleSmoothNavClick(e, 'events', 'eventsHub')}
@@ -1189,12 +1220,14 @@ export default function App() {
                           {isCardExpanded ? 'Collapse Agenda' : 'Expand Agenda'}
                         </button>
                         {!isFull && (
-                          <button
-                            onClick={() => handleOpenRegistration(event)}
+                          <a
+                            href="https://docs.google.com/forms/d/e/1FAIpQLSdUwKtlCvMl4JJBpsa6e7xMJ7KirLBU5_B6ram88WUwza-p-g/viewform"
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer text-center"
                           >
                             Register
-                          </button>
+                          </a>
                         )}
                       </div>
                     </div>
@@ -1348,37 +1381,80 @@ export default function App() {
 
       {/* 5. Team Participation Section */}
       <section id="team-participation" className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200">
-        <div className="mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <h2 className="font-heading text-3xl font-black text-slate-900 tracking-tight">Team Participation</h2>
+          
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              type="text"
+              placeholder="Search participants..."
+              value={participationSearch}
+              onChange={e => setParticipationSearch(e.target.value)}
+              className="p-2.5 border rounded-xl border-slate-300 text-sm focus:border-blue-600 focus:outline-none"
+            />
+            <select
+              value={participationAwardFilter}
+              onChange={e => setParticipationAwardFilter(e.target.value as any)}
+              className="p-2.5 border rounded-xl border-slate-300 text-sm focus:border-blue-600 focus:outline-none"
+            >
+              <option value="All">All Awards</option>
+              <option value="First Place">First Place</option>
+              <option value="Second Place">Second Place</option>
+              <option value="Third Place">Third Place</option>
+              <option value="Participation">Participation</option>
+            </select>
+          </div>
         </div>
 
-        {isAdminMode && (
-          <form onSubmit={handleAddParticipant} className="bg-white p-6 rounded-xl border border-slate-200 mb-8 space-y-4">
-            <h3 className="text-lg font-bold">Add Participant</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <input placeholder="Name" value={newParticipant.name} onChange={e => setNewParticipant({...newParticipant, name: e.target.value})} className="border p-2 rounded" />
-              <input placeholder="Project" value={newParticipant.project} onChange={e => setNewParticipant({...newParticipant, project: e.target.value})} className="border p-2 rounded" />
-              <input placeholder="Role" value={newParticipant.role} onChange={e => setNewParticipant({...newParticipant, role: e.target.value})} className="border p-2 rounded" />
-              <select value={newParticipant.award || 'Participation'} onChange={e => setNewParticipant({...newParticipant, award: e.target.value as any})} className="border p-2 rounded">
-                <option value="Participation">Participation</option>
-                <option value="First Place">First Place</option>
-                <option value="Second Place">Second Place</option>
-                <option value="Third Place">Third Place</option>
-              </select>
-            </div>
-            <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">Add Participant</button>
-          </form>
-        )}
-
+        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {teamParticipations.map(p => (
-            <div key={p.id} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-              <h3 className="font-bold text-lg">{p.name}</h3>
-              <p className="text-slate-600">Project: {p.project}</p>
-              <p className="text-slate-600">Role: {p.role}</p>
-              <div className="mt-4 inline-block px-2 py-1 text-xs font-bold bg-blue-100 text-blue-800 rounded">Award: {p.award || 'Participation'}</div>
-            </div>
-          ))}
+          {teamParticipations
+            .filter(p => 
+              (participationAwardFilter === 'All' || p.award === participationAwardFilter) &&
+              (p.teamLeader.toLowerCase().includes(participationSearch.toLowerCase()) || 
+               p.projectName.toLowerCase().includes(participationSearch.toLowerCase()))
+            )
+              .map(p => {
+              const getAwardDetails = (award?: string) => {
+                  switch(award) {
+                      case 'First Place': return { icon: <Trophy size={16} className="text-amber-600" />, style: 'bg-amber-100 text-amber-800', prize: '10,000 PKR Cash Prize + Official Winner Shield' };
+                      case 'Second Place': return { icon: <Shield size={16} className="text-slate-500" />, style: 'bg-slate-100 text-slate-800', prize: 'Runner-up Shield + Certificate of Excellence' };
+                      case 'Third Place': return { icon: <Medal size={16} className="text-orange-700" />, style: 'bg-orange-100 text-orange-800', prize: 'Runner-up Shield + Certificate of Excellence' };
+                      default: return { icon: <Award size={16} className="text-blue-600" />, style: 'bg-blue-100 text-blue-800', prize: 'Official Participation Certificate' };
+                  }
+              };
+              const { icon: awardIcon, style: awardBadgeStyle, prize } = getAwardDetails(p.award);
+
+              return (
+                <div key={p.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-bold text-lg">{p.projectName}</h3>
+                      {isAdminMode && (
+                          <div className="flex gap-2">
+                              <button onClick={() => {/* edit logic placeholder */}} className="text-blue-600 text-xs font-bold">Edit</button>
+                              <button onClick={() => setTeamParticipations(prev => prev.filter(item => item.id !== p.id))} className="text-red-600 text-xs font-bold">Delete</button>
+                          </div>
+                      )}
+                    </div>
+                    <p className="text-slate-600 text-sm mt-1">Leader: <span className="font-semibold">{p.teamLeader}</span></p>
+                    <p className="text-slate-600 text-sm">Members: {p.members.length}</p>
+                    <p className="text-slate-500 text-xs mt-2 italic">{p.projectDescription}</p>
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-slate-100">
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Event Check-in QR</p>
+                    <div className="w-20 h-20 bg-slate-100 rounded-lg flex items-center justify-center border border-slate-200">
+                      {/* Placeholder for QR code generation logic specific to team */}
+                      <span className="text-[10px] text-slate-400">QR CODE</span>
+                    </div>
+                  </div>
+                  <div className={`mt-4 inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full w-fit ${awardBadgeStyle}`}>
+                    {awardIcon} {p.award || 'Participation'}
+                  </div>
+                  <p className="mt-2 text-xs text-slate-500 font-medium">{prize}</p>
+                </div>
+              );
+            })}
         </div>
       </section>
 
@@ -1453,7 +1529,7 @@ export default function App() {
 
                       <div>
                         <h4 className="font-heading text-sm font-black text-slate-900 uppercase tracking-wider mb-2">
-                          Assigned Tasks for 18 October 2026 (Booni Upper Chitral)
+                          Assigned Tasks for 31 October 2026 (Booni Upper Chitral)
                         </h4>
                         <div className="space-y-2">
                           {loggedInVolunteer.assignedTasks && loggedInVolunteer.assignedTasks.length > 0 ? (
@@ -1638,7 +1714,7 @@ export default function App() {
                     type="text"
                     value={certForm.issueDate}
                     onChange={e => setCertForm({ ...certForm, issueDate: e.target.value })}
-                    placeholder="18 October 2026"
+                    placeholder="31 October 2026"
                     className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-600"
                   />
                 </div>
@@ -1851,10 +1927,10 @@ export default function App() {
               {[
                 {
                   id: 'aw-1',
-                  award: 'Cash Prize with Certificate',
+                  award: 'Cash Prize with Official Winner Shield',
                   recipient: '1st Position',
                   initiative: 'Grand Prize Winner',
-                  citation: 'The 1st position winner is awarded a grand Cash Prize along with an authenticated Certificate of Excellence for highest achievement in the mega exhibition.',
+                  citation: 'The 1st position winner is awarded a 10,000 PKR Cash Prize and an Official Winner Shield for highest achievement in the mega exhibition.',
                   tier: '1st Position · Gold',
                   badgeColor: 'text-amber-800 bg-amber-50 border-amber-200',
                   iconBg: 'bg-amber-100 text-amber-700',
@@ -1862,10 +1938,10 @@ export default function App() {
                 },
                 {
                   id: 'aw-2',
-                  award: 'Commemorative Shield',
+                  award: 'Runner-up Shield with Certificate',
                   recipient: '2nd Position',
                   initiative: 'Runner-Up Honor',
-                  citation: 'The 2nd position runner-up is presented with the official Collabs Commemorative Shield and Certificate honoring outstanding innovation and design.',
+                  citation: 'The 2nd position runner-up is presented with the official Runner-up Shield and a Certificate of Excellence honoring outstanding innovation.',
                   tier: '2nd Position · Silver',
                   badgeColor: 'text-slate-800 bg-slate-100 border-slate-300',
                   iconBg: 'bg-slate-200 text-slate-800',
@@ -1873,10 +1949,10 @@ export default function App() {
                 },
                 {
                   id: 'aw-3',
-                  award: 'Medal with Certificate',
+                  award: 'Runner-up Shield with Certificate',
                   recipient: '3rd Position',
                   initiative: 'Distinction Honor',
-                  citation: 'The 3rd position winner receives an official commemorative Medal alongside an authenticated Certificate of Merit celebrating creative problem-solving.',
+                  citation: 'The 3rd position winner receives the Runner-up Shield alongside a Certificate of Excellence celebrating creative problem-solving.',
                   tier: '3rd Position · Bronze',
                   badgeColor: 'text-orange-900 bg-orange-50 border-orange-200',
                   iconBg: 'bg-orange-100 text-orange-700',
@@ -1885,9 +1961,9 @@ export default function App() {
                 {
                   id: 'aw-4',
                   award: 'Participation Certificate',
-                  recipient: 'All Other Participants',
+                  recipient: 'All Participants',
                   initiative: 'Every Contributor',
-                  citation: 'Every active delegate, student innovator, and project builder receives an official verified Certificate of Participation.',
+                  citation: 'Every active delegate, student innovator, and project builder receives an Official Participation Certificate.',
                   tier: 'Participation Honor',
                   badgeColor: 'text-blue-800 bg-blue-50 border-blue-200',
                   iconBg: 'bg-blue-100 text-blue-700',
@@ -1969,7 +2045,7 @@ export default function App() {
               </span>
             </div>
             <p className="text-slate-400 leading-relaxed text-xs">
-              First Mega Event of Collabs · 18 October 2026<br />
+              First Mega Event of Collabs · 31 October 2026<br />
               Anywhere in Booni, Chitral (Venue TBA).
             </p>
             <div className="flex gap-4">
@@ -2056,7 +2132,7 @@ export default function App() {
               Event Details
             </div>
             <p className="leading-relaxed mb-2 text-slate-300">
-              Date: 18 October 2026<br />
+              Date: 31 October 2026<br />
               Location: Booni, Chitral<br />
               Venue: To Be Announced (TBA)
             </p>
@@ -2126,7 +2202,7 @@ export default function App() {
                   {selectedEventForReg?.title || 'First Mega Event of Collabs'}
                 </h3>
                 <p className="text-xs text-slate-500 mb-4">
-                  Reserve your seat for 18 October 2026 in Booni, Chitral (Venue TBA).
+                  Reserve your seat for 31 October 2026 in Booni, Chitral (Venue TBA).
                 </p>
 
                 <form onSubmit={handleRegisterSubmit} className="space-y-3">
@@ -2230,7 +2306,7 @@ export default function App() {
                         seatZone: 'Zone B · Confirmed Seat',
                         avatarVariant: 1,
                         emergencyContact: '+92 345 9876543 (Event Ops)',
-                        issueDate: '18 October 2026',
+                        issueDate: '31 October 2026',
                         verified: true
                       });
                       setIsRegisterModalOpen(false);
@@ -2422,9 +2498,8 @@ export default function App() {
               <button type="submit" className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg cursor-pointer shadow-xs mt-1">Login to Admin Portal</button>
             </form>
             <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-xl text-[11px] text-blue-800 space-y-0.5">
-              <div className="font-bold">Default Management Credentials:</div>
-              <div>Username: <code className="font-mono bg-white px-1 py-0.5 rounded border border-blue-200">admin</code></div>
-              <div>Password: <code className="font-mono bg-white px-1 py-0.5 rounded border border-blue-200">collabs2026</code></div>
+              <div className="font-bold">Admin Portal:</div>
+              <div>The administrator is responsible for managing all aspects of team participation, event details, and volunteer management.</div>
             </div>
           </div>
         </div>
