@@ -975,9 +975,6 @@ export default function App() {
               </div>
             </div>
             <div className="pt-6">
-                <button onClick={() => setIsAdminModalOpen(true)} className="px-6 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-all cursor-pointer">
-                    Admin Portal
-                </button>
             </div>
 
             <div className="pt-2 flex flex-wrap items-center gap-3">
@@ -1037,7 +1034,7 @@ export default function App() {
                       First Mega Event of Collabs
                     </h2>
                     <p className="text-xs text-slate-600">
-                      Booni, Chitral (Venue TBA) · 18 Oct 2026
+                      Booni, Chitral (Venue TBA) · 31 Oct 2026
                     </p>
                   </div>
 
@@ -1480,7 +1477,7 @@ export default function App() {
                 </button>
               </div>
               <p className="text-sm text-slate-600 mt-1 max-w-2xl">
-                Volunteers can log in with their assigned credentials to view their specific duties, schedule, and assigned tasks for the 18 Oct Booni event.
+                Volunteers can log in with their assigned credentials to view their specific duties, schedule, and assigned tasks for the 31 Oct Booni event.
               </p>
             </div>
           </div>
@@ -2136,9 +2133,9 @@ export default function App() {
               Location: Booni, Chitral<br />
               Venue: To Be Announced (TBA)
             </p>
-            <p className="text-blue-400 font-semibold">
-              community@collabs.org
-            </p>
+              <a href="https://www.collabs.eu.org/" className="text-blue-400 font-semibold hover:underline">
+                https://www.collabs.eu.org/
+              </a>
           </div>
 
           <div>
