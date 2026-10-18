@@ -32,6 +32,7 @@ interface VolunteerManagementProps {
   volunteers: VolunteerLog[];
   setVolunteers: React.Dispatch<React.SetStateAction<VolunteerLog[]>>;
   exportCSV: (data: any[], filename: string) => void;
+  isDark?: boolean;
 }
 
 const COMMON_SCHOOLS = [
@@ -49,7 +50,8 @@ const STATUSES = ['Verified Active', 'Lead Volunteer', 'Active', 'Pending', 'Ina
 export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
   volunteers,
   setVolunteers,
-  exportCSV
+  exportCSV,
+  isDark = false
 }) => {
   // Filtering & Search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -327,48 +329,50 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
 
       {/* Summary KPI Cards Bar */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-          <div className="text-xs font-semibold uppercase text-slate-600 mb-1">Total Volunteers</div>
-          <div className="text-2xl font-black text-slate-900 font-mono tabular-nums">{stats.total}</div>
-          <div className="text-[11px] text-slate-600 mt-1 flex items-center gap-1">
+        <div className={`p-5 rounded-2xl border transition-colors ${isDark ? 'bg-slate-950/80 border-slate-800 text-white' : 'bg-white border-slate-200/80 text-slate-900 shadow-xs'}`}>
+          <div className="text-xs font-semibold uppercase text-slate-400 mb-1">Total Volunteers</div>
+          <div className={`text-2xl font-black font-mono tabular-nums ${isDark ? 'text-white' : 'text-slate-900'}`}>{stats.total}</div>
+          <div className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
             <span>Enrolled in organization</span>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-          <div className="text-xs font-semibold uppercase text-slate-600 mb-1">Verified Active</div>
-          <div className="text-2xl font-black text-emerald-600 font-mono tabular-nums">{stats.verified}</div>
-          <div className="text-[11px] text-slate-600 mt-1">Confirmed on-ground</div>
+        <div className={`p-5 rounded-2xl border transition-colors ${isDark ? 'bg-slate-950/80 border-slate-800 text-white' : 'bg-white border-slate-200/80 text-slate-900 shadow-xs'}`}>
+          <div className="text-xs font-semibold uppercase text-slate-400 mb-1">Verified Active</div>
+          <div className="text-2xl font-black text-emerald-500 font-mono tabular-nums">{stats.verified}</div>
+          <div className="text-[11px] text-slate-400 mt-1">Confirmed on-ground</div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-          <div className="text-xs font-semibold uppercase text-slate-600 mb-1">Lead Volunteers</div>
-          <div className="text-2xl font-black text-blue-600 font-mono tabular-nums">{stats.leads}</div>
-          <div className="text-[11px] text-slate-600 mt-1">Supervisors & Leads</div>
+        <div className={`p-5 rounded-2xl border transition-colors ${isDark ? 'bg-slate-950/80 border-slate-800 text-white' : 'bg-white border-slate-200/80 text-slate-900 shadow-xs'}`}>
+          <div className="text-xs font-semibold uppercase text-slate-400 mb-1">Lead Volunteers</div>
+          <div className="text-2xl font-black text-blue-500 font-mono tabular-nums">{stats.leads}</div>
+          <div className="text-[11px] text-slate-400 mt-1">Supervisors & Leads</div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-          <div className="text-xs font-semibold uppercase text-slate-600 mb-1">Contributed Hours</div>
-          <div className="text-2xl font-black text-purple-600 font-mono tabular-nums">{stats.totalHours} hrs</div>
-          <div className="text-[11px] text-slate-600 mt-1">Across all tracks</div>
+        <div className={`p-5 rounded-2xl border transition-colors ${isDark ? 'bg-slate-950/80 border-slate-800 text-white' : 'bg-white border-slate-200/80 text-slate-900 shadow-xs'}`}>
+          <div className="text-xs font-semibold uppercase text-slate-400 mb-1">Contributed Hours</div>
+          <div className="text-2xl font-black text-purple-400 font-mono tabular-nums">{stats.totalHours} hrs</div>
+          <div className="text-[11px] text-slate-400 mt-1">Across all tracks</div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs col-span-2 md:col-span-1">
-          <div className="text-xs font-semibold uppercase text-slate-600 mb-1">Partner Schools</div>
-          <div className="text-2xl font-black text-amber-600 font-mono tabular-nums">{stats.schoolsCount}</div>
-          <div className="text-[11px] text-slate-600 mt-1">Chitral & District</div>
+        <div className={`p-5 rounded-2xl border transition-colors col-span-2 md:col-span-1 ${isDark ? 'bg-slate-950/80 border-slate-800 text-white' : 'bg-white border-slate-200/80 text-slate-900 shadow-xs'}`}>
+          <div className="text-xs font-semibold uppercase text-slate-400 mb-1">Partner Schools</div>
+          <div className="text-2xl font-black text-amber-500 font-mono tabular-nums">{stats.schoolsCount}</div>
+          <div className="text-[11px] text-slate-400 mt-1">Chitral & District</div>
         </div>
       </div>
 
       {/* Main Table Card */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className={`rounded-3xl border shadow-xs overflow-hidden transition-colors ${
+        isDark ? 'bg-slate-950/80 border-slate-800' : 'bg-white border-slate-200'
+      }`}>
         {/* Module Header & Action Toolbar */}
-        <div className="p-6 md:p-8 border-b border-slate-100 space-y-6">
+        <div className={`p-6 md:p-8 border-b space-y-6 ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <div className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Personnel & Roster</div>
-              <h2 className="text-2xl font-black text-slate-900 font-heading">Volunteer Management</h2>
-              <p className="text-xs text-slate-500 mt-1">
+              <div className="text-xs font-bold text-blue-500 uppercase tracking-wider mb-1">Personnel & Roster</div>
+              <h2 className={`text-2xl font-black font-heading ${isDark ? 'text-white' : 'text-slate-900'}`}>Volunteer Management</h2>
+              <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                 Monitor volunteer rosters, filter by school institution, supervise work assignments, and manage credentials.
               </p>
             </div>
@@ -376,7 +380,11 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
             <div className="flex items-center gap-3 shrink-0">
               <button
                 onClick={handleExportFiltered}
-                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-colors flex items-center gap-2 cursor-pointer border border-slate-200/80"
+                className={`px-4 py-2.5 font-semibold text-xs rounded-xl transition-colors flex items-center gap-2 cursor-pointer border ${
+                  isDark
+                    ? 'bg-slate-900 hover:bg-slate-800 text-slate-200 border-slate-700'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200/80'
+                }`}
                 title="Export filtered records as CSV"
               >
                 <Download size={15} /> Export CSV ({filteredVolunteers.length})
@@ -401,12 +409,16 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                 placeholder="Search by name, ID, school, role, email..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors"
+                className={`w-full pl-10 pr-9 py-2.5 rounded-xl text-xs transition-colors border ${
+                  isDark
+                    ? 'bg-slate-900 border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500'
+                    : 'bg-slate-50 border-slate-200 text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white'
+                }`}
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300"
                 >
                   <X size={14} />
                 </button>
@@ -419,11 +431,15 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                 <select
                   value={schoolFilter}
                   onChange={e => setSchoolFilter(e.target.value)}
-                  className="w-full py-2.5 pl-3 pr-8 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-medium appearance-none focus:outline-none focus:border-blue-600 focus:bg-white cursor-pointer"
+                  className={`w-full py-2.5 pl-3 pr-8 rounded-xl text-xs font-medium appearance-none cursor-pointer border ${
+                    isDark
+                      ? 'bg-slate-900 border-slate-700 text-slate-200 focus:outline-none focus:border-blue-500'
+                      : 'bg-slate-50 border-slate-200 text-slate-800 focus:outline-none focus:border-blue-600 focus:bg-white'
+                  }`}
                 >
-                  <option value="All">All Schools & Institutions ({volunteers.length})</option>
+                  <option value="All" className={isDark ? 'bg-slate-900 text-white' : ''}>All Schools & Institutions ({volunteers.length})</option>
                   {availableSchools.map(school => (
-                    <option key={school} value={school}>
+                    <option key={school} value={school} className={isDark ? 'bg-slate-900 text-white' : ''}>
                       {school}
                     </option>
                   ))}
@@ -438,11 +454,15 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                 <select
                   value={statusFilter}
                   onChange={e => setStatusFilter(e.target.value)}
-                  className="w-full py-2.5 pl-3 pr-8 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-medium appearance-none focus:outline-none focus:border-blue-600 focus:bg-white cursor-pointer"
+                  className={`w-full py-2.5 pl-3 pr-8 rounded-xl text-xs font-medium appearance-none cursor-pointer border ${
+                    isDark
+                      ? 'bg-slate-900 border-slate-700 text-slate-200 focus:outline-none focus:border-blue-500'
+                      : 'bg-slate-50 border-slate-200 text-slate-800 focus:outline-none focus:border-blue-600 focus:bg-white'
+                  }`}
                 >
-                  <option value="All">All Statuses</option>
+                  <option value="All" className={isDark ? 'bg-slate-900 text-white' : ''}>All Statuses</option>
                   {STATUSES.map(st => (
-                    <option key={st} value={st}>
+                    <option key={st} value={st} className={isDark ? 'bg-slate-900 text-white' : ''}>
                       {st}
                     </option>
                   ))}
@@ -457,11 +477,15 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                 <select
                   value={roleFilter}
                   onChange={e => setRoleFilter(e.target.value)}
-                  className="w-full py-2.5 pl-3 pr-8 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-medium appearance-none focus:outline-none focus:border-blue-600 focus:bg-white cursor-pointer"
+                  className={`w-full py-2.5 pl-3 pr-8 rounded-xl text-xs font-medium appearance-none cursor-pointer border ${
+                    isDark
+                      ? 'bg-slate-900 border-slate-700 text-slate-200 focus:outline-none focus:border-blue-500'
+                      : 'bg-slate-50 border-slate-200 text-slate-800 focus:outline-none focus:border-blue-600 focus:bg-white'
+                  }`}
                 >
-                  <option value="All">All Roles / Depts</option>
+                  <option value="All" className={isDark ? 'bg-slate-900 text-white' : ''}>All Roles / Depts</option>
                   {availableDepartments.map(dept => (
-                    <option key={dept} value={dept}>
+                    <option key={dept} value={dept} className={isDark ? 'bg-slate-900 text-white' : ''}>
                       {dept}
                     </option>
                   ))}
@@ -475,7 +499,11 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
               {isFiltered ? (
                 <button
                   onClick={resetFilters}
-                  className="w-full py-2.5 px-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                  className={`w-full py-2.5 px-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1 cursor-pointer ${
+                    isDark
+                      ? 'bg-red-950/50 hover:bg-red-900/50 text-red-400 border border-red-800/60'
+                      : 'bg-red-50 hover:bg-red-100 text-red-600'
+                  }`}
                   title="Reset all search and filters"
                 >
                   <RotateCcw size={13} /> Reset
@@ -483,7 +511,11 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
               ) : (
                 <button
                   onClick={() => setSortAsc(!sortAsc)}
-                  className="w-full py-2.5 px-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                  className={`w-full py-2.5 px-2 rounded-xl text-xs font-medium transition-colors flex items-center justify-center gap-1 cursor-pointer border ${
+                    isDark
+                      ? 'bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-700'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200'
+                  }`}
                   title={`Sorted by ${sortField} (${sortAsc ? 'Ascending' : 'Descending'})`}
                 >
                   <ArrowUpDown size={13} /> {sortAsc ? 'Asc' : 'Desc'}
@@ -493,14 +525,14 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
           </div>
 
           {/* Active filter counter metadata */}
-          <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
+          <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
             <div className="flex items-center gap-2">
               <span>
-                Showing <strong className="text-slate-900 font-mono">{filteredVolunteers.length}</strong> of{' '}
-                <strong className="text-slate-900 font-mono">{volunteers.length}</strong> total volunteers
+                Showing <strong className={`font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>{filteredVolunteers.length}</strong> of{' '}
+                <strong className={`font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>{volunteers.length}</strong> total volunteers
               </span>
               {isFiltered && (
-                <span className="text-blue-600 font-medium">· Filtered results</span>
+                <span className="text-blue-500 font-medium">· Filtered results</span>
               )}
             </div>
 
@@ -518,7 +550,7 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                     }
                   }}
                   className={`capitalize transition-colors ${
-                    sortField === field ? 'font-bold text-blue-600 underline' : 'text-slate-500 hover:text-slate-800'
+                    sortField === field ? 'font-bold text-blue-500 underline' : isDark ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-800'
                   }`}
                 >
                   {field === 'dateJoined' ? 'Date Joined' : field}
@@ -532,7 +564,9 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50/70 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              <tr className={`border-b text-[11px] font-bold uppercase tracking-wider ${
+                isDark ? 'bg-slate-900/90 border-slate-800 text-slate-400' : 'bg-slate-50/70 border-slate-200 text-slate-500'
+              }`}>
                 <th className="py-4 px-6">Volunteer Profile</th>
                 <th className="py-4 px-6">School / Institution</th>
                 <th className="py-4 px-6">Role & Track</th>
@@ -542,7 +576,7 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                 <th className="py-4 px-6 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
+            <tbody className={`divide-y text-xs ${isDark ? 'divide-slate-800/80 text-slate-300' : 'divide-slate-100 text-slate-700'}`}>
               {filteredVolunteers.length > 0 ? (
                 filteredVolunteers.map(vol => {
                   // Initials
@@ -561,7 +595,9 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                   return (
                     <tr
                       key={vol.id}
-                      className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
+                      className={`transition-colors group cursor-pointer ${
+                        isDark ? 'hover:bg-slate-900/70' : 'hover:bg-slate-50/80'
+                      }`}
                       onClick={() => setSelectedVolunteer(vol)}
                     >
                       {/* Volunteer Column */}
@@ -570,23 +606,25 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                           <div
                             className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
                               isLead
-                                ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                                : 'bg-slate-100 text-slate-700 border border-slate-200'
+                                ? isDark ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' : 'bg-blue-100 text-blue-800 border border-blue-200'
+                                : isDark ? 'bg-slate-800 text-slate-300 border border-slate-700' : 'bg-slate-100 text-slate-700 border border-slate-200'
                             }`}
                           >
                             {initials}
                           </div>
                           <div>
-                            <div className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors flex items-center gap-1.5">
+                            <div className={`font-bold transition-colors flex items-center gap-1.5 ${
+                              isDark ? 'text-white group-hover:text-blue-400' : 'text-slate-900 group-hover:text-blue-600'
+                            }`}>
                               {vol.name}
                               {isLead && (
                                 <span title="Lead Volunteer">
-                                  <Shield size={13} className="text-blue-600" />
+                                  <Shield size={13} className="text-blue-500" />
                                 </span>
                               )}
                             </div>
-                            <div className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
-                              <span className="font-mono text-slate-600 font-semibold">{vol.id}</span>
+                            <div className="text-[11px] text-slate-400 flex items-center gap-1.5 mt-0.5">
+                              <span className={`font-mono font-semibold ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>{vol.id}</span>
                               <span aria-hidden="true">·</span>
                               <span>@{vol.username}</span>
                               {vol.email && (
@@ -602,7 +640,7 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
 
                       {/* School / Institution */}
                       <td className="py-4 px-6">
-                        <div className="font-medium text-slate-800 flex items-center gap-1.5">
+                        <div className={`font-medium flex items-center gap-1.5 ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
                           <Building2 size={14} className="text-slate-400 shrink-0" />
                           <span>{vol.school || 'Collabs Central Organization'}</span>
                         </div>
@@ -611,8 +649,8 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
 
                       {/* Role & Department */}
                       <td className="py-4 px-6">
-                        <div className="font-semibold text-slate-900">{vol.role || `${vol.department} Team`}</div>
-                        <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
+                        <div className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{vol.role || `${vol.department} Team`}</div>
+                        <div className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
                           <span className="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block"></span>
                           <span>{vol.department} Track</span>
                         </div>
@@ -623,22 +661,22 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                         <span
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
                             isLead
-                              ? 'bg-blue-50 text-blue-700 border-blue-200'
+                              ? isDark ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' : 'bg-blue-50 text-blue-700 border-blue-200'
                               : isVerified
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              ? isDark ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                               : isPending
-                              ? 'bg-amber-50 text-amber-700 border-amber-200'
-                              : 'bg-slate-100 text-slate-600 border-slate-200'
+                              ? isDark ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-amber-50 text-amber-700 border-amber-200'
+                              : isDark ? 'bg-slate-800 text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-600 border-slate-200'
                           }`}
                         >
                           <span
                             className={`w-1.5 h-1.5 rounded-full ${
                               isLead
-                                ? 'bg-blue-600'
+                                ? 'bg-blue-500'
                                 : isVerified
-                                ? 'bg-emerald-600'
+                                ? 'bg-emerald-500'
                                 : isPending
-                                ? 'bg-amber-600'
+                                ? 'bg-amber-500'
                                 : 'bg-slate-400'
                             }`}
                           ></span>
@@ -648,8 +686,8 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
 
                       {/* Hours Logged */}
                       <td className="py-4 px-6 text-right font-mono tabular-nums">
-                        <div className="font-bold text-slate-900 text-sm">{vol.hours || 0} hrs</div>
-                        <div className="w-20 ml-auto bg-slate-100 h-1.5 rounded-full mt-1.5 overflow-hidden">
+                        <div className={`font-bold text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>{vol.hours || 0} hrs</div>
+                        <div className={`w-20 ml-auto h-1.5 rounded-full mt-1.5 overflow-hidden ${isDark ? 'bg-slate-800' : 'bg-slate-100'}`}>
                           <div
                             className="bg-blue-600 h-full rounded-full"
                             style={{ width: `${Math.min(100, ((vol.hours || 0) / 100) * 100)}%` }}
@@ -659,11 +697,11 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
 
                       {/* Duties / Tasks Preview */}
                       <td className="py-4 px-6 max-w-xs">
-                        <p className="line-clamp-1 text-slate-600 text-[11px]" title={vol.duties}>
+                        <p className={`line-clamp-1 text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-600'}`} title={vol.duties}>
                           {vol.duties || 'General operations support'}
                         </p>
                         {vol.assignedTasks && vol.assignedTasks.length > 0 && (
-                          <div className="text-[11px] text-blue-600 font-semibold mt-0.5">
+                          <div className="text-[11px] text-blue-500 font-semibold mt-0.5">
                             {vol.assignedTasks.length} active assignment{vol.assignedTasks.length > 1 ? 's' : ''}
                           </div>
                         )}
@@ -674,21 +712,27 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                         <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => setSelectedVolunteer(vol)}
-                            className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                              isDark ? 'text-slate-400 hover:text-blue-400 hover:bg-slate-800' : 'text-slate-500 hover:text-blue-600 hover:bg-blue-50'
+                            }`}
                             title="View Full Volunteer Profile"
                           >
                             <Eye size={15} />
                           </button>
                           <button
                             onClick={() => openEditModal(vol)}
-                            className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
+                            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                              isDark ? 'text-slate-400 hover:text-amber-400 hover:bg-slate-800' : 'text-slate-500 hover:text-amber-600 hover:bg-amber-50'
+                            }`}
                             title="Edit Volunteer Details"
                           >
                             <Edit3 size={15} />
                           </button>
                           <button
                             onClick={() => setDeleteConfirmVolunteer(vol)}
-                            className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                              isDark ? 'text-slate-400 hover:text-red-400 hover:bg-slate-800' : 'text-slate-500 hover:text-red-600 hover:bg-red-50'
+                            }`}
                             title="Delete Volunteer"
                           >
                             <Trash2 size={15} />
@@ -700,18 +744,22 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                 })
               ) : (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-500">
+                  <td colSpan={7} className={`py-12 text-center ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                     <div className="max-w-sm mx-auto space-y-3">
-                      <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400">
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto ${
+                        isDark ? 'bg-slate-900 text-slate-500 border border-slate-800' : 'bg-slate-100 text-slate-400'
+                      }`}>
                         <Search size={22} />
                       </div>
-                      <div className="font-bold text-slate-800 text-sm">No volunteers match your criteria</div>
-                      <p className="text-xs text-slate-500">
+                      <div className={`font-bold text-sm ${isDark ? 'text-white' : 'text-slate-800'}`}>No volunteers match your criteria</div>
+                      <p className="text-xs text-slate-400">
                         Try adjusting your search terms or clearing your school and role filters.
                       </p>
                       <button
                         onClick={resetFilters}
-                        className="px-4 py-2 bg-blue-50 text-blue-600 text-xs font-bold rounded-xl hover:bg-blue-100 transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                        className={`px-4 py-2 text-xs font-bold rounded-xl transition-colors cursor-pointer inline-flex items-center gap-1.5 ${
+                          isDark ? 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                        }`}
                       >
                         <RotateCcw size={13} /> Clear all filters
                       </button>
@@ -737,16 +785,19 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
         existingVolunteers={volunteers}
         availableSchools={availableSchools}
         availableDepartments={availableDepartments}
+        isDark={isDark}
       />
 
       {/* ========================================================================= */}
       {/* MODAL 2: VOLUNTEER DETAIL & DUTY DRAWER MODAL */}
       {/* ========================================================================= */}
       {selectedVolunteer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 my-8 animate-fadeIn text-left space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
+          <div className={`${
+            isDark ? 'bg-slate-900 border-slate-700 text-white shadow-2xl' : 'bg-white border-slate-200 text-slate-900 shadow-2xl'
+          } rounded-3xl max-w-xl w-full p-6 sm:p-8 border my-8 animate-fadeIn text-left space-y-6 transition-colors`}>
             {/* Header */}
-            <div className="flex items-start justify-between pb-4 border-b border-slate-100">
+            <div className={`flex items-start justify-between pb-4 border-b ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-blue-600 text-white font-black text-xl flex items-center justify-center shadow-md shadow-blue-600/20">
                   {selectedVolunteer.name
@@ -758,19 +809,23 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-xl font-black text-slate-900 font-heading">{selectedVolunteer.name}</h3>
-                    <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                    <h3 className={`text-xl font-black font-heading ${isDark ? 'text-white' : 'text-slate-900'}`}>{selectedVolunteer.name}</h3>
+                    <span className={`font-mono text-xs font-semibold px-2 py-0.5 rounded ${
+                      isDark ? 'bg-slate-800 text-slate-300 border border-slate-700' : 'bg-slate-100 text-slate-700'
+                    }`}>
                       {selectedVolunteer.id}
                     </span>
                   </div>
-                  <div className="text-xs text-slate-500 mt-0.5">
+                  <div className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                     {selectedVolunteer.role} · @{selectedVolunteer.username}
                   </div>
                 </div>
               </div>
               <button
                 onClick={() => setSelectedVolunteer(null)}
-                className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-slate-900 flex items-center justify-center cursor-pointer"
+                className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-colors ${
+                  isDark ? 'bg-slate-800 text-slate-400 hover:text-white' : 'bg-slate-100 text-slate-500 hover:text-slate-900'
+                }`}
               >
                 <X size={16} />
               </button>
@@ -778,25 +833,25 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
 
             {/* Quick Details Grid */}
             <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                <div className="text-[11px] font-semibold text-slate-600 uppercase">Institutional Affiliation</div>
-                <div className="font-bold text-slate-900 mt-0.5 flex items-center gap-1.5">
-                  <Building2 size={13} className="text-blue-600 shrink-0" />
+              <div className={`p-3 rounded-2xl border ${isDark ? 'bg-slate-800/80 border-slate-700/80' : 'bg-slate-50 border-slate-100'}`}>
+                <div className="text-[11px] font-semibold text-slate-400 uppercase">Institutional Affiliation</div>
+                <div className={`font-bold mt-0.5 flex items-center gap-1.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  <Building2 size={13} className="text-blue-500 shrink-0" />
                   <span>{selectedVolunteer.school || 'Collabs Central Organization'}</span>
                 </div>
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                <div className="text-[11px] font-semibold text-slate-600 uppercase">Department & Track</div>
-                <div className="font-bold text-slate-900 mt-0.5 flex items-center gap-1.5">
-                  <Briefcase size={13} className="text-blue-600 shrink-0" />
+              <div className={`p-3 rounded-2xl border ${isDark ? 'bg-slate-800/80 border-slate-700/80' : 'bg-slate-50 border-slate-100'}`}>
+                <div className="text-[11px] font-semibold text-slate-400 uppercase">Department & Track</div>
+                <div className={`font-bold mt-0.5 flex items-center gap-1.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  <Briefcase size={13} className="text-blue-500 shrink-0" />
                   <span>{selectedVolunteer.department} Track</span>
                 </div>
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                <div className="text-[11px] font-semibold text-slate-600 uppercase">Contact Information</div>
-                <div className="text-slate-700 mt-0.5 space-y-0.5">
+              <div className={`p-3 rounded-2xl border ${isDark ? 'bg-slate-800/80 border-slate-700/80' : 'bg-slate-50 border-slate-100'}`}>
+                <div className="text-[11px] font-semibold text-slate-400 uppercase">Contact Information</div>
+                <div className={`mt-0.5 space-y-0.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   <div className="flex items-center gap-1">
                     <Mail size={12} className="text-slate-400" />
                     <span>{selectedVolunteer.email || 'No email registered'}</span>
@@ -810,30 +865,36 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                 </div>
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                <div className="text-[11px] font-semibold text-slate-600 uppercase">Date Enrolled</div>
-                <div className="font-bold text-slate-900 mt-0.5">
+              <div className={`p-3 rounded-2xl border ${isDark ? 'bg-slate-800/80 border-slate-700/80' : 'bg-slate-50 border-slate-100'}`}>
+                <div className="text-[11px] font-semibold text-slate-400 uppercase">Date Enrolled</div>
+                <div className={`font-bold mt-0.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   {selectedVolunteer.dateJoined || 'Booni Event Season 2026'}
                 </div>
-                <div className="text-[10px] text-emerald-600 font-semibold mt-0.5 flex items-center gap-1">
+                <div className="text-[10px] text-emerald-500 font-semibold mt-0.5 flex items-center gap-1">
                   <CheckCircle2 size={11} /> Registered Credential
                 </div>
               </div>
             </div>
 
             {/* Quick Status & Hours Controls */}
-            <div className="p-4 bg-blue-50/60 border border-blue-100 rounded-2xl space-y-3">
+            <div className={`p-4 rounded-2xl space-y-3 border ${
+              isDark ? 'bg-blue-950/40 border-blue-800/50' : 'bg-blue-50/60 border-blue-100'
+            }`}>
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-xs font-bold text-blue-900">Contribution Hours</div>
-                  <div className="text-2xl font-black text-blue-600 font-mono tabular-nums">
+                  <div className={`text-xs font-bold ${isDark ? 'text-blue-300' : 'text-blue-900'}`}>Contribution Hours</div>
+                  <div className="text-2xl font-black text-blue-500 font-mono tabular-nums">
                     {selectedVolunteer.hours || 0} Hours
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleAdjustHours(selectedVolunteer.id, 5)}
-                    className="px-3 py-1.5 bg-white border border-blue-200 text-blue-700 hover:bg-blue-50 text-xs font-bold rounded-xl cursor-pointer transition-colors shadow-xs"
+                    className={`px-3 py-1.5 border text-xs font-bold rounded-xl cursor-pointer transition-colors shadow-xs ${
+                      isDark
+                        ? 'bg-slate-900 border-blue-500/40 text-blue-300 hover:bg-slate-800'
+                        : 'bg-white border-blue-200 text-blue-700 hover:bg-blue-50'
+                    }`}
                   >
                     +5 hrs
                   </button>
@@ -846,8 +907,10 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-2 border-t border-blue-100 text-xs">
-                <span className="font-semibold text-slate-700">Change Status:</span>
+              <div className={`flex items-center justify-between pt-2 border-t text-xs ${
+                isDark ? 'border-blue-900/50' : 'border-blue-100'
+              }`}>
+                <span className={`font-semibold ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>Change Status:</span>
                 <div className="flex items-center gap-1.5">
                   {STATUSES.map(s => (
                     <button
@@ -856,6 +919,8 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                       className={`px-2 py-1 rounded-lg text-[10px] font-bold cursor-pointer transition-colors ${
                         selectedVolunteer.status === s
                           ? 'bg-blue-600 text-white shadow-xs'
+                          : isDark
+                          ? 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-700'
                           : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                       }`}
                     >
@@ -868,8 +933,10 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
 
             {/* Duties description */}
             <div className="space-y-1 text-xs">
-              <div className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">Primary Responsibilities</div>
-              <p className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 leading-relaxed">
+              <div className="font-bold uppercase tracking-wider text-[11px] text-slate-400">Primary Responsibilities</div>
+              <p className={`p-3 rounded-xl leading-relaxed border ${
+                isDark ? 'bg-slate-800/80 border-slate-700 text-slate-200' : 'bg-slate-50 border-slate-200 text-slate-700'
+              }`}>
                 {selectedVolunteer.duties || 'General operations and student delegation assistance.'}
               </p>
             </div>
@@ -877,7 +944,7 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
             {/* Assigned Tasks Checklist */}
             <div className="space-y-2 text-xs">
               <div className="flex items-center justify-between">
-                <div className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
+                <div className="font-bold uppercase tracking-wider text-[11px] text-slate-400">
                   Assigned Operational Tasks ({selectedVolunteer.assignedTasks?.length || 0})
                 </div>
               </div>
@@ -887,7 +954,9 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                   selectedVolunteer.assignedTasks.map((task, idx) => (
                     <div
                       key={idx}
-                      className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl flex items-start gap-2.5 text-slate-800"
+                      className={`p-2.5 rounded-xl flex items-start gap-2.5 border ${
+                        isDark ? 'bg-slate-800/80 border-slate-700 text-slate-200' : 'bg-slate-50 border-slate-200 text-slate-800'
+                      }`}
                     >
                       <CheckCircle2 size={15} className="text-emerald-500 shrink-0 mt-0.5" />
                       <span className="text-xs">{task}</span>
@@ -911,11 +980,15 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                       handleAddQuickTask(selectedVolunteer.id);
                     }
                   }}
-                  className="flex-1 p-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
+                  className={`flex-1 p-2 rounded-xl text-xs border ${
+                    isDark
+                      ? 'bg-slate-800 text-white placeholder-slate-500 border-slate-700 focus:outline-none focus:border-blue-500'
+                      : 'bg-slate-50 border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-blue-600'
+                  }`}
                 />
                 <button
                   onClick={() => handleAddQuickTask(selectedVolunteer.id)}
-                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl cursor-pointer"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl cursor-pointer"
                 >
                   Assign
                 </button>
@@ -923,20 +996,26 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
             </div>
 
             {/* Footer Actions */}
-            <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+            <div className={`flex items-center justify-between pt-4 border-t ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
               <button
                 onClick={() => {
                   const vol = selectedVolunteer;
                   setSelectedVolunteer(null);
                   openEditModal(vol);
                 }}
-                className="px-4 py-2 text-amber-700 bg-amber-50 hover:bg-amber-100 font-bold text-xs rounded-xl cursor-pointer transition-colors flex items-center gap-1.5"
+                className={`px-4 py-2 font-bold text-xs rounded-xl cursor-pointer transition-colors flex items-center gap-1.5 ${
+                  isDark
+                    ? 'text-amber-300 bg-amber-950/40 hover:bg-amber-900/50 border border-amber-800/50'
+                    : 'text-amber-700 bg-amber-50 hover:bg-amber-100'
+                }`}
               >
                 <Edit3 size={14} /> Edit Information
               </button>
               <button
                 onClick={() => setSelectedVolunteer(null)}
-                className="px-5 py-2 bg-slate-900 text-white font-bold text-xs rounded-xl cursor-pointer hover:bg-slate-800 transition-colors"
+                className={`px-5 py-2 font-bold text-xs rounded-xl cursor-pointer transition-colors ${
+                  isDark ? 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700' : 'bg-slate-900 text-white hover:bg-slate-800'
+                }`}
               >
                 Close Profile
               </button>
@@ -949,18 +1028,22 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
       {/* MODAL 3: EDIT VOLUNTEER MODAL */}
       {/* ========================================================================= */}
       {editingVolunteer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 my-8 animate-fadeIn text-left">
-            <div className="flex items-start justify-between pb-4 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
+          <div className={`${
+            isDark ? 'bg-slate-900 border-slate-700 text-white shadow-2xl' : 'bg-white border-slate-200 text-slate-900 shadow-2xl'
+          } rounded-3xl max-w-xl w-full p-6 sm:p-8 border my-8 animate-fadeIn text-left transition-colors`}>
+            <div className={`flex items-start justify-between pb-4 border-b ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
               <div>
-                <h3 className="text-lg font-black text-slate-900 font-heading">
+                <h3 className={`text-lg font-black font-heading ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   Edit Volunteer: {editingVolunteer.name}
                 </h3>
-                <p className="text-xs text-slate-500">ID: {editingVolunteer.id}</p>
+                <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>ID: {editingVolunteer.id}</p>
               </div>
               <button
                 onClick={() => setEditingVolunteer(null)}
-                className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-slate-900 flex items-center justify-center cursor-pointer"
+                className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-colors ${
+                  isDark ? 'bg-slate-800 text-slate-400 hover:text-white' : 'bg-slate-100 text-slate-500 hover:text-slate-900'
+                }`}
               >
                 <X size={16} />
               </button>
@@ -969,50 +1052,66 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
             <form onSubmit={handleEditVolunteerSubmit} className="mt-5 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Full Name</label>
+                  <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>Full Name</label>
                   <input
                     type="text"
                     required
                     value={editFormData.name || ''}
                     onChange={e => setEditFormData({ ...editFormData, name: e.target.value })}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
+                    className={`w-full p-2.5 rounded-xl text-xs border ${
+                      isDark
+                        ? 'bg-slate-800 text-white border-slate-700 focus:outline-none focus:border-blue-500'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:outline-none focus:border-blue-600'
+                    }`}
                   />
-                  {editErrors.name && <p className="text-[11px] text-red-600 mt-1">{editErrors.name}</p>}
+                  {editErrors.name && <p className="text-[11px] text-red-500 mt-1">{editErrors.name}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Email</label>
+                  <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>Email</label>
                   <input
                     type="email"
                     required
                     value={editFormData.email || ''}
                     onChange={e => setEditFormData({ ...editFormData, email: e.target.value })}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
+                    className={`w-full p-2.5 rounded-xl text-xs border ${
+                      isDark
+                        ? 'bg-slate-800 text-white border-slate-700 focus:outline-none focus:border-blue-500'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:outline-none focus:border-blue-600'
+                    }`}
                   />
-                  {editErrors.email && <p className="text-[11px] text-red-600 mt-1">{editErrors.email}</p>}
+                  {editErrors.email && <p className="text-[11px] text-red-500 mt-1">{editErrors.email}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Username</label>
+                  <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>Username</label>
                   <input
                     type="text"
                     required
                     value={editFormData.username || ''}
                     onChange={e => setEditFormData({ ...editFormData, username: e.target.value })}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 font-mono"
+                    className={`w-full p-2.5 rounded-xl text-xs font-mono border ${
+                      isDark
+                        ? 'bg-slate-800 text-white border-slate-700 focus:outline-none focus:border-blue-500'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:outline-none focus:border-blue-600'
+                    }`}
                   />
-                  {editErrors.username && <p className="text-[11px] text-red-600 mt-1">{editErrors.username}</p>}
+                  {editErrors.username && <p className="text-[11px] text-red-500 mt-1">{editErrors.username}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">School / Institution</label>
+                  <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>School / Institution</label>
                   <select
                     value={editFormData.school || availableSchools[0]}
                     onChange={e => setEditFormData({ ...editFormData, school: e.target.value })}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
+                    className={`w-full p-2.5 rounded-xl text-xs border ${
+                      isDark
+                        ? 'bg-slate-800 text-white border-slate-700 focus:outline-none focus:border-blue-500'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:outline-none focus:border-blue-600'
+                    }`}
                   >
                     {availableSchools.map(s => (
-                      <option key={s} value={s}>
+                      <option key={s} value={s} className={isDark ? 'bg-slate-900 text-white' : ''}>
                         {s}
                       </option>
                     ))}
@@ -1020,14 +1119,18 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Department</label>
+                  <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>Department</label>
                   <select
                     value={editFormData.department || 'Technical'}
                     onChange={e => setEditFormData({ ...editFormData, department: e.target.value })}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
+                    className={`w-full p-2.5 rounded-xl text-xs border ${
+                      isDark
+                        ? 'bg-slate-800 text-white border-slate-700 focus:outline-none focus:border-blue-500'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:outline-none focus:border-blue-600'
+                    }`}
                   >
                     {DEPARTMENTS.map(d => (
-                      <option key={d} value={d}>
+                      <option key={d} value={d} className={isDark ? 'bg-slate-900 text-white' : ''}>
                         {d}
                       </option>
                     ))}
@@ -1035,24 +1138,32 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Role Title</label>
+                  <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>Role Title</label>
                   <input
                     type="text"
                     value={editFormData.role || ''}
                     onChange={e => setEditFormData({ ...editFormData, role: e.target.value })}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
+                    className={`w-full p-2.5 rounded-xl text-xs border ${
+                      isDark
+                        ? 'bg-slate-800 text-white border-slate-700 focus:outline-none focus:border-blue-500'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:outline-none focus:border-blue-600'
+                    }`}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Status</label>
+                  <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>Status</label>
                   <select
                     value={editFormData.status || 'Verified Active'}
                     onChange={e => setEditFormData({ ...editFormData, status: e.target.value as any })}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
+                    className={`w-full p-2.5 rounded-xl text-xs border ${
+                      isDark
+                        ? 'bg-slate-800 text-white border-slate-700 focus:outline-none focus:border-blue-500'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:outline-none focus:border-blue-600'
+                    }`}
                   >
                     {STATUSES.map(st => (
-                      <option key={st} value={st}>
+                      <option key={st} value={st} className={isDark ? 'bg-slate-900 text-white' : ''}>
                         {st}
                       </option>
                     ))}
@@ -1060,32 +1171,42 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Logged Hours</label>
+                  <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>Logged Hours</label>
                   <input
                     type="number"
                     min="0"
                     value={editFormData.hours || 0}
                     onChange={e => setEditFormData({ ...editFormData, hours: Number(e.target.value) })}
-                    className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 font-mono"
+                    className={`w-full p-2.5 rounded-xl text-xs font-mono border ${
+                      isDark
+                        ? 'bg-slate-800 text-white border-slate-700 focus:outline-none focus:border-blue-500'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:outline-none focus:border-blue-600'
+                    }`}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Duties</label>
+                <label className={`block text-xs font-bold mb-1 ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>Duties</label>
                 <textarea
                   rows={2}
                   value={editFormData.duties || ''}
                   onChange={e => setEditFormData({ ...editFormData, duties: e.target.value })}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900"
+                  className={`w-full p-2.5 rounded-xl text-xs border ${
+                    isDark
+                      ? 'bg-slate-800 text-white border-slate-700 focus:outline-none focus:border-blue-500'
+                      : 'bg-slate-50 border-slate-300 text-slate-900 focus:outline-none focus:border-blue-600'
+                  }`}
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+              <div className={`flex items-center justify-end gap-3 pt-4 border-t ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
                 <button
                   type="button"
                   onClick={() => setEditingVolunteer(null)}
-                  className="px-4 py-2 bg-slate-100 text-slate-700 font-bold text-xs rounded-xl cursor-pointer"
+                  className={`px-4 py-2 font-bold text-xs rounded-xl cursor-pointer ${
+                    isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
                 >
                   Cancel
                 </button>
@@ -1105,21 +1226,27 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
       {/* MODAL 4: DELETE CONFIRMATION DIALOG */}
       {/* ========================================================================= */}
       {deleteConfirmVolunteer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 animate-fadeIn text-center space-y-4">
-            <div className="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+          <div className={`${
+            isDark ? 'bg-slate-900 border-slate-700 text-white shadow-2xl' : 'bg-white border-slate-200 text-slate-900 shadow-2xl'
+          } rounded-3xl max-w-sm w-full p-6 border animate-fadeIn text-center space-y-4`}>
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto ${
+              isDark ? 'bg-red-950/60 text-red-400 border border-red-800/60' : 'bg-red-50 text-red-600'
+            }`}>
               <Trash2 size={24} />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900">Remove Volunteer Record?</h3>
-              <p className="text-xs text-slate-500 mt-1">
-                Are you sure you want to remove <strong className="text-slate-900">{deleteConfirmVolunteer.name}</strong> ({deleteConfirmVolunteer.id})? This action cannot be undone.
+              <h3 className={`text-base font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>Remove Volunteer Record?</h3>
+              <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                Are you sure you want to remove <strong className={isDark ? 'text-white' : 'text-slate-900'}>{deleteConfirmVolunteer.name}</strong> ({deleteConfirmVolunteer.id})? This action cannot be undone.
               </p>
             </div>
             <div className="flex items-center justify-center gap-3 pt-2">
               <button
                 onClick={() => setDeleteConfirmVolunteer(null)}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl cursor-pointer"
+                className={`px-4 py-2 font-bold text-xs rounded-xl cursor-pointer ${
+                  isDark ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                }`}
               >
                 Cancel
               </button>
