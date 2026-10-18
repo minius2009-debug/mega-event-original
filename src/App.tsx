@@ -49,7 +49,7 @@ import {
   Layers
 } from 'lucide-react';
 
-interface EventItem {
+export interface EventItem {
   id: string;
   title: string;
   category: 'Upcoming' | 'Workshops' | 'Completed';
@@ -71,16 +71,20 @@ interface TeamMember {
   responsibilities: string[];
 }
 
-interface VolunteerLog {
+export interface VolunteerLog {
   id: string;
   name: string;
   username: string;
   password?: string;
-  department: 'Technical' | 'Logistics' | 'Content' | 'Outreach';
+  email?: string;
+  phone?: string;
+  school?: string;
+  role?: string;
+  department: 'Technical' | 'Logistics' | 'Content' | 'Outreach' | string;
   hours: number;
   duties: string;
   dateJoined: string;
-  status: 'Verified Active' | 'Lead Volunteer';
+  status: 'Verified Active' | 'Lead Volunteer' | 'Active' | 'Pending' | 'Inactive' | string;
   assignedTasks?: string[];
 }
 
@@ -94,25 +98,100 @@ interface CertificateRecord {
   issuer: string;
 }
 
-interface ParticipantMember {
+export interface ParticipantMember {
   name: string;
   role: string;
   email: string;
+  phone?: string;
+  school?: string;
+  volunteerId?: string;
 }
 
-interface TeamParticipation {
+export interface TeamParticipation {
   id: string;
+  teamCode?: string;
   projectName: string;
   teamLeader: string;
+  coLeader?: string;
+  supervisor?: string;
+  school?: string;
+  campus?: string;
+  location?: string;
+  category?: string;
+  capacity?: number;
   members: ParticipantMember[];
   projectDescription: string;
   award?: 'First Place' | 'Second Place' | 'Third Place' | 'Participation';
   status: 'Pending' | 'Approved' | 'Rejected';
+  createdAt?: string;
+  qrCodeUrl?: string;
 }
 
 const INITIAL_TEAM_PARTICIPATIONS: TeamParticipation[] = [
-  { id: 'tp-1', projectName: 'AI Robotics Sprint', teamLeader: 'Fatima Zahra', members: [{name: 'Fatima Zahra', role: 'Team Lead', email: 'fatima@example.com'}, {name: 'Member 2', role: 'Dev', email: 'm2@example.com'}], projectDescription: 'Developing autonomous robots.', award: 'First Place', status: 'Approved' },
-  { id: 'tp-2', projectName: 'Smart Agriculture Tool', teamLeader: 'Ahmad Khan', members: [{name: 'Ahmad Khan', role: 'Developer', email: 'ahmad@example.com'}], projectDescription: 'IoT based solution.', award: 'Second Place', status: 'Approved' }
+  {
+    id: 'tp-1',
+    teamCode: 'CLB-ROBO-01',
+    projectName: 'AI Robotics Sprint',
+    category: 'AI & Robotics',
+    school: 'Booni Degree College',
+    campus: 'Main Science Campus',
+    location: 'Lab Block A · Room 102',
+    capacity: 6,
+    teamLeader: 'Fatima Zahra',
+    coLeader: 'Elena Rostova',
+    supervisor: 'Prof. Jamshed Ali',
+    members: [
+      { name: 'Fatima Zahra', role: 'Team Lead', email: 'fatima@collabs.org', school: 'Booni Degree College' },
+      { name: 'Elena Rostova', role: 'Robotics Dev', email: 'elena.rostova@collabs.org', school: 'Booni Degree College' },
+      { name: 'Jordan Hayes', role: 'Hardware Assistant', email: 'jordan.hayes@collabs.org', school: 'Booni Degree College' }
+    ],
+    projectDescription: 'Developing autonomous robots for high-altitude emergency supply navigation and environmental monitoring in Upper Chitral.',
+    award: 'First Place',
+    status: 'Approved',
+    createdAt: 'Oct 2026'
+  },
+  {
+    id: 'tp-2',
+    teamCode: 'CLB-AGRI-02',
+    projectName: 'Smart Agriculture Tool',
+    category: 'Climate & Smart Ag',
+    school: 'Pamir Public School & College',
+    campus: 'Higher Secondary Wing',
+    location: 'Agritech Innovation Pod',
+    capacity: 5,
+    teamLeader: 'Ahmad Khan',
+    coLeader: 'Marcus Vance',
+    supervisor: 'Dr. Tariq Hussain',
+    members: [
+      { name: 'Ahmad Khan', role: 'Developer', email: 'ahmad@example.com', school: 'Pamir Public School & College' },
+      { name: 'Marcus Vance', role: 'Field Operations', email: 'marcus.vance@collabs.org', school: 'Pamir Public School & College' },
+      { name: 'Chloe Bennett', role: 'Documentation', email: 'chloe.bennett@collabs.org', school: 'Pamir Public School & College' }
+    ],
+    projectDescription: 'IoT-based soil moisture and cold-snap early warning system designed specifically for high-elevation apple and walnut orchards.',
+    award: 'Second Place',
+    status: 'Approved',
+    createdAt: 'Oct 2026'
+  },
+  {
+    id: 'tp-3',
+    teamCode: 'CLB-COMM-03',
+    projectName: 'Clean Stream Chitral',
+    category: 'Water & Environment',
+    school: 'Aga Khan Higher Secondary School Kuragh',
+    campus: 'Kuragh Campus',
+    location: 'Eco Station Beta',
+    capacity: 4,
+    teamLeader: 'Amina Nour',
+    supervisor: 'Ms. Samina Bibi',
+    members: [
+      { name: 'Amina Nour', role: 'Project Coordinator', email: 'amina.nour@collabs.org', school: 'Aga Khan Higher Secondary School Kuragh' },
+      { name: 'Devon Takahashi', role: 'Data Analysis', email: 'devon.t@collabs.org', school: 'Aga Khan Higher Secondary School Kuragh' }
+    ],
+    projectDescription: 'Community water filtration and microplastic sampling initiative along the Mastuj River tributaries.',
+    award: 'Participation',
+    status: 'Approved',
+    createdAt: 'Oct 2026'
+  }
 ];
 
 
@@ -267,6 +346,10 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     id: 'vol-101',
     name: 'Elena Rostova',
     username: 'elena',
+    email: 'elena.rostova@collabs.org',
+    phone: '+92 345 1122334',
+    school: 'Booni Degree College',
+    role: 'Lead Systems Engineer',
     password: 'collabs2026',
     department: 'Technical',
     hours: 142,
@@ -283,6 +366,10 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     id: 'vol-102',
     name: 'Marcus Vance',
     username: 'marcus',
+    email: 'marcus.vance@collabs.org',
+    phone: '+92 345 2233445',
+    school: 'Pamir Public School & College',
+    role: 'Logistics Supervisor',
     password: 'collabs2026',
     department: 'Logistics',
     hours: 98,
@@ -299,6 +386,10 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     id: 'vol-103',
     name: 'Devon Takahashi',
     username: 'devon',
+    email: 'devon.t@collabs.org',
+    phone: '+92 345 3344556',
+    school: 'Aga Khan Higher Secondary School Kuragh',
+    role: 'Content & Editorial Lead',
     password: 'collabs2026',
     department: 'Content',
     hours: 115,
@@ -315,6 +406,10 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     id: 'vol-104',
     name: 'Amina Nour',
     username: 'amina',
+    email: 'amina.nour@collabs.org',
+    phone: '+92 345 4455667',
+    school: 'Government High School Booni',
+    role: 'Campus Outreach Liaison',
     password: 'collabs2026',
     department: 'Outreach',
     hours: 84,
@@ -331,6 +426,10 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     id: 'vol-105',
     name: 'Jordan Hayes',
     username: 'jordan',
+    email: 'jordan.hayes@collabs.org',
+    phone: '+92 345 5566778',
+    school: 'Booni Degree College',
+    role: 'Lab & Hardware Assistant',
     password: 'collabs2026',
     department: 'Technical',
     hours: 67,
@@ -346,6 +445,10 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     id: 'vol-106',
     name: 'Chloe Bennett',
     username: 'chloe',
+    email: 'chloe.bennett@collabs.org',
+    phone: '+92 345 6677889',
+    school: 'Pamir Public School & College',
+    role: 'Hospitality & Badge Coordinator',
     password: 'collabs2026',
     department: 'Logistics',
     hours: 56,
@@ -581,6 +684,7 @@ export default function App() {
     issueDate: '31 October 2026'
   });
   const [teamParticipations, setTeamParticipations] = useState<TeamParticipation[]>(INITIAL_TEAM_PARTICIPATIONS);
+  const [eventsList, setEventsList] = useState<EventItem[]>(INITIAL_EVENTS);
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [adminUsername, setAdminUsername] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
@@ -633,13 +737,25 @@ export default function App() {
     return `${base}?verify=${encodeURIComponent(certId)}`;
   };
 
+  const fallbackCert: CertificateRecord = INITIAL_CERTIFICATES[0] || {
+    id: 'CLB-2026-892',
+    recipientName: 'Jordan Hayes',
+    achievementType: 'Excellence',
+    eventName: 'First Mega Event of Collabs',
+    issueDate: '31 October 2026',
+    verified: true,
+    issuer: 'Collabs. Community Board'
+  };
+
   // Active Certificate for Live Preview
-  const activeCertificate = certDatabase.find(c => c.id === currentCertId) || certDatabase[0];
+  const activeCertificate = (certDatabase && certDatabase.length > 0
+    ? certDatabase.find(c => c && c.id === currentCertId) || certDatabase[0]
+    : fallbackCert) || fallbackCert;
 
   // Dynamic QR Code generation for the active certificate
   useEffect(() => {
-    const certId = activeCertificate.id;
-    if (!qrCodeDataUrls[certId]) {
+    const certId = activeCertificate?.id;
+    if (certId && !qrCodeDataUrls[certId]) {
       const verifyUrl = getVerificationUrl(certId);
       QRCode.toDataURL(verifyUrl, {
         width: 180,
@@ -655,7 +771,7 @@ export default function App() {
         console.error('Error creating QR Code:', err);
       });
     }
-  }, [activeCertificate.id, qrCodeDataUrls]);
+  }, [activeCertificate?.id, qrCodeDataUrls]);
 
   // URL Query verification listener
   useEffect(() => {
@@ -790,7 +906,7 @@ export default function App() {
   };
 
   // Filtered Events
-  const filteredEvents = INITIAL_EVENTS.filter(ev => {
+  const filteredEvents = eventsList.filter(ev => {
     if (eventFilter === 'All') return true;
     return ev.category === eventFilter;
   });
@@ -812,6 +928,8 @@ export default function App() {
         setVolunteers={setVolunteers}
         certDatabase={certDatabase}
         setCertDatabase={setCertDatabase}
+        events={eventsList}
+        setEvents={setEventsList}
         handleVolunteerSubmit={handleVolunteerSubmit}
         handleGenerateCertificate={handleGenerateCertificate}
     />;
@@ -2350,9 +2468,12 @@ export default function App() {
               Verify Digital Certificate
             </h3>
             <p className="text-xs text-slate-500 mb-4">
-              Enter any Certificate ID (e.g. <code>CLB-2026-892</code>, <code>CLB-2026-401</code>, or <code>CLB-2026-105</code>) to authenticate.
+              Scan QR or enter ID.
             </p>
-
+            {isVerifyModalOpen && (
+              <QRScannerComponent onScan={(text: string) => { setVerifySearchQuery(text); }} />
+            )}
+            
             <form onSubmit={handleVerifyQuery} className="flex gap-2 mb-4">
               <input
                 type="text"
@@ -2505,3 +2626,18 @@ export default function App() {
     </div>
   );
 }
+
+const QRScannerComponent = ({ onScan }: { onScan: (text: string) => void }) => {
+    React.useEffect(() => {
+        let scanner: any;
+        import('html5-qrcode').then(({ Html5QrcodeScanner }) => {
+            scanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 250 }, false);
+            scanner.render((decodedText: string) => {
+                onScan(decodedText);
+                scanner.clear();
+            }, (error: any) => console.warn(error));
+        });
+        return () => { if (scanner) scanner.clear(); };
+    }, [onScan]);
+    return <div id="qr-reader" className="w-full mb-4"></div>;
+};
