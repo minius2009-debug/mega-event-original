@@ -1067,53 +1067,56 @@ export default function App() {
         </div>
       </header>
 
-      {/* Mega Event of Collabs Official Banner */}
-      <section className="bg-gradient-to-b from-blue-50/80 via-indigo-50/40 to-slate-50 pt-8 pb-10 px-4 sm:px-6 lg:px-8 border-b border-slate-200">
-        <div className="max-w-5xl mx-auto bg-white border-2 border-blue-600/20 rounded-3xl p-6 sm:p-10 shadow-xl shadow-blue-900/5 text-center relative overflow-hidden">
+      {/* Mega Event of Collabs Official Banner - Styled like reference image */}
+      <section className="bg-gradient-to-b from-blue-50/80 via-indigo-50/40 to-slate-50 pt-6 pb-10 px-4 sm:px-6 lg:px-8 border-b border-slate-200">
+        <div className="max-w-4xl mx-auto bg-white border-2 border-blue-600/20 rounded-3xl p-6 sm:p-10 shadow-xl shadow-blue-900/5 text-center relative overflow-hidden">
           <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-blue-400/10 to-emerald-400/10 rounded-bl-full pointer-events-none"></div>
           
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <img src={officialLogo} alt="Collabs Official Logo" className="w-12 h-12 object-contain rounded-xl shadow-md" />
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <img src={officialLogo} alt="Collabs Official Logo" className="w-10 h-10 object-contain rounded-xl shadow-sm" />
           </div>
 
-          <h1 className="text-4xl sm:text-6xl font-black text-slate-900 tracking-tighter mb-2">
-            <span className="text-[#1E293B]">MEGA EVENT OF</span> <span className="text-blue-600">COLLABS</span>
+          <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tighter mb-1 uppercase">
+            <span className="text-[#1E293B] block">Mega Event of</span>
+            <span className="text-[#059669]">Collabs 2026</span>
           </h1>
 
-          <div className="text-sm sm:text-base font-extrabold tracking-widest text-[#1E3A8A] uppercase mb-3">
-            EMPOWERING YOUTH & INNOVATION IN CHITRAL
+          <div className="h-1 bg-gradient-to-r from-blue-500 via-yellow-500 via-green-500 to-purple-500 w-32 mx-auto rounded-full my-3"></div>
+
+          <div className="text-xs sm:text-sm font-extrabold tracking-widest text-[#1E3A8A] uppercase mb-2">
+            BUILDING TOMORROW'S INNOVATORS
           </div>
 
-          <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto mb-6 leading-relaxed">
-            Empowering the next generation of innovators, builders, and community leaders. Join us in Booni for an extraordinary day of collaboration and hands-on workshops.
+          <p className="text-xs sm:text-sm text-slate-600 max-w-xl mx-auto mb-5 leading-relaxed">
+            Empowering Youth. Building Tomorrow. Part of the Global Summit on Digital Literacy & Leadership.
           </p>
 
-          <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-full px-4 py-1.5 text-xs font-bold text-emerald-700 mb-8">
+          <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-full px-4 py-1 text-xs font-bold text-emerald-700 mb-6">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>Registration is Open</span>
           </div>
 
           {/* Functional Countdown Timer for 31 October 2026 */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-xl mx-auto mb-6">
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 sm:p-4 text-center">
-              <div className="font-heading text-3xl sm:text-4xl font-black text-[#1E3A8A]">{timeLeft.days}</div>
-              <div className="text-[11px] uppercase tracking-wider text-slate-500 font-bold mt-0.5">Days</div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 max-w-lg mx-auto mb-4">
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center">
+              <div className="font-heading text-2xl sm:text-3xl font-black text-[#1E3A8A]">{timeLeft.days}</div>
+              <div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mt-0.5">Days</div>
             </div>
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 sm:p-4 text-center">
-              <div className="font-heading text-3xl sm:text-4xl font-black text-[#1E3A8A]">{timeLeft.hours}</div>
-              <div className="text-[11px] uppercase tracking-wider text-slate-500 font-bold mt-0.5">Hours</div>
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center">
+              <div className="font-heading text-2xl sm:text-3xl font-black text-[#1E3A8A]">{timeLeft.hours}</div>
+              <div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mt-0.5">Hours</div>
             </div>
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 sm:p-4 text-center">
-              <div className="font-heading text-3xl sm:text-4xl font-black text-[#1E3A8A]">{timeLeft.minutes}</div>
-              <div className="text-[11px] uppercase tracking-wider text-slate-500 font-bold mt-0.5">Mins</div>
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center">
+              <div className="font-heading text-2xl sm:text-3xl font-black text-[#1E3A8A]">{timeLeft.minutes}</div>
+              <div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mt-0.5">Mins</div>
             </div>
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 sm:p-4 text-center">
-              <div className="font-heading text-3xl sm:text-4xl font-black text-[#1E3A8A]">{timeLeft.seconds}</div>
-              <div className="text-[11px] uppercase tracking-wider text-slate-500 font-bold mt-0.5">Secs</div>
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center">
+              <div className="font-heading text-2xl sm:text-3xl font-black text-[#1E3A8A]">{timeLeft.seconds}</div>
+              <div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mt-0.5">Secs</div>
             </div>
           </div>
 
-          <div className="text-xs text-slate-500 font-medium mb-8">
+          <div className="text-xs text-slate-500 font-medium mb-6">
             until event day: 31 October 2026, Booni, Upper Chitral
           </div>
 
@@ -1122,17 +1125,17 @@ export default function App() {
               href="https://docs.google.com/forms/d/e/1FAIpQLSdUwKtlCvMl4JJBpsa6e7xMJ7KirLBU5_B6ram88WUwza-p-g/viewform"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-md shadow-blue-600/20 transition-all flex items-center gap-2 cursor-pointer hover:scale-105"
+              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-blue-600/20 transition-all flex items-center gap-2 cursor-pointer hover:scale-105"
             >
-              <CheckCircle2 size={16} />
+              <CheckCircle2 size={15} />
               <span>Register Now</span>
             </a>
             <button
               onClick={() => setIsRulesModalOpen(true)}
-              className="px-6 py-3 bg-white hover:bg-slate-50 text-[#1E3A8A] border-2 border-[#1E3A8A] font-bold text-sm rounded-xl transition-all shadow-sm hover:scale-105 cursor-pointer flex items-center gap-2"
+              className="px-5 py-2.5 bg-white hover:bg-slate-50 text-[#1E3A8A] border-2 border-[#1E3A8A] font-bold text-xs sm:text-sm rounded-xl transition-all shadow-sm hover:scale-105 cursor-pointer flex items-center gap-2"
             >
               <span>Read Event Guidelines</span>
-              <ChevronRight size={16} />
+              <ChevronRight size={15} />
             </button>
           </div>
         </div>
