@@ -585,6 +585,7 @@ export default function App() {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+  const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
   const [selectedEventForReg, setSelectedEventForReg] = useState<EventItem | null>(null);
 
   // Events filter
@@ -1066,147 +1067,78 @@ export default function App() {
         </div>
       </header>
 
-      {/* 2. Hero Section - "First Mega Event of Collabs" & 18 Oct in Booni Upper Chitral */}
-      <section id="about" className="pt-10 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto scroll-mt-24">
-        <div className="grid lg:grid-cols-12 gap-10 items-center">
+      {/* Mega Event of Collabs Official Banner */}
+      <section className="bg-gradient-to-b from-blue-50/80 via-indigo-50/40 to-slate-50 pt-8 pb-10 px-4 sm:px-6 lg:px-8 border-b border-slate-200">
+        <div className="max-w-5xl mx-auto bg-white border-2 border-blue-600/20 rounded-3xl p-6 sm:p-10 shadow-xl shadow-blue-900/5 text-center relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-blue-400/10 to-emerald-400/10 rounded-bl-full pointer-events-none"></div>
           
-          {/* Hero Left Content */}
-          <div className="lg:col-span-7 text-left space-y-5">
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-slate-900 tracking-tighter leading-tight mb-6">
-              First Mega Event of <br />
-              <span className="text-blue-600">Collabs.</span>
-            </h1>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <img src={officialLogo} alt="Collabs Official Logo" className="w-12 h-12 object-contain rounded-xl shadow-md" />
+          </div>
 
-            <p className="text-lg sm:text-xl text-slate-600 leading-relaxed max-w-3xl">
-              Empowering the next generation of innovators, builders, and community leaders. Join us in Booni for an extraordinary day of collaboration, hands-on workshops, and creative problem-solving designed to turn bold ideas into tangible, verified impact.
-            </p>
+          <h1 className="text-4xl sm:text-6xl font-black text-slate-900 tracking-tighter mb-2">
+            <span className="text-[#1E293B]">MEGA EVENT OF</span> <span className="text-blue-600">COLLABS</span>
+          </h1>
 
-            {/* Quick Details Bar */}
-            <div className="inline-flex flex-wrap justify-center gap-6 bg-white p-4 rounded-2xl shadow-sm border border-slate-200 text-sm mt-4">
-              <div className="flex items-center gap-2 text-slate-800">
-                <Calendar size={18} className="text-blue-600 shrink-0" />
-                <span className="font-bold">31 October 2026</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-800 border-l border-slate-200 pl-6">
-                <MapPin size={18} className="text-blue-600 shrink-0" />
-                <span className="font-bold">Booni, Upper Chitral</span>
-              </div>
+          <div className="text-sm sm:text-base font-extrabold tracking-widest text-[#1E3A8A] uppercase mb-3">
+            EMPOWERING YOUTH & INNOVATION IN CHITRAL
+          </div>
+
+          <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto mb-6 leading-relaxed">
+            Empowering the next generation of innovators, builders, and community leaders. Join us in Booni for an extraordinary day of collaboration and hands-on workshops.
+          </p>
+
+          <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-full px-4 py-1.5 text-xs font-bold text-emerald-700 mb-8">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Registration is Open</span>
+          </div>
+
+          {/* Functional Countdown Timer for 31 October 2026 */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-xl mx-auto mb-6">
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 sm:p-4 text-center">
+              <div className="font-heading text-3xl sm:text-4xl font-black text-[#1E3A8A]">{timeLeft.days}</div>
+              <div className="text-[11px] uppercase tracking-wider text-slate-500 font-bold mt-0.5">Days</div>
             </div>
-            <div className="pt-6">
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 sm:p-4 text-center">
+              <div className="font-heading text-3xl sm:text-4xl font-black text-[#1E3A8A]">{timeLeft.hours}</div>
+              <div className="text-[11px] uppercase tracking-wider text-slate-500 font-bold mt-0.5">Hours</div>
             </div>
-
-            <div className="pt-2 flex flex-wrap items-center gap-3">
-              <a
-                href="https://docs.google.com/forms/d/e/1FAIpQLSdUwKtlCvMl4JJBpsa6e7xMJ7KirLBU5_B6ram88WUwza-p-g/viewform" target="_blank" rel="noopener noreferrer"
-                className="px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-lg shadow-md shadow-blue-600/20 transition-all flex items-center gap-2 cursor-pointer hover:scale-[1.02]"
-              >
-                <span>Reserve Seat for 31 Oct</span>
-                <ChevronRight size={16} />
-              </a>
-              <a
-                href="#events"
-                onClick={(e) => handleSmoothNavClick(e, 'events', 'eventsHub')}
-                className="px-5 py-3.5 bg-white hover:bg-slate-100 text-slate-800 font-semibold text-sm rounded-lg border border-slate-300 transition-colors flex items-center gap-2 cursor-pointer"
-              >
-                <span>Event Details</span>
-              </a>
-              <a
-                href="#attendee-pass"
-                onClick={(e) => handleSmoothNavClick(e, 'attendee-pass', 'badgeGenerator')}
-                className="px-4 py-3.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-sm rounded-lg border border-blue-200 transition-colors flex items-center gap-2 cursor-pointer"
-              >
-                <IdCard size={16} className="text-blue-600" />
-                <span>Get Digital Pass</span>
-              </a>
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 sm:p-4 text-center">
+              <div className="font-heading text-3xl sm:text-4xl font-black text-[#1E3A8A]">{timeLeft.minutes}</div>
+              <div className="text-[11px] uppercase tracking-wider text-slate-500 font-bold mt-0.5">Mins</div>
+            </div>
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 sm:p-4 text-center">
+              <div className="font-heading text-3xl sm:text-4xl font-black text-[#1E3A8A]">{timeLeft.seconds}</div>
+              <div className="text-[11px] uppercase tracking-wider text-slate-500 font-bold mt-0.5">Secs</div>
             </div>
           </div>
 
-          {/* Hero Right: 18 Oct Countdown Box with Collapse/Expand Toggle */}
-          <div className="lg:col-span-5">
-            <div className="bg-white border-2 border-blue-600/30 rounded-2xl p-6 shadow-xl shadow-blue-900/5 relative text-left">
-              
-              {/* Header with section collapse toggle */}
-              <div className="flex items-center justify-end gap-4 mb-4">
-                <button
-                  onClick={() => toggleSection('heroCountdown')}
-                  className="text-xs font-bold text-slate-500 hover:text-blue-600 flex items-center gap-1 cursor-pointer bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded transition-colors"
-                >
-                  {sectionsExpanded.heroCountdown ? (
-                    <>
-                      <span>Collapse</span>
-                      <ChevronUp size={14} />
-                    </>
-                  ) : (
-                    <>
-                      <span>Expand</span>
-                      <ChevronDown size={14} />
-                    </>
-                  )}
-                </button>
-              </div>
-
-              {sectionsExpanded.heroCountdown && (
-                <div className="space-y-4">
-                  <div>
-                    <h2 className="font-heading text-xl font-black text-slate-900 mb-1 leading-snug">
-                      First Mega Event of Collabs
-                    </h2>
-                    <p className="text-xs text-slate-600">
-                      Booni, Chitral (Venue TBA) · 31 Oct 2026
-                    </p>
-                  </div>
-
-                  {/* Live Countdown Timer Box */}
-                  <div className="grid grid-cols-4 gap-2 text-center">
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
-                      <div className="font-heading text-lg font-black text-blue-900">{timeLeft.days}</div>
-                      <div className="text-[10px] uppercase text-slate-600 font-bold">Days</div>
-                    </div>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
-                      <div className="font-heading text-lg font-black text-blue-900">{timeLeft.hours}</div>
-                      <div className="text-[10px] uppercase text-slate-600 font-bold">Hours</div>
-                    </div>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
-                      <div className="font-heading text-lg font-black text-blue-900">{timeLeft.minutes}</div>
-                      <div className="text-[10px] uppercase text-slate-600 font-bold">Mins</div>
-                    </div>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
-                      <div className="font-heading text-lg font-black text-blue-900">{timeLeft.seconds}</div>
-                      <div className="text-[10px] uppercase text-slate-600 font-bold">Secs</div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-xl p-4 text-center text-white shadow-lg shadow-blue-500/25 relative overflow-hidden group">
-                    <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                      <Sparkles size={80} />
-                    </div>
-                    <div className="flex items-center justify-center gap-2 mb-1">
-                      <Sparkles size={16} className="text-yellow-300 animate-pulse" />
-                      <span className="text-xs uppercase tracking-wider font-extrabold text-yellow-200">Your Moment</span>
-                      <Sparkles size={16} className="text-yellow-300 animate-pulse" />
-                    </div>
-                    <p className="text-sm font-bold leading-relaxed tracking-wide drop-shadow">
-                      "The exhibition is yours — get the chance to make it yours!"
-                    </p>
-                    <p className="text-[11px] text-blue-100 mt-1 font-medium">
-                      Shape the future of innovation in Chitral.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {!sectionsExpanded.heroCountdown && (
-                <div className="py-2 text-xs text-slate-500 flex items-center justify-between">
-                  <span>Countdown to 18 Oct collapsed.</span>
-                  <span className="font-bold text-blue-600">{timeLeft.days} Days remaining</span>
-                </div>
-              )}
-
-            </div>
+          <div className="text-xs text-slate-500 font-medium mb-8">
+            until event day: 31 October 2026, Booni, Upper Chitral
           </div>
 
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <a 
+              href="https://docs.google.com/forms/d/e/1FAIpQLSdUwKtlCvMl4JJBpsa6e7xMJ7KirLBU5_B6ram88WUwza-p-g/viewform"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-md shadow-blue-600/20 transition-all flex items-center gap-2 cursor-pointer hover:scale-105"
+            >
+              <CheckCircle2 size={16} />
+              <span>Register Now</span>
+            </a>
+            <button
+              onClick={() => setIsRulesModalOpen(true)}
+              className="px-6 py-3 bg-white hover:bg-slate-50 text-[#1E3A8A] border-2 border-[#1E3A8A] font-bold text-sm rounded-xl transition-all shadow-sm hover:scale-105 cursor-pointer flex items-center gap-2"
+            >
+              <span>Read Event Guidelines</span>
+              <ChevronRight size={16} />
+            </button>
+          </div>
         </div>
       </section>
+
+
 
       {/* 3. Events Hub with Expand/Collapse Features */}
       <section id="events" className="py-16 bg-white border-y border-slate-200 scroll-mt-24">
@@ -2618,6 +2550,54 @@ export default function App() {
             <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-xl text-[11px] text-blue-800 space-y-0.5">
               <div className="font-bold">Admin Portal:</div>
               <div>The administrator is responsible for managing all aspects of team participation, event details, and volunteer management.</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isRulesModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-xl w-full shadow-2xl border border-slate-200 text-left relative max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setIsRulesModalOpen(false)}
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-slate-900 flex items-center justify-center cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+            <div className="flex items-center gap-3 mb-3">
+              <img src={officialLogo} alt="Logo" className="w-8 h-8 object-contain rounded-lg" />
+              <div>
+                <h3 className="font-heading text-xl font-black text-slate-900">Mega Event of Collabs</h3>
+                <p className="text-xs text-slate-500">Official Rules & Guidelines</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-4">
+              <div>
+                <h4 className="font-bold text-slate-900 text-sm mb-1">1. Submission Deadline</h4>
+                <p>All final project submissions must be completed and uploaded by 27 Oct 2026 at 11:59 PM PKT. Late submissions are not accepted.</p>
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-900 text-sm mb-1">2. Team Eligibility & Members</h4>
+                <p>Teams must consist of 1 to 3 members from Upper Chitral and partnering educational institutions. Each team may submit their primary creative or technical product.</p>
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-900 text-sm mb-1">3. Project Categories & Standards</h4>
+                <p>Projects span across STEM, Art, as well as Food & community innovation, addressing local creativity, problem-solving, and practical community impact.</p>
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-900 text-sm mb-1">4. Code of Conduct</h4>
+                <p>All participants must uphold integrity, collaboration, and respectful conduct in accordance with Collabs. community guidelines.</p>
+              </div>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={() => setIsRulesModalOpen(false)}
+                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl cursor-pointer"
+              >
+                Got It
+              </button>
             </div>
           </div>
         </div>
