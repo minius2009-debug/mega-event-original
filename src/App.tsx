@@ -46,7 +46,12 @@ import {
   BadgeCheck,
   Smartphone,
   AlertTriangle,
-  Layers
+  Layers,
+  User,
+  Lightbulb,
+  Target,
+  Globe,
+  Leaf
 } from 'lucide-react';
 
 export interface EventItem {
@@ -1137,6 +1142,46 @@ export default function App() {
               <span>Read Event Guidelines</span>
               <ChevronRight size={15} />
             </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 5 Core Pillars Section */}
+      <section className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-xs hover:border-emerald-300 transition-all flex flex-col items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
+              <User size={24} />
+            </div>
+            <h3 className="font-heading text-sm sm:text-base font-bold text-slate-900">Leadership</h3>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-xs hover:border-amber-300 transition-all flex flex-col items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center mb-3">
+              <Lightbulb size={24} />
+            </div>
+            <h3 className="font-heading text-sm sm:text-base font-bold text-slate-900">Innovation</h3>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-xs hover:border-blue-300 transition-all flex flex-col items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
+              <Target size={24} />
+            </div>
+            <h3 className="font-heading text-sm sm:text-base font-bold text-slate-900">Capacity Building</h3>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-xs hover:border-purple-300 transition-all flex flex-col items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center mb-3">
+              <Globe size={24} />
+            </div>
+            <h3 className="font-heading text-sm sm:text-base font-bold text-slate-900">Creativity</h3>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-xs hover:border-emerald-300 transition-all flex flex-col items-center justify-center col-span-2 sm:col-span-1">
+            <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
+              <Leaf size={24} />
+            </div>
+            <h3 className="font-heading text-sm sm:text-base font-bold text-slate-900">Empowerment</h3>
           </div>
         </div>
       </section>
