@@ -593,6 +593,38 @@ export default function App() {
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
   const [selectedTeamMemberModal, setSelectedTeamMemberModal] = useState<TeamMember | null>(null);
   const [selectedEventForReg, setSelectedEventForReg] = useState<EventItem | null>(null);
+  const [activeNavTab, setActiveNavTab] = useState<string>('about');
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = [
+        { id: 'about', el: document.getElementById('about') },
+        { id: 'events', el: document.getElementById('events') },
+        { id: 'team', el: document.getElementById('team') },
+        { id: 'participants', el: document.getElementById('team-participation') },
+        { id: 'judging', el: document.getElementById('judging-criteria') },
+        { id: 'volunteers', el: document.getElementById('volunteers') },
+        { id: 'certificates', el: document.getElementById('certificates') },
+        { id: 'awards', el: document.getElementById('awards') },
+      ];
+
+      const scrollPosition = window.scrollY + 200;
+
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const section = sections[i];
+        if (section.el) {
+          const top = section.el.offsetTop;
+          if (scrollPosition >= top) {
+            setActiveNavTab(section.id);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Events filter
   const [eventFilter, setEventFilter] = useState<'All' | 'Upcoming' | 'Workshops' | 'Completed'>('All');
@@ -959,50 +991,40 @@ export default function App() {
             </a>
           </div>
 
-          {/* Navigation Links with Smooth Scrolling */}
-          <nav className="hidden lg:flex items-center gap-7 text-sm font-semibold text-slate-600">
-            <a
-              href="#about"
-              onClick={(e) => handleSmoothNavClick(e, 'about')}
-              className="hover:text-blue-600 transition-colors cursor-pointer"
-            >
-              About
-            </a>
-            <a
-              href="#events"
-              onClick={(e) => handleSmoothNavClick(e, 'events', 'eventsHub')}
-              className="hover:text-blue-600 transition-colors cursor-pointer"
-            >
-              Events
-            </a>
-            <a
-              href="#team"
-              onClick={(e) => handleSmoothNavClick(e, 'team', 'teamDirectory')}
-              className="hover:text-blue-600 transition-colors cursor-pointer"
-            >
-              Team
-            </a>
-            <a
-              href="#volunteers"
-              onClick={(e) => handleSmoothNavClick(e, 'volunteers', 'volunteerNetwork')}
-              className="hover:text-blue-600 transition-colors cursor-pointer"
-            >
-              Volunteers
-            </a>
-            <a
-              href="#certificates"
-              onClick={(e) => handleSmoothNavClick(e, 'certificates', 'certificatePortal')}
-              className="hover:text-blue-600 transition-colors cursor-pointer"
-            >
-              Certificates
-            </a>
-            <a
-              href="#awards"
-              onClick={(e) => handleSmoothNavClick(e, 'awards', 'awardsShowcase')}
-              className="hover:text-blue-600 transition-colors cursor-pointer"
-            >
-              Awards
-            </a>
+          {/* Navigation Links with Smooth Scrolling & Animated Underline */}
+          <nav className="hidden lg:flex items-center gap-6 text-sm font-semibold text-slate-600">
+            {[
+              { id: 'about', label: 'About', href: '#about', sectionKey: undefined },
+              { id: 'events', label: 'Events', href: '#events', sectionKey: 'eventsHub' as const },
+              { id: 'team', label: 'Team', href: '#team', sectionKey: 'teamDirectory' as const },
+              { id: 'participants', label: 'Participants', href: '#team-participation', sectionKey: undefined },
+              { id: 'judging', label: 'Judging', href: '#judging-criteria', sectionKey: undefined },
+              { id: 'volunteers', label: 'Volunteers', href: '#volunteers', sectionKey: 'volunteerNetwork' as const },
+              { id: 'certificates', label: 'Certificates', href: '#certificates', sectionKey: 'certificatePortal' as const },
+              { id: 'awards', label: 'Awards', href: '#awards', sectionKey: 'awardsShowcase' as const },
+            ].map(tab => {
+              const isActive = activeNavTab === tab.id;
+              return (
+                <a
+                  key={tab.id}
+                  href={tab.href}
+                  onClick={(e) => {
+                    setActiveNavTab(tab.id);
+                    handleSmoothNavClick(e, tab.href.replace('#', ''), tab.sectionKey);
+                  }}
+                  className={`relative py-2 transition-colors cursor-pointer group ${
+                    isActive ? 'text-blue-600 font-bold' : 'text-slate-600 hover:text-blue-600'
+                  }`}
+                >
+                  <span>{tab.label}</span>
+                  <span
+                    className={`absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform transition-transform duration-300 origin-left ${
+                      isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                    }`}
+                  ></span>
+                </a>
+              );
+            })}
           </nav>
 
           {/* Header Action Buttons */}
@@ -1514,8 +1536,14 @@ export default function App() {
         <div className="grid md:grid-cols-2 gap-6 mb-12">
           {/* Innovation */}
           <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex items-start gap-5 shadow-xs hover:border-emerald-300 transition-all">
-            <div className="w-16 h-16 rounded-full bg-white border-4 border-emerald-600 flex items-center justify-center shrink-0 shadow-xs">
-              <span className="font-heading font-black text-emerald-700 text-sm">25%</span>
+            <div className="w-16 h-16 relative flex items-center justify-center shrink-0">
+              <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+                <path className="text-slate-200" strokeWidth="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path className="text-emerald-600" strokeDasharray="25, 100" strokeWidth="3.5" strokeLinecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="font-heading font-black text-emerald-700 text-xs">25%</span>
+              </div>
             </div>
             <div>
               <h3 className="font-heading text-lg font-black text-slate-900 mb-1.5 flex items-center gap-2">
@@ -1530,8 +1558,14 @@ export default function App() {
 
           {/* Impact */}
           <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex items-start gap-5 shadow-xs hover:border-amber-300 transition-all">
-            <div className="w-16 h-16 rounded-full bg-white border-4 border-amber-500 flex items-center justify-center shrink-0 shadow-xs">
-              <span className="font-heading font-black text-amber-600 text-sm">25%</span>
+            <div className="w-16 h-16 relative flex items-center justify-center shrink-0">
+              <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+                <path className="text-slate-200" strokeWidth="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path className="text-amber-500" strokeDasharray="25, 100" strokeWidth="3.5" strokeLinecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="font-heading font-black text-amber-600 text-xs">25%</span>
+              </div>
             </div>
             <div>
               <h3 className="font-heading text-lg font-black text-slate-900 mb-1.5 flex items-center gap-2">
@@ -1546,8 +1580,14 @@ export default function App() {
 
           {/* Feasibility */}
           <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex items-start gap-5 shadow-xs hover:border-orange-300 transition-all">
-            <div className="w-16 h-16 rounded-full bg-white border-4 border-orange-600 flex items-center justify-center shrink-0 shadow-xs">
-              <span className="font-heading font-black text-orange-700 text-sm">25%</span>
+            <div className="w-16 h-16 relative flex items-center justify-center shrink-0">
+              <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+                <path className="text-slate-200" strokeWidth="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path className="text-orange-600" strokeDasharray="25, 100" strokeWidth="3.5" strokeLinecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="font-heading font-black text-orange-700 text-xs">25%</span>
+              </div>
             </div>
             <div>
               <h3 className="font-heading text-lg font-black text-slate-900 mb-1.5 flex items-center gap-2">
@@ -1562,8 +1602,14 @@ export default function App() {
 
           {/* Presentation */}
           <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex items-start gap-5 shadow-xs hover:border-rose-300 transition-all">
-            <div className="w-16 h-16 rounded-full bg-white border-4 border-rose-600 flex items-center justify-center shrink-0 shadow-xs">
-              <span className="font-heading font-black text-rose-700 text-sm">25%</span>
+            <div className="w-16 h-16 relative flex items-center justify-center shrink-0">
+              <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+                <path className="text-slate-200" strokeWidth="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path className="text-rose-600" strokeDasharray="25, 100" strokeWidth="3.5" strokeLinecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="font-heading font-black text-rose-700 text-xs">25%</span>
+              </div>
             </div>
             <div>
               <h3 className="font-heading text-lg font-black text-slate-900 mb-1.5 flex items-center gap-2">
