@@ -51,8 +51,13 @@ import {
   Lightbulb,
   Target,
   Globe,
-  Leaf
+  Leaf,
+  FileSpreadsheet,
+  Eye,
+  Trash2
 } from 'lucide-react';
+import { BulkTeamImportModal } from './components/BulkTeamImportModal';
+import { TeamDetailsModal } from './components/TeamDetailsModal';
 
 export interface EventItem {
   id: string;
@@ -723,6 +728,42 @@ export default function App() {
     issueDate: '31 October 2026'
   });
   const [teamParticipations, setTeamParticipations] = useState<TeamParticipation[]>(INITIAL_TEAM_PARTICIPATIONS);
+  const [isBulkTeamImportOpen, setIsBulkTeamImportOpen] = useState(false);
+  const [selectedTeamForDetails, setSelectedTeamForDetails] = useState<TeamParticipation | null>(null);
+  const [teamImportToast, setTeamImportToast] = useState<string | null>(null);
+  const [teamCardQrs, setTeamCardQrs] = useState<Record<string, string>>({});
+
+  // Auto-generate QR codes for team participations
+  useEffect(() => {
+    teamParticipations.forEach(tp => {
+      if (!teamCardQrs[tp.id]) {
+        const payload = JSON.stringify({
+          id: tp.id,
+          code: tp.teamCode || tp.id,
+          name: tp.projectName,
+          leader: tp.teamLeader,
+          school: tp.school || 'Collabs Event',
+          event: 'First Mega Event of Collabs 2026'
+        });
+        QRCode.toDataURL(payload, { width: 240, margin: 1 })
+          .then(url => {
+            setTeamCardQrs(prev => ({ ...prev, [tp.id]: url }));
+          })
+          .catch(err => console.error('Failed to generate team QR:', err));
+      }
+    });
+  }, [teamParticipations]);
+
+  const handleBulkImportTeams = (newTeams: TeamParticipation[], mode: 'append' | 'replace') => {
+    if (mode === 'replace') {
+      setTeamParticipations(newTeams);
+      setTeamImportToast(`Roster updated: Replaced with ${newTeams.length} teams from Excel spreadsheet.`);
+    } else {
+      setTeamParticipations(prev => [...newTeams, ...prev]);
+      setTeamImportToast(`Successfully added ${newTeams.length} new teams from Excel spreadsheet!`);
+    }
+    setTimeout(() => setTeamImportToast(null), 5000);
+  };
   const [eventsList, setEventsList] = useState<EventItem[]>(INITIAL_EVENTS);
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [adminUsername, setAdminUsername] = useState('');
@@ -1443,41 +1484,74 @@ export default function App() {
       </section>
 
       {/* 5. Team Participation Section */}
-      <section id="team-participation" className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <h2 className="font-heading text-3xl font-black text-slate-900 tracking-tight">Team Participation</h2>
+      <section id="team-participation" className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200 text-left">
+        {/* Toast Alert for Team Ingestion */}
+        {teamImportToast && (
+          <div className="mb-6 p-4 bg-emerald-900 text-white rounded-2xl flex items-center justify-between shadow-lg animate-fadeIn border border-emerald-700">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 size={20} className="text-emerald-400 shrink-0" />
+              <span className="font-semibold text-xs sm:text-sm">{teamImportToast}</span>
+            </div>
+            <button onClick={() => setTeamImportToast(null)} className="text-emerald-300 hover:text-white cursor-pointer">
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+          <div>
+            <div className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">
+              Booni Exhibition Finalists & Cohorts
+            </div>
+            <h2 className="font-heading text-3xl font-black text-slate-900 tracking-tight">Team Participation</h2>
+            <p className="text-xs text-slate-500 mt-1">
+              Explore participating innovation teams, view member assignments, or import team rosters in bulk via Excel spreadsheet.
+            </p>
+          </div>
           
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-wrap items-center gap-2.5">
             <input
               type="text"
-              placeholder="Search participants..."
+              placeholder="Search by project, leader, or school..."
               value={participationSearch}
               onChange={e => setParticipationSearch(e.target.value)}
-              className="p-2.5 border rounded-xl border-slate-300 text-sm focus:border-blue-600 focus:outline-none"
+              className="p-2.5 px-3.5 bg-white border rounded-xl border-slate-300 text-xs text-slate-900 focus:border-blue-600 focus:outline-none min-w-[200px]"
             />
             <select
               value={participationAwardFilter}
               onChange={e => setParticipationAwardFilter(e.target.value as any)}
-              className="p-2.5 border rounded-xl border-slate-300 text-sm focus:border-blue-600 focus:outline-none"
+              className="p-2.5 px-3 bg-white border rounded-xl border-slate-300 text-xs text-slate-800 font-medium focus:border-blue-600 focus:outline-none cursor-pointer"
             >
-              <option value="All">All Awards</option>
+              <option value="All">All Standing & Awards</option>
               <option value="First Place">First Place</option>
               <option value="Second Place">Second Place</option>
               <option value="Third Place">Third Place</option>
               <option value="Participation">Participation</option>
             </select>
+
+            {/* Bulk Excel Import Trigger Button */}
+            <button
+              type="button"
+              onClick={() => setIsBulkTeamImportOpen(true)}
+              className="p-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-600/20 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+              title="Bulk import teams from Excel (.xlsx, .xls, .csv)"
+            >
+              <FileSpreadsheet size={15} /> Bulk Import (Excel)
+            </button>
           </div>
         </div>
 
-        
+        {/* Grid of Participating Teams */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {teamParticipations
             .filter(p => 
               (participationAwardFilter === 'All' || p.award === participationAwardFilter) &&
               (p.teamLeader.toLowerCase().includes(participationSearch.toLowerCase()) || 
-               p.projectName.toLowerCase().includes(participationSearch.toLowerCase()))
+               p.projectName.toLowerCase().includes(participationSearch.toLowerCase()) ||
+               (p.school && p.school.toLowerCase().includes(participationSearch.toLowerCase())) ||
+               (p.category && p.category.toLowerCase().includes(participationSearch.toLowerCase())))
             )
-              .map(p => {
+            .map(p => {
               const getAwardDetails = (award?: string) => {
                   switch(award) {
                       case 'First Place': return { icon: <Trophy size={16} className="text-amber-600" />, style: 'bg-amber-100 text-amber-800', prize: '10,000 PKR Cash Prize + Official Winner Shield' };
@@ -1487,34 +1561,120 @@ export default function App() {
                   }
               };
               const { icon: awardIcon, style: awardBadgeStyle, prize } = getAwardDetails(p.award);
+              const qr = teamCardQrs[p.id];
 
               return (
-                <div key={p.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between">
+                <div
+                  key={p.id}
+                  onClick={() => setSelectedTeamForDetails(p)}
+                  className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl flex flex-col justify-between cursor-pointer group"
+                >
                   <div>
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-bold text-lg">{p.projectName}</h3>
-                      {isAdminMode && (
-                          <div className="flex gap-2">
-                              <button onClick={() => {/* edit logic placeholder */}} className="text-blue-600 text-xs font-bold">Edit</button>
-                              <button onClick={() => setTeamParticipations(prev => prev.filter(item => item.id !== p.id))} className="text-red-600 text-xs font-bold">Delete</button>
-                          </div>
+                    {/* Top Tag Row */}
+                    <div className="flex justify-between items-start mb-3 gap-2">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-mono text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-md">
+                          {p.teamCode || p.id}
+                        </span>
+                        <span className="text-[11px] font-semibold text-slate-500">
+                          {p.category || 'Innovation Sprint'}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          p.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                        }`}>
+                          {p.status}
+                        </span>
+                        {isAdminMode && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setTeamParticipations(prev => prev.filter(item => item.id !== p.id));
+                            }}
+                            className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50"
+                            title="Delete Team"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <h3 className="font-heading font-black text-lg text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                      {p.projectName}
+                    </h3>
+
+                    <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium mt-1.5">
+                      <Building2 size={13} className="text-slate-400 shrink-0" />
+                      <span className="truncate">{p.school || 'Collabs Central Organization'}</span>
+                    </div>
+
+                    <p className="text-slate-500 text-xs mt-3 line-clamp-2 leading-relaxed">
+                      {p.projectDescription}
+                    </p>
+
+                    {/* Leadership & Location */}
+                    <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Leader:</span>
+                        <span className="font-bold text-slate-900">{p.teamLeader}</span>
+                      </div>
+                      {p.location && (
+                        <div className="flex justify-between text-[11px]">
+                          <span className="text-slate-500 flex items-center gap-1">
+                            <MapPin size={11} className="text-slate-400" /> Station:
+                          </span>
+                          <span className="text-slate-700 font-medium">{p.location}</span>
+                        </div>
                       )}
-                    </div>
-                    <p className="text-slate-600 text-sm mt-1">Leader: <span className="font-semibold">{p.teamLeader}</span></p>
-                    <p className="text-slate-600 text-sm">Members: {p.members.length}</p>
-                    <p className="text-slate-500 text-xs mt-2 italic">{p.projectDescription}</p>
-                  </div>
-                  <div className="mt-4 pt-4 border-t border-slate-100">
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Event Check-in QR</p>
-                    <div className="w-20 h-20 bg-slate-100 rounded-lg flex items-center justify-center border border-slate-200">
-                      {/* Placeholder for QR code generation logic specific to team */}
-                      <span className="text-[10px] text-slate-400">QR CODE</span>
+                      <div className="flex justify-between text-[11px]">
+                        <span className="text-slate-500">Roster:</span>
+                        <span className="font-mono font-bold text-blue-600">{p.members?.length || 0} members</span>
+                      </div>
                     </div>
                   </div>
-                  <div className={`mt-4 inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full w-fit ${awardBadgeStyle}`}>
-                    {awardIcon} {p.award || 'Participation'}
+
+                  {/* Bottom QR Badge & Actions */}
+                  <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <div className="flex items-center gap-3" onClick={(e) => { e.stopPropagation(); setSelectedTeamForDetails(p); }}>
+                      {qr ? (
+                        <img
+                          src={qr}
+                          alt="Check-in QR"
+                          className="w-12 h-12 rounded-xl border border-slate-200 bg-white p-1 shrink-0 hover:scale-105 transition-transform"
+                          title="Click to view full QR badge"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center border border-slate-200 text-slate-400">
+                          <QrCode size={18} />
+                        </div>
+                      )}
+                      <div className="text-[11px]">
+                        <span className="font-bold text-blue-600 group-hover:underline block">Check-in QR</span>
+                        <span className="text-[10px] text-slate-400">Booni Pass</span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedTeamForDetails(p);
+                      }}
+                      className="px-3 py-1.5 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition-colors flex items-center gap-1 cursor-pointer"
+                    >
+                      <Eye size={13} /> View Details
+                    </button>
                   </div>
-                  <p className="mt-2 text-xs text-slate-500 font-medium">{prize}</p>
+
+                  {/* Standing & Prize */}
+                  <div className="mt-3 flex items-center justify-between">
+                    <div className={`inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold rounded-full ${awardBadgeStyle}`}>
+                      {awardIcon} {p.award || 'Participation'}
+                    </div>
+                  </div>
                 </div>
               );
             })}
@@ -2820,6 +2980,20 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* Bulk Excel Team Import Modal */}
+      <BulkTeamImportModal
+        isOpen={isBulkTeamImportOpen}
+        onClose={() => setIsBulkTeamImportOpen(false)}
+        onImport={handleBulkImportTeams}
+        existingTeamsCount={teamParticipations.length}
+      />
+
+      {/* Team Details & Pass Modal */}
+      <TeamDetailsModal
+        team={selectedTeamForDetails}
+        onClose={() => setSelectedTeamForDetails(null)}
+      />
 
     </div>
   );

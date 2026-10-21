@@ -27,9 +27,11 @@ import {
   UserPlus,
   Share2,
   Copy,
-  ExternalLink
+  ExternalLink,
+  FileSpreadsheet
 } from 'lucide-react';
 import { TeamParticipation, ParticipantMember, VolunteerLog } from '../App';
+import { BulkTeamImportModal } from './BulkTeamImportModal';
 
 interface TeamManagementProps {
   teamParticipations: TeamParticipation[];
@@ -75,11 +77,23 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
 
   // Modals state
   const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<TeamParticipation | null>(null);
   const [qrModalTeam, setQrModalTeam] = useState<TeamParticipation | null>(null);
   const [deleteConfirmTeam, setDeleteConfirmTeam] = useState<TeamParticipation | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
+
+  // Bulk Excel Import Callback
+  const handleBulkImport = (newTeams: TeamParticipation[], mode: 'append' | 'replace') => {
+    if (mode === 'replace') {
+      setTeamParticipations(newTeams);
+      showToast(`Replaced team roster with ${newTeams.length} teams from Excel spreadsheet.`);
+    } else {
+      setTeamParticipations(prev => [...newTeams, ...prev]);
+      showToast(`Successfully added ${newTeams.length} new teams from Excel spreadsheet!`);
+    }
+  };
 
   // Generate QR Codes for all teams
   useEffect(() => {
@@ -427,7 +441,15 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
               </p>
             </div>
 
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-3 shrink-0 flex-wrap">
+              <button
+                onClick={() => setIsBulkImportOpen(true)}
+                className="px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-2 cursor-pointer active:scale-95"
+                title="Upload .xlsx, .xls, or .csv spreadsheet to add teams in bulk"
+              >
+                <FileSpreadsheet size={15} className="text-emerald-600" /> Bulk Excel Import
+              </button>
+
               <button
                 onClick={handleExportTeams}
                 className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-colors flex items-center gap-2 cursor-pointer border border-slate-200/80"
@@ -1502,6 +1524,16 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
           </div>
         </div>
       )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: BULK EXCEL SPREADSHEET IMPORT */}
+      {/* ========================================================================= */}
+      <BulkTeamImportModal
+        isOpen={isBulkImportOpen}
+        onClose={() => setIsBulkImportOpen(false)}
+        onImport={handleBulkImport}
+        existingTeamsCount={teamParticipations.length}
+      />
     </div>
   );
 };
