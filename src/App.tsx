@@ -591,6 +591,7 @@ export default function App() {
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
+  const [selectedTeamMemberModal, setSelectedTeamMemberModal] = useState<TeamMember | null>(null);
   const [selectedEventForReg, setSelectedEventForReg] = useState<EventItem | null>(null);
 
   // Events filter
@@ -1364,112 +1365,57 @@ export default function App() {
         {sectionsExpanded.teamDirectory && (
           <div className="space-y-8 text-left">
 
-            {/* Team Directory List with Short Titles */}
-            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-xs">
-              <div className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
-                Team Directory — Click any coordinator to view details:
-              </div>
-              <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-3">
-                {INITIAL_TEAM.map(member => {
-                  const isSelected = selectedTeamMemberId === member.id;
-                  return (
-                    <button
-                      key={'dir-' + member.id}
-                      onClick={() => setSelectedTeamMemberId(member.id)}
-                      className={`p-3 rounded-lg border text-left transition-all cursor-pointer group shadow-2xs ${
-                        isSelected 
-                          ? 'bg-blue-600 border-blue-600 text-white shadow-md' 
-                          : 'bg-slate-50 hover:bg-blue-50 border-slate-200 hover:border-blue-300 text-slate-900'
-                      }`}
-                    >
-                      <div className={`font-heading font-black text-sm truncate ${isSelected ? 'text-white' : 'text-slate-900 group-hover:text-blue-600'}`}>
+            {/* Creative Team Grid Showcase matching reference image */}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {INITIAL_TEAM.map((member, idx) => {
+                const isSelected = selectedTeamMemberId === member.id;
+                const roleNum = member.department.includes('Role 1') ? 'ROLE 1' : member.department.includes('Role 2') ? 'ROLE 2' : 'ROLE 3';
+
+                return (
+                  <div
+                    key={'dir-' + member.id}
+                    onClick={() => {
+                      setSelectedTeamMemberId(member.id);
+                      setSelectedTeamMemberModal(member);
+                    }}
+                    className={`rounded-2xl p-5 border transition-all duration-300 cursor-pointer relative overflow-hidden group flex flex-col justify-between shadow-xs hover:-translate-y-1 hover:shadow-lg ${
+                      isSelected 
+                        ? 'bg-gradient-to-br from-purple-600 via-indigo-600 to-pink-600 border-transparent text-white shadow-xl ring-2 ring-purple-400/50' 
+                        : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-900'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className={`px-2.5 py-1 rounded-lg font-bold text-xs shadow-2xs ${
+                          isSelected ? 'bg-white/25 text-white' : 'bg-blue-50 text-blue-700'
+                        }`}>
+                          {member.name.split(' ').map(n => n[0]).join('')}
+                        </div>
+                        <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                          isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                        }`}>
+                          {roleNum}
+                        </span>
+                      </div>
+
+                      <h3 className={`font-heading text-base font-black tracking-tight mb-1 ${isSelected ? 'text-white' : 'text-slate-900'}`}>
                         {member.name}
-                      </div>
-                      <div className={`text-[11px] font-semibold truncate mt-0.5 ${isSelected ? 'text-blue-100' : 'text-blue-700'}`}>
+                      </h3>
+                      <p className={`text-xs font-bold ${isSelected ? 'text-purple-100' : 'text-blue-600'}`}>
                         {member.role}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+                      </p>
+                    </div>
+
+                    <div className={`mt-5 pt-3 border-t flex items-center justify-between text-xs font-semibold ${
+                      isSelected ? 'border-white/20 text-white' : 'border-slate-100 text-slate-600 group-hover:text-slate-900'
+                    }`}>
+                      <span>{isSelected ? 'Active Profile' : 'View Responsibilities'}</span>
+                      <ChevronRight size={14} className={`transform transition-transform ${isSelected ? 'translate-x-1 text-white' : 'group-hover:translate-x-1'}`} />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-
-            {/* Selected Specific Person Detail Card (Only this shown) */}
-            {(() => {
-              const member = INITIAL_TEAM.find(m => m.id === selectedTeamMemberId) || INITIAL_TEAM[0];
-              const isMemberExpanded = expandedCards[member.id] ?? true;
-
-              return (
-                <div
-                  key={member.id}
-                  id={'team-member-' + member.id}
-                  className="bg-white border border-slate-200 rounded-xl p-6 sm:p-8 shadow-sm flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex items-start justify-between gap-4 mb-4 pb-4 border-b border-slate-100">
-                      <div>
-                        <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">
-                          Selected Coordinator Profile
-                        </span>
-                        <h3 className="font-heading text-2xl font-black text-slate-900">
-                          {member.name}
-                        </h3>
-                        <div className="text-sm font-bold text-blue-600 mt-0.5">
-                          {member.role}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="px-3 py-1 rounded bg-slate-100 text-slate-700 text-xs font-bold">
-                          {member.department}
-                        </span>
-                        <button
-                          onClick={() => toggleCard(member.id)}
-                          className="p-1.5 hover:bg-slate-100 rounded text-slate-500 cursor-pointer transition-colors"
-                          title={isMemberExpanded ? 'Collapse' : 'Expand'}
-                        >
-                          {isMemberExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="mb-4 bg-blue-50/60 p-4 rounded-xl border border-blue-100">
-                      <div className="text-xs font-bold uppercase tracking-wider text-blue-700 mb-1">
-                        Focus Area:
-                      </div>
-                      <div className="text-sm font-semibold text-slate-800">
-                        {member.focus}
-                      </div>
-                    </div>
-
-                    {isMemberExpanded && (
-                      <div className="space-y-2 pt-2">
-                        <div className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2">
-                          Operational Remit:
-                        </div>
-                        <ul className="space-y-2 text-xs sm:text-sm text-slate-600">
-                          {member.responsibilities.map((resp, idx) => (
-                            <li key={idx} className="flex items-start gap-2.5">
-                              <CheckCircle2 size={15} className="text-blue-600 shrink-0 mt-0.5" />
-                              <span>{resp}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <button
-                      onClick={() => toggleCard(member.id)}
-                      className="text-blue-600 font-bold hover:underline cursor-pointer flex items-center gap-1"
-                    >
-                      {isMemberExpanded ? 'Collapse Details' : 'Expand Details'}
-                    </button>
-                    <span className="text-slate-400 text-xs font-medium">Booni Upper Chitral 2026 Core Lead</span>
-                  </div>
-                </div>
-              );
-            })()}
           </div>
         )}
       </section>
@@ -1550,6 +1496,134 @@ export default function App() {
                 </div>
               );
             })}
+        </div>
+      </section>
+
+      {/* 5b. Judging Criteria & Expert Judges Panel Section */}
+      <section id="judging-criteria" className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
+            <Trophy size={20} />
+          </div>
+          <div>
+            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block">Evaluation Standards</span>
+            <h2 className="font-heading text-3xl font-black text-slate-900 tracking-tight">Judging Criteria</h2>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6 mb-12">
+          {/* Innovation */}
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex items-start gap-5 shadow-xs hover:border-emerald-300 transition-all">
+            <div className="w-16 h-16 rounded-full bg-white border-4 border-emerald-600 flex items-center justify-center shrink-0 shadow-xs">
+              <span className="font-heading font-black text-emerald-700 text-sm">25%</span>
+            </div>
+            <div>
+              <h3 className="font-heading text-lg font-black text-slate-900 mb-1.5 flex items-center gap-2">
+                <span>Innovation</span>
+                <span className="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">25%</span>
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Originality, creativity, uniqueness, and the value of the proposed AI-powered solution.
+              </p>
+            </div>
+          </div>
+
+          {/* Impact */}
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex items-start gap-5 shadow-xs hover:border-amber-300 transition-all">
+            <div className="w-16 h-16 rounded-full bg-white border-4 border-amber-500 flex items-center justify-center shrink-0 shadow-xs">
+              <span className="font-heading font-black text-amber-600 text-sm">25%</span>
+            </div>
+            <div>
+              <h3 className="font-heading text-lg font-black text-slate-900 mb-1.5 flex items-center gap-2">
+                <span>Impact</span>
+                <span className="text-xs font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800">25%</span>
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                The importance of the problem being addressed, the intended beneficiaries, and the solution's potential real-world value.
+              </p>
+            </div>
+          </div>
+
+          {/* Feasibility */}
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex items-start gap-5 shadow-xs hover:border-orange-300 transition-all">
+            <div className="w-16 h-16 rounded-full bg-white border-4 border-orange-600 flex items-center justify-center shrink-0 shadow-xs">
+              <span className="font-heading font-black text-orange-700 text-sm">25%</span>
+            </div>
+            <div>
+              <h3 className="font-heading text-lg font-black text-slate-900 mb-1.5 flex items-center gap-2">
+                <span>Feasibility</span>
+                <span className="text-xs font-bold px-2 py-0.5 rounded bg-orange-100 text-orange-800">25%</span>
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Practicality of implementation, technical functionality, realistic execution, and potential for further development.
+              </p>
+            </div>
+          </div>
+
+          {/* Presentation */}
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex items-start gap-5 shadow-xs hover:border-rose-300 transition-all">
+            <div className="w-16 h-16 rounded-full bg-white border-4 border-rose-600 flex items-center justify-center shrink-0 shadow-xs">
+              <span className="font-heading font-black text-rose-700 text-sm">25%</span>
+            </div>
+            <div>
+              <h3 className="font-heading text-lg font-black text-slate-900 mb-1.5 flex items-center gap-2">
+                <span>Presentation</span>
+                <span className="text-xs font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-800">25%</span>
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Clarity of the project explanation, quality of the demonstration, organization of the submission, and effectiveness of the presentation.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-blue-50/80 border border-blue-200 rounded-xl p-4 text-xs font-bold text-blue-900 text-center mb-14">
+          Total: 100%. All four criteria are weighted equally.
+        </div>
+
+        {/* Judges & Expert Panel Directory */}
+        <div className="mb-6">
+          <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block">Evaluation Board</span>
+          <h3 className="font-heading text-2xl font-black text-slate-900 tracking-tight">Judges & Expert Panel</h3>
+          <p className="text-sm text-slate-600 mt-1">Distinguished faculty and tech leaders evaluating finalist projects in Booni.</p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:border-blue-300 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-700 font-black text-sm flex items-center justify-center mb-3">
+              TH
+            </div>
+            <h4 className="font-heading font-black text-base text-slate-900">Dr. Tariq Hussain</h4>
+            <p className="text-xs font-semibold text-blue-600 mt-0.5">Lead Judge & Evaluator</p>
+            <p className="text-xs text-slate-500 mt-2">Pamir Public School & College</p>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:border-blue-300 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-700 font-black text-sm flex items-center justify-center mb-3">
+              JA
+            </div>
+            <h4 className="font-heading font-black text-base text-slate-900">Prof. Jamshed Ali</h4>
+            <p className="text-xs font-semibold text-blue-600 mt-0.5">STEM Judge</p>
+            <p className="text-xs text-slate-500 mt-2">Booni Degree College</p>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:border-blue-300 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-700 font-black text-sm flex items-center justify-center mb-3">
+              SB
+            </div>
+            <h4 className="font-heading font-black text-base text-slate-900">Ms. Samina Bibi</h4>
+            <p className="text-xs font-semibold text-blue-600 mt-0.5">Innovation Judge</p>
+            <p className="text-xs text-slate-500 mt-2">Aga Khan Higher Sec. School Kuragh</p>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:border-blue-300 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 font-black text-sm flex items-center justify-center mb-3">
+              NA
+            </div>
+            <h4 className="font-heading font-black text-base text-slate-900">Dr. Naeem Akhtar</h4>
+            <p className="text-xs font-semibold text-blue-600 mt-0.5">External Tech Judge</p>
+            <p className="text-xs text-slate-500 mt-2">Chitral STEM Council</p>
+          </div>
         </div>
       </section>
 
@@ -2645,6 +2719,56 @@ export default function App() {
                 className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl cursor-pointer"
               >
                 Got It
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selectedTeamMemberModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-xl w-full shadow-2xl border border-slate-200 text-left relative max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setSelectedTeamMemberModal(null)}
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-slate-900 flex items-center justify-center cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+            <div className="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 text-white font-black text-lg flex items-center justify-center shadow-md">
+                {selectedTeamMemberModal.name.split(' ').map(n => n[0]).join('')}
+              </div>
+              <div>
+                <h3 className="font-heading text-xl font-black text-slate-900">{selectedTeamMemberModal.name}</h3>
+                <p className="text-xs font-bold text-blue-600">{selectedTeamMemberModal.role} · <span className="text-slate-500 font-medium">{selectedTeamMemberModal.department}</span></p>
+              </div>
+            </div>
+            
+            <div className="space-y-4 text-xs text-slate-600 leading-relaxed">
+              <div className="bg-blue-50/70 p-3.5 rounded-xl border border-blue-100">
+                <div className="font-bold text-blue-900 mb-1">Focus Area:</div>
+                <div className="text-slate-800 font-semibold">{selectedTeamMemberModal.focus}</div>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-900 text-sm mb-2">Operational Responsibilities & Remit:</h4>
+                <ul className="space-y-2">
+                  {selectedTeamMemberModal.responsibilities.map((resp, idx) => (
+                    <li key={idx} className="flex items-start gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                      <CheckCircle2 size={15} className="text-blue-600 shrink-0 mt-0.5" />
+                      <span className="text-slate-700 font-medium">{resp}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={() => setSelectedTeamMemberModal(null)}
+                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl cursor-pointer"
+              >
+                Close Profile
               </button>
             </div>
           </div>
