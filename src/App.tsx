@@ -1523,7 +1523,7 @@ export default function App() {
                 <span className="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">25%</span>
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Originality, creativity, uniqueness, and the value of the proposed AI-powered solution.
+                Originality, creative problem-solving, and the unique value of the proposed STEM, Art, Food, or community project.
               </p>
             </div>
           </div>
@@ -1539,7 +1539,7 @@ export default function App() {
                 <span className="text-xs font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800">25%</span>
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                The importance of the problem being addressed, the intended beneficiaries, and the solution's potential real-world value.
+                The importance of the community challenge being addressed in Upper Chitral, intended beneficiaries, and potential real-world value.
               </p>
             </div>
           </div>
@@ -1555,7 +1555,7 @@ export default function App() {
                 <span className="text-xs font-bold px-2 py-0.5 rounded bg-orange-100 text-orange-800">25%</span>
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Practicality of implementation, technical functionality, realistic execution, and potential for further development.
+                Practicality of implementation, effective collaboration among team members, realistic execution, and potential for further community development.
               </p>
             </div>
           </div>
@@ -1571,7 +1571,7 @@ export default function App() {
                 <span className="text-xs font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-800">25%</span>
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Clarity of the project explanation, quality of the demonstration, organization of the submission, and effectiveness of the presentation.
+                Clarity of the project explanation, quality of the exhibition display or demonstration, organization, and effectiveness of communication.
               </p>
             </div>
           </div>
