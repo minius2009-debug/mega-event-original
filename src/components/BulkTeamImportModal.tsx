@@ -123,7 +123,7 @@ export const BulkTeamImportModal: React.FC<BulkTeamImportModalProps> = ({
         'Team Members': 'Zeeshan Ahmad (Team Lead); Bilal Shah (Robotics Eng); Nida Fatima (Sensors & Firmware); Karim Baig (Cloud Telemetry)',
         'Project Description': 'Autonomous ultrasonic water-level detection nodes that relay flash-flood alerts across mountainous valleys.',
         'Status': 'Approved',
-        'Award': 'First Place'
+        'Award': 'Participation'
       },
       {
         'Team Code': 'CLB-WATER-03',
@@ -157,7 +157,7 @@ export const BulkTeamImportModal: React.FC<BulkTeamImportModalProps> = ({
         'Team Members': 'Afroza Gul (Creative Director); Salma Karim (Traditional Weaving); Faraz Baig (Digital Media & 3D Scanner)',
         'Project Description': 'Preserving traditional indigenous Chitrali embroidery patterns through digital documentation and modern craft exhibits.',
         'Status': 'Approved',
-        'Award': 'Third Place'
+        'Award': 'Participation'
       },
       {
         'Team Code': 'CLB-FOOD-05',
@@ -382,16 +382,8 @@ export const BulkTeamImportModal: React.FC<BulkTeamImportModalProps> = ({
           mapped['abstract'] ||
           `Innovative student project by ${projectName || 'team'} for First Mega Event of Collabs 2026 in Booni.`;
 
-        // Check for award
-        const rawAward = (mapped['award'] || mapped['prize'] || '').toString().toLowerCase();
-        let award: ParsedTeamRow['award'] = 'Participation';
-        if (rawAward.includes('first') || rawAward.includes('1st') || rawAward.includes('gold')) {
-          award = 'First Place';
-        } else if (rawAward.includes('second') || rawAward.includes('2nd') || rawAward.includes('silver')) {
-          award = 'Second Place';
-        } else if (rawAward.includes('third') || rawAward.includes('3rd') || rawAward.includes('bronze')) {
-          award = 'Third Place';
-        }
+        // In team participation, all registered teams are equal participants
+        const award: ParsedTeamRow['award'] = 'Participation';
 
         // Status
         const rawStatus = (mapped['status'] || '').toString().toLowerCase();

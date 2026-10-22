@@ -1,0 +1,36 @@
+{
+  "entities": {
+    "TeamParticipation": {
+      "title": "TeamParticipation",
+      "description": "Represents a participating student team, project details, institutional affiliation, and roster for the First Mega Event of Collabs 2026.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the team record", "maxLength": 128 },
+        "teamCode": { "type": "string", "description": "Standardized team code, e.g. CLB-STEM-01", "maxLength": 50 },
+        "projectName": { "type": "string", "description": "Title of the project or innovation", "maxLength": 200 },
+        "teamLeader": { "type": "string", "description": "Full name of the designated team leader", "maxLength": 150 },
+        "leaderEmail": { "type": "string", "description": "Contact email of the team leader", "maxLength": 150 },
+        "coLeader": { "type": "string", "description": "Secondary co-leader name", "maxLength": 150 },
+        "supervisor": { "type": "string", "description": "Faculty advisor or mentor", "maxLength": 150 },
+        "school": { "type": "string", "description": "Associated school or college in Upper Chitral", "maxLength": 150 },
+        "campus": { "type": "string", "description": "Campus or facility branch", "maxLength": 100 },
+        "location": { "type": "string", "description": "Stall or presentation station at event grounds", "maxLength": 100 },
+        "category": { "type": "string", "description": "Competition category track", "maxLength": 100 },
+        "capacity": { "type": "number", "description": "Maximum roster capacity" },
+        "members": { "type": "array", "description": "Array of student participants with their roles" },
+        "projectDescription": { "type": "string", "description": "Abstract and community impact description", "maxLength": 5000 },
+        "award": { "type": "string", "description": "Award outcome or certificate tier", "enum": ["First Place", "Second Place", "Third Place", "Participation"] },
+        "status": { "type": "string", "description": "Approval status", "enum": ["Approved", "Pending", "Rejected"] },
+        "createdAt": { "type": "string", "description": "Creation timestamp label or ISO string", "maxLength": 100 },
+        "qrCodeUrl": { "type": "string", "description": "Base64 data URL for fast QR verification", "maxLength": 200000 }
+      },
+      "required": ["projectName", "teamLeader"]
+    }
+  },
+  "firestore": {
+    "/teams/{teamId}": {
+      "schema": "TeamParticipation",
+      "description": "Exhibition teams and participant rosters for Collabs 2026."
+    }
+  }
+}

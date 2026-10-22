@@ -1,0 +1,54 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default-deny global safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Health / connection test doc
+    match /test/{docId} {
+      allow read: if true;
+    }
+
+    // Validation helper for team participation records
+    function isValidTeam(data) {
+      return data.projectName is string && data.projectName.size() > 0 && data.projectName.size() <= 200
+        && data.teamLeader is string && data.teamLeader.size() > 0 && data.teamLeader.size() <= 150
+        && (!('teamCode' in data) || (data.teamCode is string && data.teamCode.size() <= 50))
+        && (!('school' in data) || (data.school is string && data.school.size() <= 150))
+        && (!('category' in data) || (data.category is string && data.category.size() <= 100))
+        && (!('campus' in data) || (data.campus is string && data.campus.size() <= 100))
+        && (!('location' in data) || (data.location is string && data.location.size() <= 100))
+        && (!('coLeader' in data) || (data.coLeader is string && data.coLeader.size() <= 150))
+        && (!('supervisor' in data) || (data.supervisor is string && data.supervisor.size() <= 150))
+        && (!('leaderEmail' in data) || (data.leaderEmail is string && data.leaderEmail.size() <= 150))
+        && (!('capacity' in data) || (data.capacity is number && data.capacity >= 1 && data.capacity <= 50))
+        && (!('projectDescription' in data) || (data.projectDescription is string && data.projectDescription.size() <= 5000))
+        && (!('status' in data) || (data.status is string && (data.status == 'Approved' || data.status == 'Pending' || data.status == 'Rejected')))
+        && (!('award' in data) || (data.award is string && (data.award == 'First Place' || data.award == 'Second Place' || data.award == 'Third Place' || data.award == 'Participation')))
+        && (!('members' in data) || (data.members is list && data.members.size() <= 30))
+        && (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 100))
+        && (!('qrCodeUrl' in data) || (data.qrCodeUrl is string && data.qrCodeUrl.size() <= 250000));
+    }
+
+    // Team Participation & Innovation Roster Collection
+    match /teams/{teamId} {
+      allow read: if true;
+      allow create, update: if isValidId(teamId) && isValidTeam(incoming());
+      allow delete: if isValidId(teamId);
+    }
+  }
+}

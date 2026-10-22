@@ -120,9 +120,12 @@ export const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ team, onClos
             </div>
 
             <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80">
-              <div className="text-[10px] text-slate-600 uppercase font-bold tracking-wider">Standing & Award</div>
+              <div className="text-[10px] text-slate-600 uppercase font-bold tracking-wider">Recognition</div>
               <div className="font-bold text-emerald-700 mt-1">{team.status}</div>
-              <div className="text-[10px] text-amber-700 font-semibold">{team.award || 'Participation'}</div>
+              <div className="text-[10px] text-blue-700 font-semibold flex items-center gap-1 mt-0.5">
+                <Award size={10} className="text-blue-600 shrink-0" />
+                <span>Official Participation</span>
+              </div>
             </div>
           </div>
 

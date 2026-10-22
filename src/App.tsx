@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import AdminPage from './pages/Admin.tsx';
 import QRCode from 'qrcode';
@@ -54,10 +54,29 @@ import {
   Leaf,
   FileSpreadsheet,
   Eye,
-  Trash2
+  Trash2,
+  ArrowUpDown,
+  SlidersHorizontal,
+  LayoutGrid,
+  List,
+  ArrowDownAZ,
+  ArrowUpAZ,
+  Cpu,
+  Palette,
+  Utensils,
+  Droplets,
+  GraduationCap,
+  Filter
 } from 'lucide-react';
 import { BulkTeamImportModal } from './components/BulkTeamImportModal';
 import { TeamDetailsModal } from './components/TeamDetailsModal';
+import {
+  subscribeTeams,
+  deleteTeamFromFirestore,
+  bulkImportTeamsToFirestore,
+  seedInitialTeamsIfEmpty
+} from './services/teamService';
+import { testConnection } from './firebase/firebaseConfig';
 
 export interface EventItem {
   id: string;
@@ -156,7 +175,7 @@ const INITIAL_TEAM_PARTICIPATIONS: TeamParticipation[] = [
       { name: 'Jordan Hayes', role: 'Hardware Assistant', email: 'jordan.hayes@collabs.org', school: 'Booni Degree College' }
     ],
     projectDescription: 'Developing autonomous robots for high-altitude emergency supply navigation and environmental monitoring in Upper Chitral.',
-    award: 'First Place',
+    award: 'Participation',
     status: 'Approved',
     createdAt: 'Oct 2026'
   },
@@ -178,7 +197,7 @@ const INITIAL_TEAM_PARTICIPATIONS: TeamParticipation[] = [
       { name: 'Chloe Bennett', role: 'Documentation', email: 'chloe.bennett@collabs.org', school: 'Pamir Public School & College' }
     ],
     projectDescription: 'IoT-based soil moisture and cold-snap early warning system designed specifically for high-elevation apple and walnut orchards.',
-    award: 'Second Place',
+    award: 'Participation',
     status: 'Approved',
     createdAt: 'Oct 2026'
   },
@@ -634,9 +653,13 @@ export default function App() {
   // Events filter
   const [eventFilter, setEventFilter] = useState<'All' | 'Upcoming' | 'Workshops' | 'Completed'>('All');
 
-  // Participation filter
+  // Participation filter & sorting controls
   const [participationSearch, setParticipationSearch] = useState('');
-  const [participationAwardFilter, setParticipationAwardFilter] = useState<'All' | 'First Place' | 'Second Place' | 'Third Place' | 'Participation'>('All');
+  const [participationStatusFilter, setParticipationStatusFilter] = useState<'All' | 'Approved' | 'Pending' | 'Rejected'>('All');
+  const [participationCategoryFilter, setParticipationCategoryFilter] = useState<string>('All');
+  const [participationSort, setParticipationSort] = useState<string>('name-asc');
+  const [participationViewMode, setParticipationViewMode] = useState<'grid' | 'table'>('grid');
+  const [isTeamsExpanded, setIsTeamsExpanded] = useState(false);
 
   // Real-time Countdown strictly for 31 October 2026
   const [timeLeft, setTimeLeft] = useState({ days: 8, hours: 19, minutes: 48, seconds: 20 });
@@ -732,6 +755,33 @@ export default function App() {
   const [selectedTeamForDetails, setSelectedTeamForDetails] = useState<TeamParticipation | null>(null);
   const [teamImportToast, setTeamImportToast] = useState<string | null>(null);
   const [teamCardQrs, setTeamCardQrs] = useState<Record<string, string>>({});
+  const [isFirebaseConnected, setIsFirebaseConnected] = useState(false);
+
+  // Initialize and synchronize with Firebase Firestore
+  useEffect(() => {
+    let unsubscribe: (() => void) | undefined;
+    testConnection().then(connected => {
+      if (connected) {
+        setIsFirebaseConnected(true);
+        seedInitialTeamsIfEmpty(INITIAL_TEAM_PARTICIPATIONS).then(() => {
+          unsubscribe = subscribeTeams(
+            firestoreTeams => {
+              if (firestoreTeams && firestoreTeams.length > 0) {
+                setTeamParticipations(firestoreTeams);
+              }
+            },
+            err => {
+              console.warn('Live team sync notice:', err);
+            }
+          );
+        });
+      }
+    });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
 
   // Auto-generate QR codes for team participations
   useEffect(() => {
@@ -754,15 +804,211 @@ export default function App() {
     });
   }, [teamParticipations]);
 
-  const handleBulkImportTeams = (newTeams: TeamParticipation[], mode: 'append' | 'replace') => {
+  const handleBulkImportTeams = async (newTeams: TeamParticipation[], mode: 'append' | 'replace') => {
+    // Optimistic UI update
     if (mode === 'replace') {
       setTeamParticipations(newTeams);
-      setTeamImportToast(`Roster updated: Replaced with ${newTeams.length} teams from Excel spreadsheet.`);
     } else {
       setTeamParticipations(prev => [...newTeams, ...prev]);
-      setTeamImportToast(`Successfully added ${newTeams.length} new teams from Excel spreadsheet!`);
+    }
+
+    try {
+      await bulkImportTeamsToFirestore(newTeams, mode);
+      setTeamImportToast(
+        mode === 'replace'
+          ? `Saved to Firebase: Roster updated with ${newTeams.length} teams.`
+          : `Saved to Firebase: Successfully added ${newTeams.length} new teams!`
+      );
+    } catch (err: any) {
+      console.error('Firebase save error:', err);
+      setTeamImportToast(`Saved locally (Firebase sync pending: ${err.message || 'offline'})`);
     }
     setTimeout(() => setTeamImportToast(null), 5000);
+  };
+
+  // Unique categories extracted dynamically from teams
+  const availableCategories = useMemo(() => {
+    const set = new Set<string>();
+    teamParticipations.forEach(t => {
+      if (t.category && t.category.trim()) {
+        set.add(t.category.trim());
+      }
+    });
+    return Array.from(set).sort();
+  }, [teamParticipations]);
+
+  // Filtered and Sorted teams list based on user selections
+  const sortedAndFilteredTeams = useMemo(() => {
+    const list = teamParticipations.filter(p => {
+      // Search query filter
+      const q = participationSearch.toLowerCase().trim();
+      if (q) {
+        const matchName = p.projectName.toLowerCase().includes(q);
+        const matchLeader = p.teamLeader.toLowerCase().includes(q);
+        const matchSchool = (p.school || '').toLowerCase().includes(q);
+        const matchCategory = (p.category || '').toLowerCase().includes(q);
+        const matchCode = (p.teamCode || '').toLowerCase().includes(q);
+        const matchDesc = (p.projectDescription || '').toLowerCase().includes(q);
+        if (!matchName && !matchLeader && !matchSchool && !matchCategory && !matchCode && !matchDesc) {
+          return false;
+        }
+      }
+
+      // Status filter
+      if (participationStatusFilter !== 'All' && p.status !== participationStatusFilter) {
+        return false;
+      }
+
+      // Category filter
+      if (participationCategoryFilter !== 'All' && p.category !== participationCategoryFilter) {
+        return false;
+      }
+
+      return true;
+    });
+
+    // Sorting status maps
+    const statusRank: Record<string, number> = {
+      'Approved': 1,
+      'Pending': 2,
+      'Rejected': 3
+    };
+
+    return list.sort((a, b) => {
+      switch (participationSort) {
+        case 'name-asc':
+          return a.projectName.localeCompare(b.projectName);
+        case 'name-desc':
+          return b.projectName.localeCompare(a.projectName);
+        case 'code-asc':
+          return (a.teamCode || a.id).localeCompare(b.teamCode || b.id);
+        case 'school-asc':
+          return (a.school || '').localeCompare(b.school || '');
+        case 'school-desc':
+          return (b.school || '').localeCompare(a.school || '');
+        case 'category-asc':
+          return (a.category || '').localeCompare(b.category || '');
+        case 'status-approved': {
+          const rankA = statusRank[a.status] || 99;
+          const rankB = statusRank[b.status] || 99;
+          if (rankA !== rankB) return rankA - rankB;
+          return a.projectName.localeCompare(b.projectName);
+        }
+        case 'status-pending': {
+          const rankA = a.status === 'Pending' ? 0 : 1;
+          const rankB = b.status === 'Pending' ? 0 : 1;
+          if (rankA !== rankB) return rankA - rankB;
+          return a.projectName.localeCompare(b.projectName);
+        }
+        case 'members-desc': {
+          const countA = a.members?.length || 0;
+          const countB = b.members?.length || 0;
+          return countB - countA;
+        }
+        default:
+          return 0;
+      }
+    });
+  }, [
+    teamParticipations,
+    participationSearch,
+    participationStatusFilter,
+    participationCategoryFilter,
+    participationSort
+  ]);
+
+  // Show only 3 or 4 teams initially with an option to expand to all teams
+  const INITIAL_TEAMS_LIMIT = 4;
+  const displayedTeams = useMemo(() => {
+    return isTeamsExpanded
+      ? sortedAndFilteredTeams
+      : sortedAndFilteredTeams.slice(0, INITIAL_TEAMS_LIMIT);
+  }, [sortedAndFilteredTeams, isTeamsExpanded]);
+
+  const hasMoreTeams = sortedAndFilteredTeams.length > INITIAL_TEAMS_LIMIT;
+
+  const getTeamCategoryBadge = (category?: string) => {
+    const cat = (category || '').toLowerCase();
+    if (cat.includes('robo') || cat.includes('ai') || cat.includes('tech')) {
+      return {
+        label: category || 'AI & Robotics',
+        icon: <Cpu size={11} className="text-indigo-600 shrink-0" />,
+        style: 'bg-indigo-50 text-indigo-700 border-indigo-200/80',
+        borderAccent: 'border-l-indigo-500'
+      };
+    }
+    if (cat.includes('agri') || cat.includes('climate') || cat.includes('farm')) {
+      return {
+        label: category || 'Climate & Ag',
+        icon: <Leaf size={11} className="text-emerald-600 shrink-0" />,
+        style: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
+        borderAccent: 'border-l-emerald-500'
+      };
+    }
+    if (cat.includes('water') || cat.includes('enviro') || cat.includes('eco')) {
+      return {
+        label: category || 'Water & Eco',
+        icon: <Droplets size={11} className="text-cyan-600 shrink-0" />,
+        style: 'bg-cyan-50 text-cyan-700 border-cyan-200/80',
+        borderAccent: 'border-l-cyan-500'
+      };
+    }
+    if (cat.includes('art') || cat.includes('culture') || cat.includes('craft')) {
+      return {
+        label: category || 'Art & Culture',
+        icon: <Palette size={11} className="text-pink-600 shrink-0" />,
+        style: 'bg-pink-50 text-pink-700 border-pink-200/80',
+        borderAccent: 'border-l-pink-500'
+      };
+    }
+    if (cat.includes('food') || cat.includes('nutri')) {
+      return {
+        label: category || 'Food & Nutrition',
+        icon: <Utensils size={11} className="text-amber-600 shrink-0" />,
+        style: 'bg-amber-50 text-amber-700 border-amber-200/80',
+        borderAccent: 'border-l-amber-500'
+      };
+    }
+    return {
+      label: category || 'Innovation',
+      icon: <Sparkles size={11} className="text-blue-600 shrink-0" />,
+      style: 'bg-blue-50 text-blue-700 border-blue-200/80',
+      borderAccent: 'border-l-blue-500'
+    };
+  };
+
+  const getTeamStatusBadge = (status?: string) => {
+    if (status === 'Approved') {
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs shrink-0">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          Approved
+        </span>
+      );
+    }
+    if (status === 'Pending') {
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
+          <Clock size={10} className="text-amber-600" />
+          Pending
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 shrink-0">
+        <X size={10} className="text-rose-600" />
+        Rejected
+      </span>
+    );
+  };
+
+  const getTeamAwardDetails = (_award?: string) => {
+    return {
+      icon: <Award size={12} className="text-blue-600 shrink-0" />,
+      style: 'bg-blue-50 text-blue-700 border border-blue-200/90 font-bold',
+      label: 'Participation',
+      tag: 'Participant'
+    };
   };
   const [eventsList, setEventsList] = useState<EventItem[]>(INITIAL_EVENTS);
   const [isAdminMode, setIsAdminMode] = useState(false);
@@ -1498,187 +1744,494 @@ export default function App() {
           </div>
         )}
 
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+        {/* Section Header */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-6">
           <div>
-            <div className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">
-              Booni Exhibition Finalists & Cohorts
+            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+              <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
+                Booni Exhibition Finalists & Cohorts
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                Saved in Firebase Firestore
+              </span>
+              <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                {teamParticipations.length} Enrolled Teams
+              </span>
             </div>
             <h2 className="font-heading text-3xl font-black text-slate-900 tracking-tight">Team Participation</h2>
-            <p className="text-xs text-slate-500 mt-1">
-              Explore participating innovation teams, view member assignments, or import team rosters in bulk via Excel spreadsheet.
+            <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
+              Explore participating innovation teams, view member assignments, and access event passes. All teams are recognized as official event participants with cloud synchronization.
             </p>
           </div>
           
-          <div className="flex flex-wrap items-center gap-2.5">
-            <input
-              type="text"
-              placeholder="Search by project, leader, or school..."
-              value={participationSearch}
-              onChange={e => setParticipationSearch(e.target.value)}
-              className="p-2.5 px-3.5 bg-white border rounded-xl border-slate-300 text-xs text-slate-900 focus:border-blue-600 focus:outline-none min-w-[200px]"
-            />
-            <select
-              value={participationAwardFilter}
-              onChange={e => setParticipationAwardFilter(e.target.value as any)}
-              className="p-2.5 px-3 bg-white border rounded-xl border-slate-300 text-xs text-slate-800 font-medium focus:border-blue-600 focus:outline-none cursor-pointer"
-            >
-              <option value="All">All Standing & Awards</option>
-              <option value="First Place">First Place</option>
-              <option value="Second Place">Second Place</option>
-              <option value="Third Place">Third Place</option>
-              <option value="Participation">Participation</option>
-            </select>
-
-            {/* Bulk Excel Import Trigger Button */}
+          <div className="flex items-center gap-2 shrink-0">
+            {hasMoreTeams && (
+              <button
+                type="button"
+                onClick={() => setIsTeamsExpanded(!isTeamsExpanded)}
+                className="p-2 px-3.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs rounded-xl border border-blue-200 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-2xs"
+                title={isTeamsExpanded ? 'Collapse to 4 teams' : `Expand to all ${sortedAndFilteredTeams.length} teams`}
+              >
+                {isTeamsExpanded ? (
+                  <>
+                    <ChevronUp size={14} /> Collapse
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown size={14} /> View All ({sortedAndFilteredTeams.length})
+                  </>
+                )}
+              </button>
+            )}
             <button
               type="button"
-              onClick={() => setIsBulkTeamImportOpen(true)}
-              className="p-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-600/20 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
-              title="Bulk import teams from Excel (.xlsx, .xls, .csv)"
+              onClick={() => navigate('/admin')}
+              className="p-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+              title="Admin Portal - Manage Teams & Bulk Import Spreadsheet"
             >
-              <FileSpreadsheet size={15} /> Bulk Import (Excel)
+              <Shield size={13} className="text-slate-500" /> Admin Portal
             </button>
           </div>
         </div>
 
-        {/* Grid of Participating Teams */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {teamParticipations
-            .filter(p => 
-              (participationAwardFilter === 'All' || p.award === participationAwardFilter) &&
-              (p.teamLeader.toLowerCase().includes(participationSearch.toLowerCase()) || 
-               p.projectName.toLowerCase().includes(participationSearch.toLowerCase()) ||
-               (p.school && p.school.toLowerCase().includes(participationSearch.toLowerCase())) ||
-               (p.category && p.category.toLowerCase().includes(participationSearch.toLowerCase())))
-            )
-            .map(p => {
-              const getAwardDetails = (award?: string) => {
-                  switch(award) {
-                      case 'First Place': return { icon: <Trophy size={16} className="text-amber-600" />, style: 'bg-amber-100 text-amber-800', prize: '10,000 PKR Cash Prize + Official Winner Shield' };
-                      case 'Second Place': return { icon: <Shield size={16} className="text-slate-500" />, style: 'bg-slate-100 text-slate-800', prize: 'Runner-up Shield + Certificate of Excellence' };
-                      case 'Third Place': return { icon: <Medal size={16} className="text-orange-700" />, style: 'bg-orange-100 text-orange-800', prize: 'Runner-up Shield + Certificate of Excellence' };
-                      default: return { icon: <Award size={16} className="text-blue-600" />, style: 'bg-blue-100 text-blue-800', prize: 'Official Participation Certificate' };
-                  }
-              };
-              const { icon: awardIcon, style: awardBadgeStyle, prize } = getAwardDetails(p.award);
+        {/* Creative Interactive Controls & Sorter Bar */}
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-4 mb-6 shadow-2xs space-y-3">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+            {/* Search Input */}
+            <div className="relative flex-1 min-w-[220px]">
+              <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search project, leader, school, code, category..."
+                value={participationSearch}
+                onChange={e => setParticipationSearch(e.target.value)}
+                className="w-full pl-9 pr-8 py-2 bg-slate-50 hover:bg-white focus:bg-white border rounded-xl border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none transition-colors"
+              />
+              {participationSearch && (
+                <button
+                  type="button"
+                  onClick={() => setParticipationSearch('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+
+            {/* Sorting & Filtering Controls */}
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Sort By Dropdown */}
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
+                <ArrowUpDown size={13} className="text-blue-600 shrink-0" />
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider hidden sm:inline">Sort:</span>
+                <select
+                  value={participationSort}
+                  onChange={e => setParticipationSort(e.target.value)}
+                  className="bg-transparent text-xs text-slate-800 font-bold focus:outline-none cursor-pointer"
+                >
+                  <option value="name-asc">Alphabetical: Project (A → Z)</option>
+                  <option value="name-desc">Alphabetical: Project (Z → A)</option>
+                  <option value="code-asc">Team Code (A → Z)</option>
+                  <option value="school-asc">School Name (A → Z)</option>
+                  <option value="school-desc">School Name (Z → A)</option>
+                  <option value="category-asc">Category (A → Z)</option>
+                  <option value="status-approved">Status: Approved First</option>
+                  <option value="status-pending">Status: Pending First</option>
+                  <option value="members-desc">Team Size (Largest First)</option>
+                </select>
+              </div>
+
+              {/* Category Filter */}
+              <select
+                value={participationCategoryFilter}
+                onChange={e => setParticipationCategoryFilter(e.target.value)}
+                className="p-2 px-3 bg-slate-50 border rounded-xl border-slate-200 text-xs text-slate-800 font-medium focus:border-blue-600 focus:outline-none cursor-pointer"
+              >
+                <option value="All">All Categories</option>
+                {availableCategories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+
+              {/* Status Filter (Pending vs Approved vs Rejected) */}
+              <select
+                value={participationStatusFilter}
+                onChange={e => setParticipationStatusFilter(e.target.value as any)}
+                className="p-2 px-3 bg-slate-50 border rounded-xl border-slate-200 text-xs text-slate-800 font-medium focus:border-blue-600 focus:outline-none cursor-pointer"
+              >
+                <option value="All">All Statuses</option>
+                <option value="Approved">Approved</option>
+                <option value="Pending">Pending</option>
+                <option value="Rejected">Rejected</option>
+              </select>
+
+              {/* Official Participation Recognition Indicator */}
+              <div
+                className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50/90 border border-blue-200 text-blue-700 text-xs font-bold rounded-xl shadow-2xs select-none"
+                title="All registered teams are recognized as official event participants"
+              >
+                <Award size={13} className="text-blue-600 shrink-0" />
+                <span>All: Participation</span>
+              </div>
+
+              {/* View Switcher (Grid vs Table) */}
+              <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setParticipationViewMode('grid')}
+                  className={`p-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
+                    participationViewMode === 'grid'
+                      ? 'bg-white text-blue-600 shadow-2xs'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                  title="Small Creative Cards View"
+                >
+                  <LayoutGrid size={14} />
+                  <span className="hidden sm:inline text-[11px]">Cards</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setParticipationViewMode('table')}
+                  className={`p-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
+                    participationViewMode === 'table'
+                      ? 'bg-white text-blue-600 shadow-2xs'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                  title="Dense Roster Table View"
+                >
+                  <List size={14} />
+                  <span className="hidden sm:inline text-[11px]">Table</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Active Filter Indicators & Reset Action */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
+            <div className="flex items-center gap-2 flex-wrap text-slate-500 text-[11px]">
+              <span>
+                Showing <strong className="text-slate-900">{displayedTeams.length}</strong> of{' '}
+                <strong className="text-slate-900">{sortedAndFilteredTeams.length}</strong> teams
+                {!isTeamsExpanded && hasMoreTeams && (
+                  <span className="text-blue-600 font-semibold ml-1">(Previewing 4)</span>
+                )}
+              </span>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 font-semibold rounded-md border border-blue-200/60">
+                <Award size={10} className="text-blue-600" />
+                All Teams: Participation
+              </span>
+              {participationSort !== 'name-asc' && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 font-semibold rounded-md">
+                  Sorted
+                </span>
+              )}
+              {participationStatusFilter !== 'All' && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-800 font-semibold rounded-md">
+                  Status: {participationStatusFilter}
+                </span>
+              )}
+              {participationCategoryFilter !== 'All' && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-50 text-purple-800 font-semibold rounded-md">
+                  Category: {participationCategoryFilter}
+                </span>
+              )}
+            </div>
+
+            {(participationSearch || participationStatusFilter !== 'All' || participationCategoryFilter !== 'All' || participationSort !== 'name-asc') && (
+              <button
+                type="button"
+                onClick={() => {
+                  setParticipationSearch('');
+                  setParticipationStatusFilter('All');
+                  setParticipationCategoryFilter('All');
+                  setParticipationSort('name-asc');
+                }}
+                className="text-[11px] font-bold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <RotateCw size={11} /> Reset Filters
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Empty State */}
+        {sortedAndFilteredTeams.length === 0 && (
+          <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center max-w-md mx-auto my-6 shadow-xs">
+            <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+              <Search size={24} />
+            </div>
+            <h4 className="font-heading font-black text-slate-900 text-base mb-1">No Matching Teams Found</h4>
+            <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+              No participating teams matched your search criteria or selected filters. Try broadening your terms or reset the filters.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setParticipationSearch('');
+                setParticipationStatusFilter('All');
+                setParticipationCategoryFilter('All');
+                setParticipationSort('name-asc');
+              }}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer"
+            >
+              Reset All Filters
+            </button>
+          </div>
+        )}
+
+        {/* Small, Creative & Engaging Grid of Participating Teams */}
+        {participationViewMode === 'grid' && sortedAndFilteredTeams.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-3.5">
+            {displayedTeams.map(p => {
+              const categoryBadge = getTeamCategoryBadge(p.category);
+              const { icon: awardIcon, style: awardBadgeStyle, label: awardLabel } = getTeamAwardDetails(p.award);
               const qr = teamCardQrs[p.id];
 
               return (
                 <div
                   key={p.id}
                   onClick={() => setSelectedTeamForDetails(p)}
-                  className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl flex flex-col justify-between cursor-pointer group"
+                  className={`group relative bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-150 p-3 flex flex-col justify-between cursor-pointer overflow-hidden border-l-[3px] ${categoryBadge.borderAccent}`}
                 >
                   <div>
-                    {/* Top Tag Row */}
-                    <div className="flex justify-between items-start mb-3 gap-2">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="font-mono text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-md">
+                    {/* Top Header: Category Tag & Status Badge */}
+                    <div className="flex items-center justify-between gap-1 mb-1.5">
+                      <span className={`inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded ${categoryBadge.style}`}>
+                        {categoryBadge.icon}
+                        <span className="truncate max-w-[80px]">{categoryBadge.label}</span>
+                      </span>
+
+                      <div className="flex items-center gap-1 shrink-0">
+                        <span className="font-mono text-[9px] font-bold text-slate-600 bg-slate-100 border border-slate-200/80 px-1 py-0.5 rounded">
                           {p.teamCode || p.id}
                         </span>
-                        <span className="text-[11px] font-semibold text-slate-500">
-                          {p.category || 'Innovation Sprint'}
-                        </span>
-                      </div>
-                      
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          p.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-                        }`}>
-                          {p.status}
-                        </span>
+                        {getTeamStatusBadge(p.status)}
                         {isAdminMode && (
                           <button
-                            onClick={(e) => {
+                            onClick={async e => {
                               e.stopPropagation();
+                              try {
+                                await deleteTeamFromFirestore(p.id);
+                              } catch (err) {
+                                console.error('Error deleting team from Firebase:', err);
+                              }
                               setTeamParticipations(prev => prev.filter(item => item.id !== p.id));
                             }}
-                            className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50"
+                            className="text-red-500 hover:text-red-700 p-0.5 rounded hover:bg-red-50"
                             title="Delete Team"
                           >
-                            <Trash2 size={13} />
+                            <Trash2 size={11} />
                           </button>
                         )}
                       </div>
                     </div>
 
-                    <h3 className="font-heading font-black text-lg text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                    {/* Project Title */}
+                    <h3
+                      className="font-heading font-black text-xs text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1 leading-snug"
+                      title={p.projectName}
+                    >
                       {p.projectName}
                     </h3>
 
-                    <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium mt-1.5">
-                      <Building2 size={13} className="text-slate-400 shrink-0" />
-                      <span className="truncate">{p.school || 'Collabs Central Organization'}</span>
+                    {/* School / Institution */}
+                    <div className="flex items-center gap-1 text-[10px] text-slate-500 font-medium mt-0.5 truncate">
+                      <GraduationCap size={11} className="text-slate-400 shrink-0" />
+                      <span className="truncate">{p.school || 'Collabs Event'}</span>
                     </div>
 
-                    <p className="text-slate-500 text-xs mt-3 line-clamp-2 leading-relaxed">
-                      {p.projectDescription}
+                    {/* Creative Project Description Snippet */}
+                    <p className="text-[10px] text-slate-500 line-clamp-1 leading-snug bg-slate-50 p-1.5 rounded-lg border border-slate-100/90 mt-1.5 italic">
+                      "{p.projectDescription}"
                     </p>
 
-                    {/* Leadership & Location */}
-                    <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs">
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">Leader:</span>
-                        <span className="font-bold text-slate-900">{p.teamLeader}</span>
-                      </div>
-                      {p.location && (
-                        <div className="flex justify-between text-[11px]">
-                          <span className="text-slate-500 flex items-center gap-1">
-                            <MapPin size={11} className="text-slate-400" /> Station:
-                          </span>
-                          <span className="text-slate-700 font-medium">{p.location}</span>
-                        </div>
-                      )}
-                      <div className="flex justify-between text-[11px]">
-                        <span className="text-slate-500">Roster:</span>
-                        <span className="font-mono font-bold text-blue-600">{p.members?.length || 0} members</span>
-                      </div>
+                    {/* Micro Data Badges: Leader, Roster & Station */}
+                    <div className="mt-2 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-600 gap-1">
+                      <span className="truncate max-w-[130px] font-semibold text-slate-800">
+                        <span className="text-slate-400 font-normal">Lead:</span> {p.teamLeader}
+                      </span>
+                      <span className="font-mono font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded text-[9px] shrink-0">
+                        {p.members?.length || 0} members
+                      </span>
                     </div>
+
+                    {p.location && (
+                      <div className="text-[9px] text-slate-400 truncate flex items-center gap-0.5 mt-0.5">
+                        <MapPin size={8} className="text-slate-400 shrink-0" />
+                        <span className="truncate">{p.location}</span>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Bottom QR Badge & Actions */}
-                  <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <div className="flex items-center gap-3" onClick={(e) => { e.stopPropagation(); setSelectedTeamForDetails(p); }}>
-                      {qr ? (
+                  {/* Card Footer: Award Badge & Quick Pass Trigger */}
+                  <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between gap-1">
+                    {/* Award Tag */}
+                    <div className={`inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full ${awardBadgeStyle}`}>
+                      {awardIcon}
+                      <span className="font-bold">{awardLabel}</span>
+                    </div>
+
+                    {/* Action & Mini QR Peek */}
+                    <div className="flex items-center gap-1 shrink-0">
+                      {qr && (
                         <img
                           src={qr}
-                          alt="Check-in QR"
-                          className="w-12 h-12 rounded-xl border border-slate-200 bg-white p-1 shrink-0 hover:scale-105 transition-transform"
-                          title="Click to view full QR badge"
+                          alt="QR Peek"
+                          className="w-5 h-5 rounded border border-slate-200 bg-white p-0.5 hover:scale-125 transition-transform"
+                          title="View attendee check-in pass"
                         />
-                      ) : (
-                        <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center border border-slate-200 text-slate-400">
-                          <QrCode size={18} />
-                        </div>
                       )}
-                      <div className="text-[11px]">
-                        <span className="font-bold text-blue-600 group-hover:underline block">Check-in QR</span>
-                        <span className="text-[10px] text-slate-400">Booni Pass</span>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedTeamForDetails(p);
-                      }}
-                      className="px-3 py-1.5 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition-colors flex items-center gap-1 cursor-pointer"
-                    >
-                      <Eye size={13} /> View Details
-                    </button>
-                  </div>
-
-                  {/* Standing & Prize */}
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className={`inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-bold rounded-full ${awardBadgeStyle}`}>
-                      {awardIcon} {p.award || 'Participation'}
+                      <button
+                        type="button"
+                        onClick={e => {
+                          e.stopPropagation();
+                          setSelectedTeamForDetails(p);
+                        }}
+                        className="px-2 py-0.5 bg-slate-50 hover:bg-blue-600 hover:text-white text-slate-700 text-[10px] font-bold rounded-lg border border-slate-200 group-hover:border-blue-600 transition-colors flex items-center gap-0.5 cursor-pointer"
+                      >
+                        <span>Pass</span>
+                        <ChevronRight size={10} />
+                      </button>
                     </div>
                   </div>
                 </div>
               );
             })}
-        </div>
+          </div>
+        )}
+
+        {/* Dense Table View Mode */}
+        {participationViewMode === 'table' && sortedAndFilteredTeams.length > 0 && (
+          <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
+                  <tr>
+                    <th className="p-3 pl-4">Team Code</th>
+                    <th className="p-3">Project & Category</th>
+                    <th className="p-3">School / Institution</th>
+                    <th className="p-3">Team Leader</th>
+                    <th className="p-3 text-center">Roster</th>
+                    <th className="p-3 text-center">Recognition</th>
+                    <th className="p-3 text-center">Status</th>
+                    <th className="p-3 pr-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {displayedTeams.map(p => {
+                    const categoryBadge = getTeamCategoryBadge(p.category);
+                    const { icon: awardIcon, style: awardBadgeStyle, label: awardLabel } = getTeamAwardDetails(p.award);
+
+                    return (
+                      <tr
+                        key={p.id}
+                        onClick={() => setSelectedTeamForDetails(p)}
+                        className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                      >
+                        <td className="p-3 pl-4 font-mono font-bold text-slate-800 text-[11px]">
+                          {p.teamCode || p.id}
+                        </td>
+                        <td className="p-3">
+                          <div className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                            {p.projectName}
+                          </div>
+                          <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-0.5">
+                            {categoryBadge.icon}
+                            <span>{p.category || 'Innovation Sprint'}</span>
+                          </div>
+                        </td>
+                        <td className="p-3 text-slate-700">
+                          <div className="font-medium truncate max-w-[200px]">{p.school || 'Collabs Event'}</div>
+                          {p.location && (
+                            <div className="text-[10px] text-slate-400 flex items-center gap-1">
+                              <MapPin size={9} /> {p.location}
+                            </div>
+                          )}
+                        </td>
+                        <td className="p-3 text-slate-800 font-semibold">
+                          {p.teamLeader}
+                        </td>
+                        <td className="p-3 text-center font-mono font-bold text-blue-600">
+                          {p.members?.length || 0}
+                        </td>
+                        <td className="p-3 text-center">
+                          <span className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full ${awardBadgeStyle}`}>
+                            {awardIcon} {awardLabel}
+                          </span>
+                        </td>
+                        <td className="p-3 text-center">
+                          {getTeamStatusBadge(p.status)}
+                        </td>
+                        <td className="p-3 pr-4 text-right" onClick={e => e.stopPropagation()}>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedTeamForDetails(p)}
+                              className="px-2.5 py-1 bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-blue-700 text-xs font-bold rounded-lg border border-slate-200 transition-colors flex items-center gap-1"
+                              title="View Team Pass & Roster Details"
+                            >
+                              <Eye size={12} /> View
+                            </button>
+                            {isAdminMode && (
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  try {
+                                    await deleteTeamFromFirestore(p.id);
+                                  } catch (err) {
+                                    console.error('Error deleting team:', err);
+                                  }
+                                  setTeamParticipations(prev => prev.filter(item => item.id !== p.id));
+                                }}
+                                className="p-1 text-red-500 hover:bg-red-50 rounded"
+                                title="Delete Team"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Expand / Collapse Interactive Banner (Shows 3-4 teams initially with option to expand all) */}
+        {hasMoreTeams && (
+          <div className="mt-5 flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 bg-white border border-slate-200/90 rounded-2xl shadow-2xs">
+            <div className="flex items-center gap-2.5 text-xs text-slate-600">
+              <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0"></span>
+              <span>
+                {isTeamsExpanded ? (
+                  <>Showing all <strong className="text-slate-900">{sortedAndFilteredTeams.length}</strong> participating teams</>
+                ) : (
+                  <>Showing <strong className="text-slate-900">{INITIAL_TEAMS_LIMIT}</strong> of <strong className="text-slate-900">{sortedAndFilteredTeams.length}</strong> teams (Preview mode)</>
+                )}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsTeamsExpanded(!isTeamsExpanded)}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              {isTeamsExpanded ? (
+                <>
+                  <ChevronUp size={14} /> Show Less (Collapse to 4 Teams)
+                </>
+              ) : (
+                <>
+                  <ChevronDown size={14} /> View All {sortedAndFilteredTeams.length} Teams
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </section>
 
       {/* 5b. Judging Criteria & Expert Judges Panel Section */}
@@ -2982,12 +3535,14 @@ export default function App() {
       )}
 
       {/* Bulk Excel Team Import Modal */}
-      <BulkTeamImportModal
-        isOpen={isBulkTeamImportOpen}
-        onClose={() => setIsBulkTeamImportOpen(false)}
-        onImport={handleBulkImportTeams}
-        existingTeamsCount={teamParticipations.length}
-      />
+      {isBulkTeamImportOpen && (
+        <BulkTeamImportModal
+          isOpen={isBulkTeamImportOpen}
+          onClose={() => setIsBulkTeamImportOpen(false)}
+          onImport={handleBulkImportTeams}
+          existingTeamsCount={teamParticipations.length}
+        />
+      )}
 
       {/* Team Details & Pass Modal */}
       <TeamDetailsModal

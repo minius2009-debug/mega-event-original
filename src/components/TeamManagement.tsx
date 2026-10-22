@@ -32,6 +32,11 @@ import {
 } from 'lucide-react';
 import { TeamParticipation, ParticipantMember, VolunteerLog } from '../App';
 import { BulkTeamImportModal } from './BulkTeamImportModal';
+import {
+  saveTeamToFirestore,
+  deleteTeamFromFirestore,
+  bulkImportTeamsToFirestore
+} from '../services/teamService';
 
 interface TeamManagementProps {
   teamParticipations: TeamParticipation[];
@@ -85,13 +90,23 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
   const [copiedLink, setCopiedLink] = useState(false);
 
   // Bulk Excel Import Callback
-  const handleBulkImport = (newTeams: TeamParticipation[], mode: 'append' | 'replace') => {
+  const handleBulkImport = async (newTeams: TeamParticipation[], mode: 'append' | 'replace') => {
     if (mode === 'replace') {
       setTeamParticipations(newTeams);
-      showToast(`Replaced team roster with ${newTeams.length} teams from Excel spreadsheet.`);
     } else {
       setTeamParticipations(prev => [...newTeams, ...prev]);
-      showToast(`Successfully added ${newTeams.length} new teams from Excel spreadsheet!`);
+    }
+
+    try {
+      await bulkImportTeamsToFirestore(newTeams, mode);
+      showToast(
+        mode === 'replace'
+          ? `Saved to Firebase: Replaced team roster with ${newTeams.length} teams.`
+          : `Saved to Firebase: Successfully added ${newTeams.length} new teams!`
+      );
+    } catch (err: any) {
+      console.error('Firebase save error:', err);
+      showToast(`Saved locally (Firebase sync pending: ${err.message || 'offline'})`);
     }
   };
 
@@ -302,7 +317,11 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
 
     setTeamParticipations(prev => [newTeam, ...prev]);
     setIsWizardOpen(false);
-    showToast(`Team "${newTeam.projectName}" (${newTeam.teamCode}) created successfully!`);
+    showToast(`Team "${newTeam.projectName}" (${newTeam.teamCode}) created!`);
+
+    saveTeamToFirestore(newTeam).catch(err => {
+      console.error('Error saving team to Firestore:', err);
+    });
   };
 
   // Filter & Search Logic
@@ -369,10 +388,15 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
   // Delete Team
   const handleDeleteTeam = () => {
     if (!deleteConfirmTeam) return;
-    setTeamParticipations(prev => prev.filter(t => t.id !== deleteConfirmTeam.id));
-    if (selectedTeam?.id === deleteConfirmTeam.id) setSelectedTeam(null);
-    showToast(`Removed team "${deleteConfirmTeam.projectName}".`);
+    const target = deleteConfirmTeam;
+    setTeamParticipations(prev => prev.filter(t => t.id !== target.id));
+    if (selectedTeam?.id === target.id) setSelectedTeam(null);
+    showToast(`Removed team "${target.projectName}".`);
     setDeleteConfirmTeam(null);
+
+    deleteTeamFromFirestore(target.id).catch(err => {
+      console.error('Error deleting team from Firestore:', err);
+    });
   };
 
   // Download QR Code
