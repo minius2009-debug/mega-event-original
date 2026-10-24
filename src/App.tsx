@@ -802,6 +802,58 @@ export default function App() {
   });
   const [volSubmitted, setVolSubmitted] = useState(false);
   const [volunteerSuccessMsg, setVolunteerSuccessMsg] = useState('');
+  const [scannedCheckInTeam, setScannedCheckInTeam] = useState<TeamParticipation | null>(null);
+  const [checkInStationName, setCheckInStationName] = useState<string>('Main Gate & Registration Desk');
+  const [checkInScanSuccess, setCheckInScanSuccess] = useState<string | null>(null);
+  const [stationCheckInLogs, setStationCheckInLogs] = useState<Array<{ id: string; teamCode: string; projectName: string; station: string; time: string; volunteerName: string }>>([
+    { id: 'log-1', teamCode: 'CLB-COMM-01', projectName: 'Chitral River Micro-Hydro', station: 'Main Gate Registration Desk', time: '09:15 AM PKT', volunteerName: 'Marcus Vance' },
+    { id: 'log-2', teamCode: 'CLB-COMM-02', projectName: 'High-Altitude Greenhouse', station: 'Exhibition Pavilion Beta', time: '09:42 AM PKT', volunteerName: 'Elena Rostova' }
+  ]);
+  const [isCameraScannerActive, setIsCameraScannerActive] = useState<boolean>(false);
+  const [manualScanInput, setManualScanInput] = useState<string>('');
+
+  const handleScanCheckInCode = (codeText: string) => {
+    let cleanCode = codeText.trim();
+    try {
+      if (cleanCode.startsWith('{')) {
+        const parsed = JSON.parse(cleanCode);
+        if (parsed.teamCode) cleanCode = parsed.teamCode;
+        else if (parsed.id) cleanCode = parsed.id;
+      }
+    } catch (e) {}
+
+    const match = teamParticipations.find(
+      t => (t.teamCode && t.teamCode.toLowerCase() === cleanCode.toLowerCase()) ||
+           t.id.toLowerCase() === cleanCode.toLowerCase() ||
+           t.projectName.toLowerCase().includes(cleanCode.toLowerCase())
+    );
+
+    if (match) {
+      setScannedCheckInTeam(match);
+      setCheckInScanSuccess(null);
+    } else {
+      setCheckInScanSuccess(`No team found matching code "${cleanCode}". Try testing CLB-COMM-01, CLB-COMM-02, or CLB-COMM-03.`);
+    }
+  };
+
+  const handleConfirmStationCheckIn = () => {
+    if (!scannedCheckInTeam) return;
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' PKT';
+    const newLog = {
+      id: `log-${Date.now().toString().slice(-4)}`,
+      teamCode: scannedCheckInTeam.teamCode || scannedCheckInTeam.id,
+      projectName: scannedCheckInTeam.projectName,
+      station: checkInStationName,
+      time: timeStr,
+      volunteerName: loggedInVolunteer ? loggedInVolunteer.name : 'Duty Volunteer'
+    };
+
+    setStationCheckInLogs([newLog, ...stationCheckInLogs]);
+    setCheckInScanSuccess(`Successfully checked in ${scannedCheckInTeam.projectName} (${scannedCheckInTeam.teamCode}) at ${checkInStationName}!`);
+    setScannedCheckInTeam(null);
+    setIsCameraScannerActive(false);
+    setTimeout(() => setCheckInScanSuccess(null), 6000);
+  };
 
   const handleVolunteerLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -1500,11 +1552,13 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const normalizedPath = (location.pathname || '').toLowerCase();
+  const normalizedHash = (currentHash || '').toLowerCase();
+
   const isAdminRoute =
-    location.pathname === '/admin' ||
-    location.pathname.startsWith('/admin/') ||
-    currentHash === '#admin' ||
-    currentHash.startsWith('#/admin');
+    normalizedPath === '/admin' ||
+    normalizedPath.startsWith('/admin') ||
+    normalizedHash.includes('admin');
 
   if (isAdminRoute) {
     if (!isAdminAuthenticated) {
@@ -1512,7 +1566,7 @@ export default function App() {
         <AdminLoginGate
           onLoginSuccess={() => setIsAdminAuthenticated(true)}
           onBackHome={() => {
-            if (currentHash === '#admin' || currentHash.startsWith('#/admin')) {
+            if (normalizedHash.includes('admin')) {
               window.location.hash = '';
             }
             navigate('/');
@@ -1536,7 +1590,7 @@ export default function App() {
         onLogout={() => {
           setIsAdminAuthenticated(false);
           sessionStorage.removeItem('collabs_admin_auth');
-          if (currentHash === '#admin' || currentHash.startsWith('#/admin')) {
+          if (normalizedHash.includes('admin')) {
             window.location.hash = '';
           }
           navigate('/');
@@ -1546,14 +1600,12 @@ export default function App() {
   }
 
   const isVolunteerRoute =
-    location.pathname === '/volunteer' ||
-    location.pathname === '/volunter' ||
-    location.pathname.startsWith('/volunteer') ||
-    location.pathname.startsWith('/volunter') ||
-    currentHash === '#volunteer' ||
-    currentHash === '#volunter' ||
-    currentHash.startsWith('#/volunteer') ||
-    currentHash.startsWith('#/volunter');
+    normalizedPath === '/volunteer' ||
+    normalizedPath === '/volunter' ||
+    normalizedPath.startsWith('/volunteer') ||
+    normalizedPath.startsWith('/volunter') ||
+    normalizedHash.includes('volunteer') ||
+    normalizedHash.includes('volunter');
 
   if (isVolunteerRoute) {
     return (
@@ -1619,6 +1671,216 @@ export default function App() {
             </div>
 
             <div className="space-y-8 text-left">
+              {/* Team Pass QR Scanner & Station Quick Check-In Card */}
+              <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white border border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                  <div>
+                    <span className="text-[10px] font-mono font-bold text-blue-400 uppercase tracking-widest block mb-1">
+                      Station Check-In Tool
+                    </span>
+                    <h2 className="font-heading text-2xl font-black text-white flex items-center gap-2.5">
+                      <QrCode size={24} className="text-blue-400" />
+                      <span>Scan Team Pass QR Code</span>
+                    </h2>
+                    <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
+                      Scan a team pass QR code or select a participating team to perform an instant station check-in directly from your duty post.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setIsCameraScannerActive(!isCameraScannerActive)}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-xs ${
+                        isCameraScannerActive
+                          ? 'bg-rose-600 hover:bg-rose-700 text-white'
+                          : 'bg-blue-600 hover:bg-blue-700 text-white'
+                      }`}
+                    >
+                      <QrCode size={15} />
+                      <span>{isCameraScannerActive ? 'Close Camera Scanner' : 'Open Camera Scanner'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {checkInScanSuccess && (
+                  <div className="p-4 bg-emerald-950/80 border border-emerald-500/50 rounded-2xl text-xs font-semibold text-emerald-200 flex items-center gap-3 animate-fadeIn">
+                    <CheckCircle2 size={20} className="text-emerald-400 shrink-0" />
+                    <span>{checkInScanSuccess}</span>
+                  </div>
+                )}
+
+                {/* Camera Scanner Container */}
+                {isCameraScannerActive && (
+                  <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-center max-w-md mx-auto space-y-3">
+                    <p className="text-xs font-bold text-slate-300">Point camera at Team Pass QR Code:</p>
+                    <QRScannerComponent
+                      onScan={(decodedText) => {
+                        handleScanCheckInCode(decodedText);
+                      }}
+                    />
+                    <p className="text-[11px] text-slate-500">Hold team pass steady in camera view</p>
+                  </div>
+                )}
+
+                {/* Quick Demo Scan Buttons / Select Team */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                  <div className="md:col-span-7 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-300">Quick Test Scan by Team Code:</span>
+                      <span className="text-[10px] text-blue-400 font-mono font-semibold">1-Click Test</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {teamParticipations.slice(0, 3).map((team) => (
+                        <button
+                          key={team.id}
+                          type="button"
+                          onClick={() => handleScanCheckInCode(team.teamCode || team.id)}
+                          className="p-3 bg-slate-800/80 hover:bg-slate-800 border border-slate-700 hover:border-blue-500/60 rounded-xl text-left transition-all cursor-pointer group"
+                        >
+                          <div className="text-[10px] font-mono text-blue-400 font-bold truncate">
+                            {team.teamCode || team.id}
+                          </div>
+                          <div className="text-xs font-bold text-white truncate group-hover:text-blue-300">
+                            {team.projectName}
+                          </div>
+                          <div className="text-[10px] text-slate-400 truncate mt-0.5">
+                            {team.school}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Manual Code Input Form */}
+                    <div className="flex items-center gap-2 pt-1">
+                      <input
+                        type="text"
+                        value={manualScanInput}
+                        onChange={(e) => setManualScanInput(e.target.value)}
+                        placeholder="Or enter Team Code (e.g. CLB-COMM-01)"
+                        className="flex-1 px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs font-semibold text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (manualScanInput) {
+                            handleScanCheckInCode(manualScanInput);
+                            setManualScanInput('');
+                          }
+                        }}
+                        className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer shrink-0"
+                      >
+                        Verify & Scan
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Scanned Team Detail & Confirmation Card */}
+                  <div className="md:col-span-5 bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-4">
+                    {scannedCheckInTeam ? (
+                      <div className="space-y-3 text-xs">
+                        <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                          <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-wider">
+                            Team QR Scanned
+                          </span>
+                          <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 text-[10px] font-bold rounded border border-emerald-500/40">
+                            {scannedCheckInTeam.teamCode || scannedCheckInTeam.id}
+                          </span>
+                        </div>
+
+                        <div>
+                          <h4 className="font-bold text-base text-white">{scannedCheckInTeam.projectName}</h4>
+                          <p className="text-slate-400 mt-0.5">{scannedCheckInTeam.school}</p>
+                        </div>
+
+                        <div className="space-y-1 bg-slate-900/90 p-3 rounded-xl border border-slate-800 text-[11px] text-slate-300">
+                          <div><strong className="text-slate-400">Team Leader:</strong> {scannedCheckInTeam.teamLeader}</div>
+                          <div><strong className="text-slate-400">Category:</strong> {scannedCheckInTeam.category}</div>
+                          <div><strong className="text-slate-400">Members:</strong> {scannedCheckInTeam.members?.length || 0} Registered</div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-300 mb-1">
+                            Duty Station Check-In Location:
+                          </label>
+                          <select
+                            value={checkInStationName}
+                            onChange={(e) => setCheckInStationName(e.target.value)}
+                            className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="Main Gate & Registration Desk">Main Gate & Registration Desk</option>
+                            <option value="AV & Stage Technical Pod">AV & Stage Technical Pod</option>
+                            <option value="Exhibition Pavilion Beta">Exhibition Pavilion Beta</option>
+                            <option value="Press & Media Suite Room 104">Press & Media Suite Room 104</option>
+                            <option value="VIP & Mentors Lounge">VIP & Mentors Lounge</option>
+                          </select>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={handleConfirmStationCheckIn}
+                          className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 shadow-md"
+                        >
+                          <CheckCircle2 size={16} />
+                          <span>Confirm Station Check-In</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="text-center py-6 space-y-2">
+                        <div className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 text-slate-500 flex items-center justify-center mx-auto">
+                          <QrCode size={20} />
+                        </div>
+                        <p className="text-xs font-bold text-slate-300">No Team Scanned Yet</p>
+                        <p className="text-[11px] text-slate-500 max-w-xs mx-auto">
+                          Click "Open Camera Scanner" or tap a 1-click test button above to preview team details and record check-in.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Station Check-In Live Activity Log */}
+                {stationCheckInLogs.length > 0 && (
+                  <div className="pt-4 border-t border-slate-800 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                        <Clock size={14} className="text-blue-400" />
+                        <span>Recent Station Check-In Log ({stationCheckInLogs.length})</span>
+                      </span>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-[11px]">
+                        <thead>
+                          <tr className="border-b border-slate-800 text-slate-400 font-semibold">
+                            <th className="py-2 px-2">Team Code</th>
+                            <th className="py-2 px-2">Project Name</th>
+                            <th className="py-2 px-2">Checked-In Station</th>
+                            <th className="py-2 px-2">Time</th>
+                            <th className="py-2 px-2">Verified By</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-800/60 text-slate-300">
+                          {stationCheckInLogs.map((log) => (
+                            <tr key={log.id} className="hover:bg-slate-800/40">
+                              <td className="py-2 px-2 font-mono text-blue-400 font-bold">{log.teamCode}</td>
+                              <td className="py-2 px-2 font-semibold text-white">{log.projectName}</td>
+                              <td className="py-2 px-2 text-slate-400">{log.station}</td>
+                              <td className="py-2 px-2 text-slate-400">{log.time}</td>
+                              <td className="py-2 px-2">
+                                <span className="px-2 py-0.5 bg-blue-500/20 text-blue-300 font-bold rounded text-[10px]">
+                                  {log.volunteerName}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 <div className="lg:col-span-6 bg-white border border-slate-200 rounded-2xl p-6 shadow-xs flex flex-col justify-between">
                   <div>
@@ -1900,14 +2162,12 @@ export default function App() {
   }
 
   const isCertificateRoute =
-    location.pathname === '/certificate' ||
-    location.pathname === '/certicate' ||
-    location.pathname.startsWith('/certificate') ||
-    location.pathname.startsWith('/certicate') ||
-    currentHash === '#certificate' ||
-    currentHash === '#certicate' ||
-    currentHash.startsWith('#/certificate') ||
-    currentHash.startsWith('#/certicate');
+    normalizedPath === '/certificate' ||
+    normalizedPath === '/certicate' ||
+    normalizedPath.startsWith('/certificate') ||
+    normalizedPath.startsWith('/certicate') ||
+    normalizedHash.includes('certificate') ||
+    normalizedHash.includes('certicate');
 
   if (isCertificateRoute) {
     return (
@@ -2941,9 +3201,7 @@ export default function App() {
           </div>
         </div>
 
-        <div className="bg-blue-50/80 border border-blue-200 rounded-xl p-4 text-xs font-bold text-blue-900 text-center mb-14">
-          Total: 100%. All four criteria are weighted equally.
-        </div>
+
 
 
       </section>
