@@ -2336,18 +2336,18 @@ export default function App() {
             Team
           </a>
           <a
-            href="#volunteers"
-            onClick={(e) => handleSmoothNavClick(e, 'volunteers', 'volunteerNetwork')}
+            href="#participants"
+            onClick={(e) => handleSmoothNavClick(e, 'team-participation')}
             className="px-2.5 py-1 rounded-md hover:bg-slate-100 hover:text-blue-600 shrink-0 transition-colors cursor-pointer"
           >
-            Volunteers
+            Participants
           </a>
           <a
-            href="#certificates"
-            onClick={(e) => handleSmoothNavClick(e, 'certificates', 'certificatePortal')}
+            href="#judging"
+            onClick={(e) => handleSmoothNavClick(e, 'judging-criteria')}
             className="px-2.5 py-1 rounded-md hover:bg-slate-100 hover:text-blue-600 shrink-0 transition-colors cursor-pointer"
           >
-            Certificates
+            Judging
           </a>
           <a
             href="#awards"
@@ -3345,152 +3345,312 @@ export default function App() {
         </div>
       </section>
 
-      {/* 8. Clean Footer */}
-      <footer className="bg-slate-900 text-slate-400 py-14 px-4 sm:px-6 lg:px-8 text-xs text-left">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-slate-800">
+      {/* 8. Creative, Modern & Engaging Footer */}
+      <footer className="relative bg-slate-950 text-slate-400 overflow-hidden text-xs text-left border-t border-slate-800/80">
+        {/* Glowing Top Accent Beam */}
+        <div className="h-1 w-full bg-gradient-to-r from-blue-600 via-indigo-500 via-sky-400 to-emerald-400 animate-pulse" />
+        
+        {/* Background Ambient Glow Effects */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10 space-y-12">
           
-          <div className="space-y-2">
-            <div className="flex items-center gap-2.5">
-              <img src={officialLogo} alt="Collabs. Official Logo" className="w-8 h-8 object-contain rounded bg-white p-0.5" />
-              <span className="font-heading text-xl font-black text-white">
-                Collabs.
-              </span>
-            </div>
-            <p className="text-slate-400 leading-relaxed text-xs">
-              First Mega Event of Collabs · 31 October 2026<br />
-              Anywhere in Booni, Chitral (Venue TBA).
-            </p>
-            <div className="flex gap-4">
-              <a href="#" className="text-slate-400 hover:text-white"><Instagram size={18} /></a>
-              <a href="#" className="text-slate-400 hover:text-white"><Facebook size={18} /></a>
-              <a href="#" className="text-slate-400 hover:text-white"><Twitter size={18} /></a>
+          {/* Top Footer Highlight Card (Engaging Action Banner) */}
+          <div className="bg-gradient-to-r from-slate-900/90 via-slate-900/95 to-slate-800/90 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-md flex flex-col lg:flex-row items-center justify-between gap-6">
+            <div className="space-y-2 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[11px] font-semibold tracking-wide">
+                <Sparkles size={12} className="text-blue-400" />
+                First Mega Event of Collabs · 31 October 2026
+              </div>
+              <h2 className="font-heading text-xl sm:text-2xl font-black text-white tracking-tight">
+                Empowering Youth, Tech Innovators & Mountain Leaders
+              </h2>
+              <p className="text-slate-400 text-xs sm:text-sm max-w-2xl leading-relaxed">
+                Join participants across Booni, Upper Chitral & beyond. Secure your attendee pass or verify credentials in real-time.
+              </p>
             </div>
 
+            <div className="flex flex-wrap items-center justify-center lg:justify-end gap-3 shrink-0">
+              <button
+                onClick={() => {
+                  setSelectedEventForReg(INITIAL_EVENTS[0]);
+                  setIsRegisterModalOpen(true);
+                }}
+                className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-blue-900/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer flex items-center gap-2"
+              >
+                <IdCard size={15} />
+                Get Attendee Pass
+              </button>
+              <button
+                onClick={() => {
+                  setVerifySearchQuery('');
+                  setVerifyResult({ searched: false, found: false });
+                  setIsVerifyModalOpen(true);
+                }}
+                className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold rounded-xl transition-all cursor-pointer flex items-center gap-2"
+              >
+                <Search size={15} />
+                Verify Certificate
+              </button>
+            </div>
           </div>
 
-          <div>
-            <div className="font-heading text-white font-bold text-sm mb-3">
-              Navigation
-            </div>
-            <ul className="space-y-1.5">
-              <li>
-                <a
-                  href="#about"
-                  onClick={(e) => handleSmoothNavClick(e, 'about')}
-                  className="hover:text-white transition-colors cursor-pointer"
-                >
-                  First Mega Event Overview
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#events"
-                  onClick={(e) => handleSmoothNavClick(e, 'events', 'eventsHub')}
-                  className="hover:text-white transition-colors cursor-pointer"
-                >
-                  Booni Schedule & Workshops
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#attendee-pass"
-                  onClick={(e) => handleSmoothNavClick(e, 'attendee-pass', 'badgeGenerator')}
-                  className="hover:text-white transition-colors cursor-pointer text-blue-400 font-semibold"
-                >
-                  Attendee Pass & ID Badge
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#team"
-                  onClick={(e) => handleSmoothNavClick(e, 'team', 'teamDirectory')}
-                  className="hover:text-white transition-colors cursor-pointer"
-                >
-                  Community Team Leads
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#volunteers"
-                  onClick={(e) => handleSmoothNavClick(e, 'volunteers', 'volunteerNetwork')}
-                  className="hover:text-white transition-colors cursor-pointer"
-                >
-                  Volunteer Opportunities
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#certificates"
-                  onClick={(e) => handleSmoothNavClick(e, 'certificates', 'certificatePortal')}
-                  className="hover:text-white transition-colors cursor-pointer"
-                >
-                  Digital Certificates
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#awards"
-                  onClick={(e) => handleSmoothNavClick(e, 'awards', 'awardsShowcase')}
-                  className="hover:text-white transition-colors cursor-pointer"
-                >
-                  Awards & Hall of Fame
-                </a>
-              </li>
-            </ul>
-          </div>
+          {/* Main 4-Column Footer Content */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-slate-800/80">
+            
+            {/* Column 1: Brand & Community Identity */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-1.5 bg-white rounded-xl shadow-md inline-block">
+                  <img src={officialLogo} alt="Collabs. Official Logo" className="w-8 h-8 object-contain" />
+                </div>
+                <div>
+                  <span className="font-heading text-2xl font-black text-white tracking-tight block leading-none">
+                    Collabs<span className="text-blue-500">.</span>
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-medium">Community Tech & Innovation</span>
+                </div>
+              </div>
 
-          <div>
-            <div className="font-heading text-white font-bold text-sm mb-3">
-              Event Details
-            </div>
-            <p className="leading-relaxed mb-2 text-slate-300">
-              Date: 31 October 2026<br />
-              Location: Booni, Chitral<br />
-              Venue: To Be Announced (TBA)
-            </p>
-              <a href="https://www.collabs.eu.org/" className="text-blue-400 font-semibold hover:underline">
-                https://www.collabs.eu.org/
+              <p className="text-slate-400 leading-relaxed text-xs">
+                Fostering digital transformation, youth empowerment, and collaborative projects across Booni, Chitral, and northern Pakistan.
+              </p>
+
+              {/* Official Website Link */}
+              <a
+                href="https://www.collabs.eu.org/"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 text-xs font-semibold text-blue-400 hover:text-blue-300 bg-blue-950/40 border border-blue-800/50 px-3 py-1.5 rounded-lg transition-all hover:border-blue-500/50 group"
+              >
+                <Globe size={13} className="text-blue-400 group-hover:rotate-12 transition-transform" />
+                <span>www.collabs.eu.org</span>
+                <ExternalLink size={11} className="opacity-70 group-hover:opacity-100" />
               </a>
-          </div>
 
-          <div>
-            <div className="font-heading text-white font-bold text-sm mb-3">
-              Verification & QR
+              {/* Social Channels */}
+              <div className="pt-2">
+                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2.5">
+                  Connect & Follow
+                </div>
+                <div className="flex items-center gap-2">
+                  <a
+                    href="https://www.instagram.com/collabs"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Collabs Instagram"
+                    className="p-2.5 bg-slate-900 hover:bg-pink-600/20 border border-slate-800 hover:border-pink-500/50 text-slate-400 hover:text-pink-400 rounded-xl transition-all transform hover:-translate-y-0.5"
+                  >
+                    <Instagram size={16} />
+                  </a>
+                  <a
+                    href="https://www.facebook.com/collabs"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Collabs Facebook"
+                    className="p-2.5 bg-slate-900 hover:bg-blue-600/20 border border-slate-800 hover:border-blue-500/50 text-slate-400 hover:text-blue-400 rounded-xl transition-all transform hover:-translate-y-0.5"
+                  >
+                    <Facebook size={16} />
+                  </a>
+                  <a
+                    href="https://twitter.com/collabs"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Collabs Twitter"
+                    className="p-2.5 bg-slate-900 hover:bg-sky-600/20 border border-slate-800 hover:border-sky-500/50 text-slate-400 hover:text-sky-400 rounded-xl transition-all transform hover:-translate-y-0.5"
+                  >
+                    <Twitter size={16} />
+                  </a>
+                  <a
+                    href="mailto:contact@collabs.eu.org"
+                    aria-label="Email Collabs Secretariat"
+                    className="p-2.5 bg-slate-900 hover:bg-indigo-600/20 border border-slate-800 hover:border-indigo-500/50 text-slate-400 hover:text-indigo-400 rounded-xl transition-all transform hover:-translate-y-0.5"
+                  >
+                    <Send size={16} />
+                  </a>
+                </div>
+              </div>
             </div>
-            <p className="mb-2 text-slate-400">
-              Query any certificate ID issued for the Booni Mega Event or test QR code links.
-            </p>
-            <button
-              onClick={() => {
-                setVerifySearchQuery('');
-                setVerifyResult({ searched: false, found: false });
-                setIsVerifyModalOpen(true);
-              }}
-              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors cursor-pointer"
-            >
-              Open Lookup Registry
-            </button>
+
+            {/* Column 2: Event Navigation */}
+            <div>
+              <div className="font-heading text-white font-bold text-sm mb-4 flex items-center gap-2">
+                <span className="w-1.5 h-4 bg-blue-500 rounded-full" />
+                Quick Navigation
+              </div>
+              <ul className="space-y-2 text-xs">
+                {[
+                  { label: 'First Mega Event Overview', hash: 'about', tab: undefined },
+                  { label: 'Booni Schedule & Workshops', hash: 'events', tab: 'eventsHub' as const },
+                  { label: 'Attendee Pass & ID Badge', hash: 'attendee-pass', tab: 'badgeGenerator' as const, highlight: true },
+                  { label: 'Community Team Leads', hash: 'team', tab: 'teamDirectory' as const },
+                  { label: 'Participating Teams', hash: 'team-participation', tab: undefined },
+                  { label: 'Judging Criteria', hash: 'judging-criteria', tab: undefined },
+                  { label: 'Awards & Hall of Fame', hash: 'awards', tab: 'awardsShowcase' as const },
+                ].map((item, idx) => (
+                  <li key={idx}>
+                    <a
+                      href={`#${item.hash}`}
+                      onClick={(e) => handleSmoothNavClick(e, item.hash, item.tab)}
+                      className={`group flex items-center justify-between py-0.5 transition-colors cursor-pointer ${
+                        item.highlight ? 'text-blue-400 hover:text-blue-300 font-semibold' : 'hover:text-white text-slate-400'
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      <ChevronRight size={13} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-blue-400 shrink-0" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Column 3: Event & Venue Logistics */}
+            <div className="space-y-4">
+              <div className="font-heading text-white font-bold text-sm mb-4 flex items-center gap-2">
+                <span className="w-1.5 h-4 bg-indigo-500 rounded-full" />
+                Event & Logistics
+              </div>
+
+              <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 space-y-2.5">
+                <div className="flex items-start gap-2.5">
+                  <Calendar size={15} className="text-blue-400 shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-[11px] font-bold text-white">Date & Schedule</div>
+                    <div className="text-slate-400 text-[11px]">31 October 2026 · Full Day</div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <MapPin size={15} className="text-indigo-400 shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-[11px] font-bold text-white">Location</div>
+                    <div className="text-slate-400 text-[11px]">Booni, Upper Chitral, KP</div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5">
+                  <Building2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-[11px] font-bold text-white">Venue</div>
+                    <div className="text-slate-400 text-[11px]">Central Auditorium (TBA)</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Dedicated Route Shortcuts */}
+              <div>
+                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                  Dedicated Direct Portals
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-[11px]">
+                  <a
+                    href="/volunteer"
+                    className="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg text-center transition-all cursor-pointer font-medium hover:text-white"
+                  >
+                    /volunteer
+                  </a>
+                  <a
+                    href="/certificate"
+                    className="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-lg text-center transition-all cursor-pointer font-medium hover:text-white"
+                  >
+                    /certificate
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Column 4: Verification & Quick QR Lookup Card */}
+            <div className="space-y-4">
+              <div className="font-heading text-white font-bold text-sm mb-4 flex items-center gap-2">
+                <span className="w-1.5 h-4 bg-sky-400 rounded-full" />
+                Certificate & QR Check
+              </div>
+
+              <div className="bg-gradient-to-b from-slate-900 to-slate-900/60 border border-slate-800 hover:border-blue-500/40 rounded-2xl p-4 space-y-3 transition-all shadow-lg group">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-blue-400 font-bold text-xs">
+                    <QrCode size={16} />
+                    <span>Instant Registry Lookup</span>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">
+                    Verified
+                  </span>
+                </div>
+
+                <p className="text-slate-400 text-xs leading-relaxed">
+                  Validate official certificate records or scan attendee QR passes directly.
+                </p>
+
+                <button
+                  onClick={() => {
+                    setVerifySearchQuery('');
+                    setVerifyResult({ searched: false, found: false });
+                    setIsVerifyModalOpen(true);
+                  }}
+                  className="w-full py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all cursor-pointer shadow-md shadow-blue-900/20 flex items-center justify-center gap-2 text-xs"
+                >
+                  <FileCheck2 size={15} />
+                  Open Lookup Registry
+                </button>
+              </div>
+
+              <a
+                href="/admin"
+                className="flex items-center justify-between p-3 bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/40 rounded-xl text-slate-400 hover:text-amber-400 text-xs transition-all group"
+              >
+                <div className="flex items-center gap-2 font-medium">
+                  <Shield size={14} className="text-amber-400" />
+                  <span>Organizer Admin Hub</span>
+                </div>
+                <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+              </a>
+            </div>
+
           </div>
 
-        </div>
+          {/* Bottom Row */}
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-500 text-xs">
+            <div className="flex flex-col sm:flex-row items-center gap-2 text-center sm:text-left">
+              <span className="text-slate-400 font-semibold">© 2026 Collabs. Community.</span>
+              <span className="hidden sm:inline">·</span>
+              <span>First Mega Event · Booni, Upper Chitral</span>
+            </div>
 
-        <div className="max-w-7xl mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-500">
-          <div>
-            © 2026 Collabs. Community. First Mega Event · Booni, Chitral.
+            <div className="flex items-center gap-4 flex-wrap justify-center">
+              <a
+                href="#about"
+                onClick={(e) => handleSmoothNavClick(e, 'about')}
+                className="hover:text-slate-300 transition-colors cursor-pointer"
+              >
+                Community Charter
+              </a>
+              <span>·</span>
+              <a
+                href="#about"
+                onClick={(e) => handleSmoothNavClick(e, 'about')}
+                className="hover:text-slate-300 transition-colors cursor-pointer"
+              >
+                Code of Conduct
+              </a>
+              <span>·</span>
+              <a
+                href="/admin"
+                className="text-slate-400 hover:text-amber-400 transition-colors cursor-pointer"
+              >
+                Admin Control
+              </a>
+              <span>·</span>
+              <button
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1.5 transition-all transform hover:-translate-y-0.5 cursor-pointer ml-1"
+              >
+                <ArrowUp size={13} />
+                <span>Back to Top</span>
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="hover:text-slate-300">Community Charter</span>
-            <span>·</span>
-            <span className="hover:text-slate-300">Code of Conduct</span>
-            <span>·</span>
-            <a
-              href="#about"
-              onClick={(e) => handleSmoothNavClick(e, 'about')}
-              className="text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
-            >
-              <ArrowUp size={12} /> Back to Top
-            </a>
-          </div>
+
         </div>
       </footer>
 
