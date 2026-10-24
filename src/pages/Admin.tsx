@@ -48,7 +48,8 @@ import {
   Zap,
   ArrowUpRight,
   Sun,
-  Moon
+  Moon,
+  LogOut
 } from 'lucide-react';
 import {
   BarChart,
@@ -70,12 +71,14 @@ import officialLogo from '../assets/images/logo2.png';
 interface CertificateRecord {
   id: string;
   recipientName: string;
-  achievementType: 'Excellence' | 'Volunteer Leadership' | 'Active Participation';
+  achievementType: 'Excellence' | 'Volunteer Leadership' | 'Active Participation' | string;
   eventName: string;
   issueDate: string;
   verified: boolean;
   issuer: string;
   school?: string;
+  theme?: 'gold' | 'emerald' | 'royal' | 'obsidian' | string;
+  project?: string;
 }
 
 interface OperationalTask {
@@ -108,6 +111,7 @@ interface AdminPageProps {
   setEvents?: React.Dispatch<React.SetStateAction<EventItem[]>>;
   handleVolunteerSubmit?: any;
   handleGenerateCertificate?: any;
+  onLogout?: () => void;
 }
 
 const COMMON_SCHOOLS = [
@@ -232,7 +236,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   certDatabase,
   setCertDatabase,
   events = [],
-  setEvents
+  setEvents,
+  onLogout
 }) => {
   const navigate = useNavigate();
 
@@ -912,6 +917,26 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             title="Switch back to public website view"
           >
             <ExternalLink size={13} /> Return to Site
+          </button>
+
+          {/* Log Out Admin Session */}
+          <button
+            onClick={() => {
+              if (onLogout) {
+                onLogout();
+              } else {
+                sessionStorage.removeItem('collabs_admin_auth');
+                navigate('/');
+              }
+            }}
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer shadow-xs ${
+              isDark
+                ? 'bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border-rose-800/60'
+                : 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200'
+            }`}
+            title="Log out of Admin Mission Control"
+          >
+            <LogOut size={13} /> Log Out
           </button>
         </div>
       </header>

@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import AdminPage from './pages/Admin.tsx';
+import { AdminLoginGate } from './components/AdminLoginGate';
 import QRCode from 'qrcode';
 import officialLogo from './assets/images/logo2.png';
 import {
@@ -15,6 +16,7 @@ import {
   PlusCircle,
   Printer,
   X,
+  ChevronLeft,
   ChevronRight,
   ChevronDown,
   ChevronUp,
@@ -66,10 +68,23 @@ import {
   Utensils,
   Droplets,
   GraduationCap,
-  Filter
+  Filter,
+  CheckSquare,
+  Square,
+  UserCheck,
+  Briefcase,
+  Radio,
+  Zap,
+  Key,
+  Compass,
+  ShieldCheck,
+  CheckCheck,
+  UserPlus,
+  CheckCircle
 } from 'lucide-react';
 import { BulkTeamImportModal } from './components/BulkTeamImportModal';
 import { TeamDetailsModal } from './components/TeamDetailsModal';
+import { CertificatePortal, CertificateRecord } from './components/CertificatePortal';
 import {
   subscribeTeams,
   deleteTeamFromFirestore,
@@ -115,17 +130,14 @@ export interface VolunteerLog {
   dateJoined: string;
   status: 'Verified Active' | 'Lead Volunteer' | 'Active' | 'Pending' | 'Inactive' | string;
   assignedTasks?: string[];
+  completedTasks?: string[];
+  station?: string;
+  shiftTime?: string;
+  checkedIn?: boolean;
+  checkInTime?: string;
 }
 
-interface CertificateRecord {
-  id: string;
-  recipientName: string;
-  achievementType: 'Excellence' | 'Volunteer Leadership' | 'Active Participation';
-  eventName: string;
-  issueDate: string;
-  verified: boolean;
-  issuer: string;
-}
+export type { CertificateRecord };
 
 export interface ParticipantMember {
   name: string;
@@ -382,6 +394,10 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     password: 'collabs2026',
     department: 'Technical',
     hours: 142,
+    station: 'Main Hall A · AV & Stage Tech Pod',
+    shiftTime: '08:00 AM – 02:30 PM PKT',
+    checkedIn: true,
+    checkInTime: '08:15 AM',
     duties: 'Built attendee verification portal and managed projector/display hardware.',
     dateJoined: 'Jan 2026',
     status: 'Lead Volunteer',
@@ -389,6 +405,9 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
       'Setup registration desk laptops & check-in software by 08:30 AM',
       'Test projector and display audio in main Booni auditorium',
       'Assist keynote speakers with slide presentations'
+    ],
+    completedTasks: [
+      'Setup registration desk laptops & check-in software by 08:30 AM'
     ]
   },
   {
@@ -402,6 +421,9 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     password: 'collabs2026',
     department: 'Logistics',
     hours: 98,
+    station: 'Main Gate & Roster Verification Station',
+    shiftTime: '07:45 AM – 02:00 PM PKT',
+    checkedIn: false,
     duties: 'Staging coordinator, registration desk supervisor, and venue equipment arrangement in Booni.',
     dateJoined: 'Mar 2026',
     status: 'Verified Active',
@@ -409,7 +431,8 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
       'Supervise main entrance crowd flow at Booni venue',
       'Coordinate seating arrangements for VIP guests and community elders',
       'Distribute official welcome kits and badges'
-    ]
+    ],
+    completedTasks: []
   },
   {
     id: 'vol-103',
@@ -422,6 +445,10 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     password: 'collabs2026',
     department: 'Content',
     hours: 115,
+    station: 'Press & Media Suite · Room 104',
+    shiftTime: '09:00 AM – 04:30 PM PKT',
+    checkedIn: true,
+    checkInTime: '08:50 AM',
     duties: 'Editor of event workbooks, bilingual community notices, and presentation slide packs.',
     dateJoined: 'Nov 2025',
     status: 'Lead Volunteer',
@@ -429,6 +456,9 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
       'Prepare digital workshop booklets for attendees',
       'Capture session notes and feedback forms',
       'Coordinate bilingual announcements (Khowar & English)'
+    ],
+    completedTasks: [
+      'Prepare digital workshop booklets for attendees'
     ]
   },
   {
@@ -442,6 +472,9 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     password: 'collabs2026',
     department: 'Outreach',
     hours: 84,
+    station: 'Student Lounge & Campus Welcome Pod',
+    shiftTime: '08:30 AM – 03:30 PM PKT',
+    checkedIn: false,
     duties: 'Liaison with colleges and student networks across Chitral.',
     dateJoined: 'Apr 2026',
     status: 'Verified Active',
@@ -449,7 +482,8 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
       'Liaison with Chitral student delegates and colleges',
       'Guide participants to workshop break-out rooms',
       'Assist registration helpdesk'
-    ]
+    ],
+    completedTasks: []
   },
   {
     id: 'vol-105',
@@ -462,13 +496,17 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     password: 'collabs2026',
     department: 'Technical',
     hours: 67,
+    station: 'Hardware Bench B · Power & Cable Ops',
+    shiftTime: '08:00 AM – 03:00 PM PKT',
+    checkedIn: false,
     duties: 'Workshop assistant, laptop lab setup, and digital certificate record keeper.',
     dateJoined: 'Jun 2026',
     status: 'Verified Active',
     assignedTasks: [
       'Assist technical team with cable management and backup power',
       'Distribute digital certificates upon completion'
-    ]
+    ],
+    completedTasks: []
   },
   {
     id: 'vol-106',
@@ -481,12 +519,19 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     password: 'collabs2026',
     department: 'Logistics',
     hours: 56,
+    station: 'VIP Hospitality Lounge & Badge Desk',
+    shiftTime: '09:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    checkInTime: '08:45 AM',
     duties: 'Participant badges, welcome kit distribution, and volunteer snack stations.',
     dateJoined: 'Aug 2026',
     status: 'Verified Active',
     assignedTasks: [
       'Manage volunteer break room and refreshment stations',
       'Assist event manager with badge printing'
+    ],
+    completedTasks: [
+      'Manage volunteer break room and refreshment stations'
     ]
   }
 ];
@@ -494,30 +539,63 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
 const INITIAL_CERTIFICATES: CertificateRecord[] = [
   {
     id: 'CLB-2026-892',
-    recipientName: 'Jordan Hayes',
-    achievementType: 'Excellence',
-    eventName: 'First Mega Event of Collabs',
+    recipientName: 'Fatima Zahra',
+    achievementType: 'First Position Winner',
+    eventName: 'First Mega Event of Collabs 2026',
     issueDate: '31 October 2026',
     verified: true,
-    issuer: 'Collabs. Community Board'
+    issuer: 'Collabs. Community Executive Secretariat',
+    school: 'Booni Degree College',
+    project: 'Autonomous High-Altitude Robotics Sprint',
+    theme: 'gold'
   },
   {
     id: 'CLB-2026-401',
-    recipientName: 'Samantha Wu',
+    recipientName: 'Elena Rostova',
     achievementType: 'Volunteer Leadership',
     eventName: 'First Mega Event of Collabs Operations',
     issueDate: '31 October 2026',
     verified: true,
-    issuer: 'Sofia Morales, Volunteer Coordinator'
+    issuer: 'Collabs. Community Executive Secretariat',
+    school: 'Booni Degree College',
+    project: 'Lead Systems Engineer & Volunteer Coordinator',
+    theme: 'emerald'
+  },
+  {
+    id: 'CLB-2026-774',
+    recipientName: 'Marcus Vance',
+    achievementType: 'Runner-Up Innovation Award',
+    eventName: 'First Mega Event of Collabs 2026',
+    issueDate: '31 October 2026',
+    verified: true,
+    issuer: 'Collabs. Community Executive Secretariat',
+    school: 'Chitral University · Tech Wing',
+    project: 'Clean Mountain Hydro-Turbine Prototype',
+    theme: 'royal'
   },
   {
     id: 'CLB-2026-105',
-    recipientName: 'Devon Takahashi',
+    recipientName: 'Ahmad Khan',
+    achievementType: 'Excellence',
+    eventName: 'First Mega Event of Collabs',
+    issueDate: '31 October 2026',
+    verified: true,
+    issuer: 'Collabs. Community Executive Secretariat',
+    school: 'Pamir Public School & College Booni',
+    project: 'Smart High-Altitude Agriculture & Soil Sensor',
+    theme: 'emerald'
+  },
+  {
+    id: 'CLB-2026-520',
+    recipientName: 'Asad Ullah',
     achievementType: 'Active Participation',
     eventName: 'First Mega Event of Collabs',
     issueDate: '31 October 2026',
     verified: true,
-    issuer: 'Alex Rivera, Lead Organizer'
+    issuer: 'Collabs. Community Executive Secretariat',
+    school: 'Chitral Community Model School',
+    project: 'Chitral Code Guild · Digital Literacy',
+    theme: 'obsidian'
   }
 ];
 
@@ -556,6 +634,8 @@ export default function App() {
   });
 
   const selectedTeamMemberIdState = useState<string>('tm-1');
+  const [activeTeamIndex, setActiveTeamIndex] = useState<number>(0);
+  const teamSliderRef = useRef<HTMLDivElement>(null);
   const selectedTeamMemberId = selectedTeamMemberIdState[0];
   const setSelectedTeamMemberId = selectedTeamMemberIdState[1];
 
@@ -612,7 +692,6 @@ export default function App() {
 
   // Navigation & Modals
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
-  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
   const [selectedTeamMemberModal, setSelectedTeamMemberModal] = useState<TeamMember | null>(null);
@@ -722,6 +801,7 @@ export default function App() {
     experience: ''
   });
   const [volSubmitted, setVolSubmitted] = useState(false);
+  const [volunteerSuccessMsg, setVolunteerSuccessMsg] = useState('');
 
   const handleVolunteerLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -734,6 +814,7 @@ export default function App() {
         setLoggedInVolunteer(found);
         setVolLoginUsername('');
         setVolLoginPassword('');
+        setVolunteerTab('mission');
       } else {
         setVolLoginError('Invalid password. Default test password is: collabs2026');
       }
@@ -742,11 +823,117 @@ export default function App() {
     }
   };
 
+  // Volunteer Portal Tab and Checklist State
+  const [volunteerTab, setVolunteerTab] = useState<'mission' | 'tracks' | 'radar' | 'schedule' | 'apply'>('mission');
+  const [selectedRadarStation, setSelectedRadarStation] = useState<string>('st-1');
+  const [newVolunteerTaskInput, setNewVolunteerTaskInput] = useState('');
+  const [volunteerBadgeQr, setVolunteerBadgeQr] = useState<string>('');
+
+  useEffect(() => {
+    if (loggedInVolunteer) {
+      QRCode.toDataURL(
+        `https://collabs.org/verify/volunteer/${loggedInVolunteer.id}?user=${loggedInVolunteer.username}`,
+        { margin: 1, width: 140, color: { dark: '#0f172a', light: '#ffffff' } }
+      ).then(url => setVolunteerBadgeQr(url)).catch(() => {});
+    }
+  }, [loggedInVolunteer]);
+
+  const handleToggleVolunteerTask = (taskText: string) => {
+    if (!loggedInVolunteer) return;
+    const currentCompleted = loggedInVolunteer.completedTasks || [];
+    const isDone = currentCompleted.includes(taskText);
+    const updatedCompleted = isDone
+      ? currentCompleted.filter(t => t !== taskText)
+      : [...currentCompleted, taskText];
+
+    const updated = {
+      ...loggedInVolunteer,
+      completedTasks: updatedCompleted
+    };
+    setLoggedInVolunteer(updated);
+    setVolunteers(prev => prev.map(v => (v.id === updated.id ? updated : v)));
+  };
+
+  const handleToggleVolunteerCheckIn = () => {
+    if (!loggedInVolunteer) return;
+    const newChecked = !loggedInVolunteer.checkedIn;
+    const timeNow = newChecked ? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : undefined;
+    const updated = {
+      ...loggedInVolunteer,
+      checkedIn: newChecked,
+      checkInTime: timeNow
+    };
+    setLoggedInVolunteer(updated);
+    setVolunteers(prev => prev.map(v => (v.id === updated.id ? updated : v)));
+  };
+
+  const handleAddVolunteerTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loggedInVolunteer || !newVolunteerTaskInput.trim()) return;
+    const currentTasks = loggedInVolunteer.assignedTasks || [];
+    const updated = {
+      ...loggedInVolunteer,
+      assignedTasks: [...currentTasks, newVolunteerTaskInput.trim()]
+    };
+    setLoggedInVolunteer(updated);
+    setVolunteers(prev => prev.map(v => (v.id === updated.id ? updated : v)));
+    setNewVolunteerTaskInput('');
+  };
+
+  const handleQuickVolunteerLogin = (vol: VolunteerLog) => {
+    setLoggedInVolunteer(vol);
+    setVolLoginError('');
+    setVolunteerTab('mission');
+  };
+
+  const handleVolunteerFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!volForm.name || !volForm.email) return;
+
+    const newVol: VolunteerLog = {
+      id: `vol-${Date.now().toString().slice(-4)}`,
+      name: volForm.name.trim(),
+      username: volForm.name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 10) || 'crew',
+      email: volForm.email.trim(),
+      department: volForm.department,
+      school: volForm.experience || 'Chitral Youth Innovation Group',
+      role: `${volForm.department} Crew Member`,
+      password: 'collabs2026',
+      hours: 12,
+      duties: `Assigned to ${volForm.department} operations for the 31 October 2026 Booni event.`,
+      dateJoined: 'Oct 2026',
+      status: 'Active',
+      station: volForm.department === 'Technical' ? 'Lab Block A · Hardware Support' : 'Main Venue Concourse',
+      shiftTime: '08:30 AM – 03:00 PM PKT',
+      assignedTasks: [
+        'Attend morning volunteer briefing at 08:00 AM',
+        `Assist ${volForm.department} lead with station setup`,
+        'Guide event attendees & team participants'
+      ],
+      completedTasks: [],
+      checkedIn: false
+    };
+
+    setVolunteers(prev => [newVol, ...prev]);
+    setLoggedInVolunteer(newVol);
+    setVolSubmitted(true);
+    setVolunteerTab('mission');
+    setVolForm({
+      name: '',
+      email: '',
+      department: 'Technical',
+      availability: '4-8 Hours / Week',
+      experience: ''
+    });
+  };
+
   // Certificate Generator State
   const [certDatabase, setCertDatabase] = useState<CertificateRecord[]>(INITIAL_CERTIFICATES);
+  const [certTheme, setCertTheme] = useState<'gold' | 'emerald' | 'royal'>('gold');
+  const [certRecipientSchool, setCertRecipientSchool] = useState('Booni Degree College');
   const [certForm, setCertForm] = useState({
     recipientName: 'Ali Ahmad',
-    achievementType: 'Excellence' as 'Excellence' | 'Volunteer Leadership' | 'Active Participation',
+    achievementType: 'Active Participation' as 'Excellence' | 'Volunteer Leadership' | 'Active Participation',
     eventName: 'First Mega Event of Collabs',
     issueDate: '31 October 2026'
   });
@@ -927,6 +1114,69 @@ export default function App() {
 
   const hasMoreTeams = sortedAndFilteredTeams.length > INITIAL_TEAMS_LIMIT;
 
+  // Export current filtered roster of teams to a CSV file
+  const handleExportFilteredTeamsCSV = () => {
+    if (sortedAndFilteredTeams.length === 0) return;
+    const headers = [
+      'Team Code',
+      'Project Name',
+      'Category',
+      'School / Institution',
+      'Location / Station',
+      'Team Leader',
+      'Co-Leader',
+      'Supervisor',
+      'Members Count',
+      'Members Roster',
+      'Project Description',
+      'Recognition Award',
+      'Registration Status',
+      'Created At'
+    ];
+
+    const escapeCSV = (val: any) => {
+      if (val === null || val === undefined) return '""';
+      const str = String(val).replace(/"/g, '""');
+      return `"${str}"`;
+    };
+
+    const rows = sortedAndFilteredTeams.map(t => {
+      const memberNames = (t.members || [])
+        .map((m: any) => (typeof m === 'string' ? m : `${m.name}${m.role ? ` (${m.role})` : ''}`))
+        .filter(Boolean)
+        .join('; ');
+
+      return [
+        escapeCSV(t.teamCode || t.id),
+        escapeCSV(t.projectName),
+        escapeCSV(t.category || 'Innovation Sprint'),
+        escapeCSV(t.school || 'Collabs Event'),
+        escapeCSV(t.location || ''),
+        escapeCSV(t.teamLeader),
+        escapeCSV(t.coLeader || ''),
+        escapeCSV(t.supervisor || ''),
+        escapeCSV(t.members?.length || 0),
+        escapeCSV(memberNames),
+        escapeCSV(t.projectDescription || ''),
+        escapeCSV('Participation'),
+        escapeCSV(t.status || 'Pending'),
+        escapeCSV(t.createdAt || 'Oct 2026')
+      ].join(',');
+    });
+
+    const csvContent = [headers.join(','), ...rows].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    const filterSuffix = participationCategoryFilter !== 'All' ? `_${participationCategoryFilter.replace(/\s+/g, '_')}` : '';
+    link.setAttribute('download', `collabs2026_participating_teams${filterSuffix}_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const getTeamCategoryBadge = (category?: string) => {
     const cat = (category || '').toLowerCase();
     if (cat.includes('robo') || cat.includes('ai') || cat.includes('tech')) {
@@ -1011,28 +1261,29 @@ export default function App() {
     };
   };
   const [eventsList, setEventsList] = useState<EventItem[]>(INITIAL_EVENTS);
-  const [isAdminMode, setIsAdminMode] = useState(false);
-  const [adminUsername, setAdminUsername] = useState('');
-  const [adminPassword, setAdminPassword] = useState('');
-  const [adminLoginError, setAdminLoginError] = useState('');
-// ...
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('collabs_admin_auth') === 'true';
+    }
+    return false;
+  });
+  const isAdminMode = isAdminAuthenticated;
+  const [currentHash, setCurrentHash] = useState(() => (typeof window !== 'undefined' ? window.location.hash : ''));
+
+  useEffect(() => {
+    const handleUrlChange = () => {
+      setCurrentHash(window.location.hash);
+    };
+    window.addEventListener('popstate', handleUrlChange);
+    window.addEventListener('hashchange', handleUrlChange);
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      window.removeEventListener('hashchange', handleUrlChange);
+    };
+  }, []);
 
   const [activePass, setActivePass] = useState<any>(null);
   const [badgeSuccessNotice, setBadgeSuccessNotice] = useState<string | null>(null);
-
-  const handleAdminLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (adminUsername === 'admin' && adminPassword === 'collabs2026') {
-      setIsAdminMode(true);
-      setIsAdminModalOpen(false);
-      navigate('/admin');
-      setAdminUsername('');
-      setAdminPassword('');
-      setAdminLoginError('');
-    } else {
-      setAdminLoginError('Invalid credentials');
-    }
-  };
   const [currentCertId, setCurrentCertId] = useState('CLB-2026-892');
   const [generatorSuccess, setGeneratorSuccess] = useState(false);
   const [qrCodeDataUrls, setQrCodeDataUrls] = useState<Record<string, string>>({});
@@ -1178,16 +1429,19 @@ export default function App() {
     const newId = `CLB-2026-${Math.floor(500 + Math.random() * 499)}`;
     const newCert: CertificateRecord = {
       id: newId,
-      recipientName: certForm.recipientName,
+      recipientName: certForm.recipientName.trim(),
       achievementType: certForm.achievementType,
       eventName: certForm.eventName,
       issueDate: certForm.issueDate || '31 October 2026',
       verified: true,
-      issuer: 'Collabs. Community Board'
+      issuer: 'Collabs. Community Executive Secretariat',
+      school: certRecipientSchool,
+      theme: certTheme
     };
     setCertDatabase([newCert, ...certDatabase]);
     setCurrentCertId(newId);
     setGeneratorSuccess(true);
+    setTimeout(() => setGeneratorSuccess(false), 3000);
   };
 
   const handleVerifyQuery = (e: React.FormEvent) => {
@@ -1246,8 +1500,29 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  if (location.pathname === '/admin') {
-    return <AdminPage 
+  const isAdminRoute =
+    location.pathname === '/admin' ||
+    location.pathname.startsWith('/admin/') ||
+    currentHash === '#admin' ||
+    currentHash.startsWith('#/admin');
+
+  if (isAdminRoute) {
+    if (!isAdminAuthenticated) {
+      return (
+        <AdminLoginGate
+          onLoginSuccess={() => setIsAdminAuthenticated(true)}
+          onBackHome={() => {
+            if (currentHash === '#admin' || currentHash.startsWith('#/admin')) {
+              window.location.hash = '';
+            }
+            navigate('/');
+          }}
+        />
+      );
+    }
+
+    return (
+      <AdminPage 
         teamParticipations={teamParticipations} 
         setTeamParticipations={setTeamParticipations} 
         volunteers={volunteers}
@@ -1258,7 +1533,448 @@ export default function App() {
         setEvents={setEventsList}
         handleVolunteerSubmit={handleVolunteerSubmit}
         handleGenerateCertificate={handleGenerateCertificate}
-    />;
+        onLogout={() => {
+          setIsAdminAuthenticated(false);
+          sessionStorage.removeItem('collabs_admin_auth');
+          if (currentHash === '#admin' || currentHash.startsWith('#/admin')) {
+            window.location.hash = '';
+          }
+          navigate('/');
+        }}
+      />
+    );
+  }
+
+  const isVolunteerRoute =
+    location.pathname === '/volunteer' ||
+    location.pathname === '/volunter' ||
+    location.pathname.startsWith('/volunteer') ||
+    location.pathname.startsWith('/volunter') ||
+    currentHash === '#volunteer' ||
+    currentHash === '#volunter' ||
+    currentHash.startsWith('#/volunteer') ||
+    currentHash.startsWith('#/volunter');
+
+  if (isVolunteerRoute) {
+    return (
+      <div className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased selection:bg-blue-600 selection:text-white">
+        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate('/')}
+                className="flex items-center gap-2.5 cursor-pointer group text-left"
+              >
+                <img src={officialLogo} alt="Logo" className="w-10 h-10 object-contain rounded-lg shadow-xs group-hover:scale-105 transition-transform" />
+                <div>
+                  <span className="font-heading text-2xl font-black tracking-tight text-slate-900 leading-none block">
+                    Collabs.
+                  </span>
+                  <span className="text-[10px] font-extrabold text-blue-600 uppercase tracking-wider block mt-0.5">
+                    Volunteer Portal
+                  </span>
+                </div>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                onClick={() => navigate('/certificate')}
+                className="px-3 py-1.5 text-xs font-bold rounded-xl text-slate-700 hover:text-blue-600 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
+              >
+                Certificate Portal
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="px-4 py-2 text-xs font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-colors cursor-pointer shadow-xs flex items-center gap-1.5"
+              >
+                <span>Back to Home</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <main className="py-12">
+          <section id="volunteers" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 text-left">
+              <div>
+                <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">
+                  Field Operations & Crew
+                </span>
+                <h1 className="font-heading text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+                  Volunteer Portal
+                </h1>
+                <p className="text-sm text-slate-600 mt-1 max-w-3xl leading-relaxed">
+                  Join our dedicated crew for the First Mega Event of Collabs in Booni on 31 October 2026. Select a role, apply in seconds, and contribute to youth innovation in Chitral.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 text-xs text-slate-500 shrink-0">
+                <span className="font-semibold text-slate-800">{volunteers.length} Active Crew</span>
+                <span aria-hidden="true">·</span>
+                <span>4 Key Teams</span>
+                <span aria-hidden="true">·</span>
+                <span className="text-blue-600 font-bold">31 Oct 2026 Booni</span>
+              </div>
+            </div>
+
+            <div className="space-y-8 text-left">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div className="lg:col-span-6 bg-white border border-slate-200 rounded-2xl p-6 shadow-xs flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                        <UserPlus size={20} />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg text-slate-900">Apply as Volunteer</h3>
+                        <p className="text-xs text-slate-500">Fill out your details to join the event operations crew</p>
+                      </div>
+                    </div>
+
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        const form = e.currentTarget;
+                        const formData = new FormData(form);
+                        const name = formData.get('name') as string;
+                        const email = formData.get('email') as string;
+                        const phone = formData.get('phone') as string;
+                        const school = formData.get('school') as string;
+                        const department = formData.get('department') as string;
+                        const shift = formData.get('shift') as string;
+
+                        if (!name || !email) return;
+
+                        const newVol: VolunteerLog = {
+                          id: `vol-${Date.now().toString().slice(-4)}`,
+                          name,
+                          username: name.toLowerCase().replace(/\s+/g, ''),
+                          email,
+                          phone: phone || '+92 300 0000000',
+                          school: school || 'Local Institution',
+                          role: `${department} Crew`,
+                          department: department || 'General',
+                          hours: 0,
+                          station: 'Booni Exhibition Venue',
+                          shiftTime: shift || '09:00 AM – 05:00 PM PKT',
+                          checkedIn: false,
+                          duties: `Assigned to ${department} team.`,
+                          dateJoined: 'Oct 2026',
+                          status: 'Verified Active',
+                          assignedTasks: ['Report to team lead on 31 Oct at 08:30 AM'],
+                          completedTasks: []
+                        };
+
+                        setVolunteers([newVol, ...volunteers]);
+                        setVolunteerSuccessMsg(`Thank you, ${name}! Your application for ${department} crew has been registered.`);
+                        form.reset();
+                        setTimeout(() => setVolunteerSuccessMsg(''), 5000);
+                      }}
+                      className="space-y-4"
+                    >
+                      {volunteerSuccessMsg && (
+                        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-semibold text-emerald-800 flex items-center gap-2">
+                          <CheckCircle size={16} className="text-emerald-600 shrink-0" />
+                          <span>{volunteerSuccessMsg}</span>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">Full Name *</label>
+                          <input
+                            type="text"
+                            name="name"
+                            required
+                            placeholder="e.g. Zahid Hussain"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">Email Address *</label>
+                          <input
+                            type="email"
+                            name="email"
+                            required
+                            placeholder="e.g. zahid@collabs.org"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">Phone / WhatsApp</label>
+                          <input
+                            type="text"
+                            name="phone"
+                            placeholder="+92 345 0000000"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">School / Institution</label>
+                          <input
+                            type="text"
+                            name="school"
+                            placeholder="e.g. Booni Degree College"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">Preferred Department</label>
+                          <select
+                            name="department"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none"
+                          >
+                            <option value="Venue Operations">Venue Operations & Logistics</option>
+                            <option value="Technical">Tech & Registration Support</option>
+                            <option value="Media & Coverage">Media & Coverage</option>
+                            <option value="Guest Hospitality">Guest Hospitality & Protocol</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">Preferred Shift</label>
+                          <select
+                            name="shift"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none"
+                          >
+                            <option value="08:00 AM – 01:00 PM PKT">Morning Shift (08:00 AM - 01:00 PM)</option>
+                            <option value="01:00 PM – 06:00 PM PKT">Afternoon Shift (01:00 PM - 06:00 PM)</option>
+                            <option value="08:00 AM – 06:00 PM PKT">Full Event Day (08:00 AM - 06:00 PM)</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs"
+                      >
+                        <UserPlus size={16} />
+                        <span>Submit Volunteer Application</span>
+                      </button>
+                    </form>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-6 space-y-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="p-2 bg-slate-100 rounded-lg text-slate-700">
+                      <Shield size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg text-slate-900">Volunteer Departments</h3>
+                      <p className="text-xs text-slate-500">Key teams supporting the Booni Exhibition</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="bg-white border border-slate-200 rounded-xl p-4">
+                      <div className="flex items-center gap-2 font-bold text-xs text-blue-900 mb-1">
+                        <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                        Venue Operations & Logistics
+                      </div>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        Assist with seating, stage setup, crowd guidance, and equipment management at the main hall.
+                      </p>
+                      <span className="inline-block mt-3 text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                        Shift: 08:00 AM - 06:00 PM
+                      </span>
+                    </div>
+
+                    <div className="bg-white border border-slate-200 rounded-xl p-4">
+                      <div className="flex items-center gap-2 font-bold text-xs text-emerald-900 mb-1">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        Tech & Registration
+                      </div>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        Manage helpdesk check-ins, barcode verification, screen displays, and projector hardware.
+                      </p>
+                      <span className="inline-block mt-3 text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                        Shift: 08:00 AM - 02:30 PM
+                      </span>
+                    </div>
+
+                    <div className="bg-white border border-slate-200 rounded-xl p-4">
+                      <div className="flex items-center gap-2 font-bold text-xs text-purple-900 mb-1">
+                        <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                        Media & Coverage
+                      </div>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        Capture photography, record team presentations, conduct interviews, and handle social updates.
+                      </p>
+                      <span className="inline-block mt-3 text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                        Shift: 09:00 AM - 05:00 PM
+                      </span>
+                    </div>
+
+                    <div className="bg-white border border-slate-200 rounded-xl p-4">
+                      <div className="flex items-center gap-2 font-bold text-xs text-amber-900 mb-1">
+                        <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                        Guest Hospitality
+                      </div>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        Welcome guest speakers, mentors, institutional leads, and assist with refreshments and schedules.
+                      </p>
+                      <span className="inline-block mt-3 text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                        Shift: 08:30 AM - 04:30 PM
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                  <div>
+                    <h3 className="font-bold text-base text-slate-900 flex items-center gap-2">
+                      <Users size={18} className="text-blue-600" />
+                      <span>Registered Crew Roster ({volunteers.length})</span>
+                    </h3>
+                    <p className="text-xs text-slate-500">Confirmed volunteer team members for Collabs Booni Event</p>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left">
+                    <thead>
+                      <tr className="border-b border-slate-200 text-slate-500 font-semibold bg-slate-50/50">
+                        <th className="py-3 px-3">Volunteer Name</th>
+                        <th className="py-3 px-3">Department & Role</th>
+                        <th className="py-3 px-3">Institution</th>
+                        <th className="py-3 px-3">Shift & Station</th>
+                        <th className="py-3 px-3">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {volunteers.map((v) => (
+                        <tr key={v.id} className="hover:bg-slate-50/60 transition-colors">
+                          <td className="py-3 px-3 font-semibold text-slate-900">
+                            <div>{v.name}</div>
+                            <div className="text-[10px] text-slate-400 font-normal">{v.email}</div>
+                          </td>
+                          <td className="py-3 px-3">
+                            <span className="font-medium text-slate-800">{v.role}</span>
+                            <div className="text-[10px] text-slate-500">{v.department}</div>
+                          </td>
+                          <td className="py-3 px-3 text-slate-600">{v.school || 'Collabs Crew'}</td>
+                          <td className="py-3 px-3 text-slate-600">
+                            <div>{v.shiftTime}</div>
+                            <div className="text-[10px] text-slate-400">{v.station}</div>
+                          </td>
+                          <td className="py-3 px-3">
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              v.status === 'Lead Volunteer'
+                                ? 'bg-purple-100 text-purple-700'
+                                : 'bg-emerald-100 text-emerald-700'
+                            }`}>
+                              <CheckCircle size={10} />
+                              {v.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        <footer className="bg-slate-900 text-slate-400 text-xs py-8 border-t border-slate-800 text-center">
+          <div className="max-w-7xl mx-auto px-4">
+            <p className="font-medium text-slate-300">First Mega Event of Collabs · Volunteer Crew Operations</p>
+            <p className="text-slate-500 mt-1">31 October 2026 · Booni, Upper Chitral</p>
+          </div>
+        </footer>
+      </div>
+    );
+  }
+
+  const isCertificateRoute =
+    location.pathname === '/certificate' ||
+    location.pathname === '/certicate' ||
+    location.pathname.startsWith('/certificate') ||
+    location.pathname.startsWith('/certicate') ||
+    currentHash === '#certificate' ||
+    currentHash === '#certicate' ||
+    currentHash.startsWith('#/certificate') ||
+    currentHash.startsWith('#/certicate');
+
+  if (isCertificateRoute) {
+    return (
+      <div className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased selection:bg-blue-600 selection:text-white">
+        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate('/')}
+                className="flex items-center gap-2.5 cursor-pointer group text-left"
+              >
+                <img src={officialLogo} alt="Logo" className="w-10 h-10 object-contain rounded-lg shadow-xs group-hover:scale-105 transition-transform" />
+                <div>
+                  <span className="font-heading text-2xl font-black tracking-tight text-slate-900 leading-none block">
+                    Collabs.
+                  </span>
+                  <span className="text-[10px] font-extrabold text-blue-600 uppercase tracking-wider block mt-0.5">
+                    Certificate Portal
+                  </span>
+                </div>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                onClick={() => navigate('/volunteer')}
+                className="px-3 py-1.5 text-xs font-bold rounded-xl text-slate-700 hover:text-blue-600 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
+              >
+                Volunteer Portal
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="px-4 py-2 text-xs font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-colors cursor-pointer shadow-xs flex items-center gap-1.5"
+              >
+                <span>Back to Home</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <main className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <CertificatePortal
+            certDatabase={certDatabase}
+            setCertDatabase={setCertDatabase}
+            currentCertId={currentCertId}
+            setCurrentCertId={setCurrentCertId}
+            activeCertificate={activeCertificate}
+            qrCodeDataUrls={qrCodeDataUrls}
+            handlePrintCertificate={handlePrintCertificate}
+            handleCopyVerificationLink={handleCopyVerificationLink}
+            copiedLink={copiedLink}
+            handleOpenLookupForId={handleOpenLookupForId}
+            setIsVerifyModalOpen={setIsVerifyModalOpen}
+            officialLogo={officialLogo}
+            isExpanded={true}
+            onToggleExpand={() => {}}
+          />
+        </main>
+
+        <footer className="bg-slate-900 text-slate-400 text-xs py-8 border-t border-slate-800 text-center">
+          <div className="max-w-7xl mx-auto px-4">
+            <p className="font-medium text-slate-300">Collabs Official Digital Certificate Verification Registry</p>
+            <p className="text-slate-500 mt-1">First Mega Event of Collabs 2026 · Booni, Upper Chitral</p>
+          </div>
+        </footer>
+      </div>
+    );
   }
 
   return (
@@ -1286,8 +2002,6 @@ export default function App() {
               { id: 'team', label: 'Team', href: '#team', sectionKey: 'teamDirectory' as const },
               { id: 'participants', label: 'Participants', href: '#team-participation', sectionKey: undefined },
               { id: 'judging', label: 'Judging', href: '#judging-criteria', sectionKey: undefined },
-              { id: 'volunteers', label: 'Volunteers', href: '#volunteers', sectionKey: 'volunteerNetwork' as const },
-              { id: 'certificates', label: 'Certificates', href: '#certificates', sectionKey: 'certificatePortal' as const },
               { id: 'awards', label: 'Awards', href: '#awards', sectionKey: 'awardsShowcase' as const },
             ].map(tab => {
               const isActive = activeNavTab === tab.id;
@@ -1296,6 +2010,16 @@ export default function App() {
                   key={tab.id}
                   href={tab.href}
                   onClick={(e) => {
+                    if (tab.id === 'volunteers') {
+                      e.preventDefault();
+                      navigate('/volunteer');
+                      return;
+                    }
+                    if (tab.id === 'certificates') {
+                      e.preventDefault();
+                      navigate('/certificate');
+                      return;
+                    }
                     setActiveNavTab(tab.id);
                     handleSmoothNavClick(e, tab.href.replace('#', ''), tab.sectionKey);
                   }}
@@ -1316,13 +2040,6 @@ export default function App() {
 
           {/* Header Action Buttons */}
           <div className="flex items-center gap-2 sm:gap-3">
-
-            <button
-              onClick={() => setIsAdminModalOpen(true)}
-              className="px-3.5 sm:px-5 py-2 text-xs sm:text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
-            >
-              <span>Admin</span>
-            </button>
             <a
               href="https://docs.google.com/forms/d/e/1FAIpQLSdUwKtlCvMl4JJBpsa6e7xMJ7KirLBU5_B6ram88WUwza-p-g/viewform"
               target="_blank"
@@ -1669,25 +2386,70 @@ export default function App() {
               Meet the coordinators leading the First Mega Event of Collabs in Upper Chitral.
             </p>
           </div>
+
+          {/* Horizontal Next-by-Next Controls */}
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="text-xs font-semibold text-slate-500">
+              Member {activeTeamIndex + 1} of {INITIAL_TEAM.length}
+            </span>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  const nextIdx = (activeTeamIndex - 1 + INITIAL_TEAM.length) % INITIAL_TEAM.length;
+                  setActiveTeamIndex(nextIdx);
+                  if (teamSliderRef.current) {
+                    teamSliderRef.current.scrollTo({
+                      left: nextIdx * 320,
+                      behavior: 'smooth'
+                    });
+                  }
+                }}
+                className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors cursor-pointer active:scale-95 shadow-2xs"
+                title="Previous Member"
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <button
+                onClick={() => {
+                  const nextIdx = (activeTeamIndex + 1) % INITIAL_TEAM.length;
+                  setActiveTeamIndex(nextIdx);
+                  if (teamSliderRef.current) {
+                    teamSliderRef.current.scrollTo({
+                      left: nextIdx * 320,
+                      behavior: 'smooth'
+                    });
+                  }
+                }}
+                className="p-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors cursor-pointer active:scale-95 shadow-2xs flex items-center gap-1 text-xs"
+                title="Next Member"
+              >
+                <span>Next</span>
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
         </div>
 
         {sectionsExpanded.teamDirectory && (
-          <div className="space-y-8 text-left">
-
-            {/* Creative Team Grid Showcase matching reference image */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="space-y-6 text-left">
+            {/* Horizontal Scroll Track */}
+            <div
+              ref={teamSliderRef}
+              className="flex overflow-x-auto gap-4 pb-4 scroll-smooth snap-x snap-mandatory scrollbar-none p-1"
+            >
               {INITIAL_TEAM.map((member, idx) => {
-                const isSelected = selectedTeamMemberId === member.id;
+                const isSelected = selectedTeamMemberId === member.id || activeTeamIndex === idx;
                 const roleNum = member.department.includes('Role 1') ? 'ROLE 1' : member.department.includes('Role 2') ? 'ROLE 2' : 'ROLE 3';
 
                 return (
                   <div
                     key={'dir-' + member.id}
                     onClick={() => {
+                      setActiveTeamIndex(idx);
                       setSelectedTeamMemberId(member.id);
                       setSelectedTeamMemberModal(member);
                     }}
-                    className={`rounded-2xl p-5 border transition-all duration-300 cursor-pointer relative overflow-hidden group flex flex-col justify-between shadow-xs hover:-translate-y-1 hover:shadow-lg ${
+                    className={`snap-start w-[280px] sm:w-[320px] shrink-0 rounded-2xl p-5 border transition-all duration-300 cursor-pointer relative overflow-hidden group flex flex-col justify-between shadow-xs hover:-translate-y-1 hover:shadow-lg min-h-[220px] ${
                       isSelected 
                         ? 'bg-gradient-to-br from-purple-600 via-indigo-600 to-pink-600 border-transparent text-white shadow-xl ring-2 ring-purple-400/50' 
                         : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-900'
@@ -1725,6 +2487,29 @@ export default function App() {
                 );
               })}
             </div>
+
+            {/* Horizontal Pagination Dots */}
+            <div className="flex items-center justify-center gap-2 pt-2">
+              {INITIAL_TEAM.map((member, idx) => (
+                <button
+                  key={member.id}
+                  onClick={() => {
+                    setActiveTeamIndex(idx);
+                    setSelectedTeamMemberId(member.id);
+                    if (teamSliderRef.current) {
+                      teamSliderRef.current.scrollTo({
+                        left: idx * 320,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }}
+                  className={`h-2 rounded-full transition-all cursor-pointer ${
+                    activeTeamIndex === idx ? 'w-8 bg-blue-600' : 'w-2 bg-slate-300 hover:bg-slate-400'
+                  }`}
+                  title={`Go to ${member.name}`}
+                />
+              ))}
+            </div>
           </div>
         )}
       </section>
@@ -1747,18 +2532,6 @@ export default function App() {
         {/* Section Header */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-6">
           <div>
-            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-              <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
-                Booni Exhibition Finalists & Cohorts
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                Saved in Firebase Firestore
-              </span>
-              <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-                {teamParticipations.length} Enrolled Teams
-              </span>
-            </div>
             <h2 className="font-heading text-3xl font-black text-slate-900 tracking-tight">Team Participation</h2>
             <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
               Explore participating innovation teams, view member assignments, and access event passes. All teams are recognized as official event participants with cloud synchronization.
@@ -1782,174 +2555,6 @@ export default function App() {
                     <ChevronDown size={14} /> View All ({sortedAndFilteredTeams.length})
                   </>
                 )}
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => navigate('/admin')}
-              className="p-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
-              title="Admin Portal - Manage Teams & Bulk Import Spreadsheet"
-            >
-              <Shield size={13} className="text-slate-500" /> Admin Portal
-            </button>
-          </div>
-        </div>
-
-        {/* Creative Interactive Controls & Sorter Bar */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-4 mb-6 shadow-2xs space-y-3">
-          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-            {/* Search Input */}
-            <div className="relative flex-1 min-w-[220px]">
-              <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search project, leader, school, code, category..."
-                value={participationSearch}
-                onChange={e => setParticipationSearch(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 bg-slate-50 hover:bg-white focus:bg-white border rounded-xl border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none transition-colors"
-              />
-              {participationSearch && (
-                <button
-                  type="button"
-                  onClick={() => setParticipationSearch('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </div>
-
-            {/* Sorting & Filtering Controls */}
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Sort By Dropdown */}
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
-                <ArrowUpDown size={13} className="text-blue-600 shrink-0" />
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider hidden sm:inline">Sort:</span>
-                <select
-                  value={participationSort}
-                  onChange={e => setParticipationSort(e.target.value)}
-                  className="bg-transparent text-xs text-slate-800 font-bold focus:outline-none cursor-pointer"
-                >
-                  <option value="name-asc">Alphabetical: Project (A → Z)</option>
-                  <option value="name-desc">Alphabetical: Project (Z → A)</option>
-                  <option value="code-asc">Team Code (A → Z)</option>
-                  <option value="school-asc">School Name (A → Z)</option>
-                  <option value="school-desc">School Name (Z → A)</option>
-                  <option value="category-asc">Category (A → Z)</option>
-                  <option value="status-approved">Status: Approved First</option>
-                  <option value="status-pending">Status: Pending First</option>
-                  <option value="members-desc">Team Size (Largest First)</option>
-                </select>
-              </div>
-
-              {/* Category Filter */}
-              <select
-                value={participationCategoryFilter}
-                onChange={e => setParticipationCategoryFilter(e.target.value)}
-                className="p-2 px-3 bg-slate-50 border rounded-xl border-slate-200 text-xs text-slate-800 font-medium focus:border-blue-600 focus:outline-none cursor-pointer"
-              >
-                <option value="All">All Categories</option>
-                {availableCategories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-
-              {/* Status Filter (Pending vs Approved vs Rejected) */}
-              <select
-                value={participationStatusFilter}
-                onChange={e => setParticipationStatusFilter(e.target.value as any)}
-                className="p-2 px-3 bg-slate-50 border rounded-xl border-slate-200 text-xs text-slate-800 font-medium focus:border-blue-600 focus:outline-none cursor-pointer"
-              >
-                <option value="All">All Statuses</option>
-                <option value="Approved">Approved</option>
-                <option value="Pending">Pending</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-
-              {/* Official Participation Recognition Indicator */}
-              <div
-                className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50/90 border border-blue-200 text-blue-700 text-xs font-bold rounded-xl shadow-2xs select-none"
-                title="All registered teams are recognized as official event participants"
-              >
-                <Award size={13} className="text-blue-600 shrink-0" />
-                <span>All: Participation</span>
-              </div>
-
-              {/* View Switcher (Grid vs Table) */}
-              <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setParticipationViewMode('grid')}
-                  className={`p-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
-                    participationViewMode === 'grid'
-                      ? 'bg-white text-blue-600 shadow-2xs'
-                      : 'text-slate-500 hover:text-slate-900'
-                  }`}
-                  title="Small Creative Cards View"
-                >
-                  <LayoutGrid size={14} />
-                  <span className="hidden sm:inline text-[11px]">Cards</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setParticipationViewMode('table')}
-                  className={`p-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
-                    participationViewMode === 'table'
-                      ? 'bg-white text-blue-600 shadow-2xs'
-                      : 'text-slate-500 hover:text-slate-900'
-                  }`}
-                  title="Dense Roster Table View"
-                >
-                  <List size={14} />
-                  <span className="hidden sm:inline text-[11px]">Table</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Active Filter Indicators & Reset Action */}
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
-            <div className="flex items-center gap-2 flex-wrap text-slate-500 text-[11px]">
-              <span>
-                Showing <strong className="text-slate-900">{displayedTeams.length}</strong> of{' '}
-                <strong className="text-slate-900">{sortedAndFilteredTeams.length}</strong> teams
-                {!isTeamsExpanded && hasMoreTeams && (
-                  <span className="text-blue-600 font-semibold ml-1">(Previewing 4)</span>
-                )}
-              </span>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 font-semibold rounded-md border border-blue-200/60">
-                <Award size={10} className="text-blue-600" />
-                All Teams: Participation
-              </span>
-              {participationSort !== 'name-asc' && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 font-semibold rounded-md">
-                  Sorted
-                </span>
-              )}
-              {participationStatusFilter !== 'All' && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-50 text-amber-800 font-semibold rounded-md">
-                  Status: {participationStatusFilter}
-                </span>
-              )}
-              {participationCategoryFilter !== 'All' && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-50 text-purple-800 font-semibold rounded-md">
-                  Category: {participationCategoryFilter}
-                </span>
-              )}
-            </div>
-
-            {(participationSearch || participationStatusFilter !== 'All' || participationCategoryFilter !== 'All' || participationSort !== 'name-asc') && (
-              <button
-                type="button"
-                onClick={() => {
-                  setParticipationSearch('');
-                  setParticipationStatusFilter('All');
-                  setParticipationCategoryFilter('All');
-                  setParticipationSort('name-asc');
-                }}
-                className="text-[11px] font-bold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <RotateCw size={11} /> Reset Filters
               </button>
             )}
           </div>
@@ -2340,489 +2945,10 @@ export default function App() {
           Total: 100%. All four criteria are weighted equally.
         </div>
 
-        {/* Judges & Expert Panel Directory */}
-        <div className="mb-6">
-          <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block">Evaluation Board</span>
-          <h3 className="font-heading text-2xl font-black text-slate-900 tracking-tight">Judges & Expert Panel</h3>
-          <p className="text-sm text-slate-600 mt-1">Distinguished faculty and tech leaders evaluating finalist projects in Booni.</p>
-        </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:border-blue-300 transition-all">
-            <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-700 font-black text-sm flex items-center justify-center mb-3">
-              TH
-            </div>
-            <h4 className="font-heading font-black text-base text-slate-900">Dr. Tariq Hussain</h4>
-            <p className="text-xs font-semibold text-blue-600 mt-0.5">Lead Judge & Evaluator</p>
-            <p className="text-xs text-slate-500 mt-2">Pamir Public School & College</p>
-          </div>
-
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:border-blue-300 transition-all">
-            <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-700 font-black text-sm flex items-center justify-center mb-3">
-              JA
-            </div>
-            <h4 className="font-heading font-black text-base text-slate-900">Prof. Jamshed Ali</h4>
-            <p className="text-xs font-semibold text-blue-600 mt-0.5">STEM Judge</p>
-            <p className="text-xs text-slate-500 mt-2">Booni Degree College</p>
-          </div>
-
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:border-blue-300 transition-all">
-            <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-700 font-black text-sm flex items-center justify-center mb-3">
-              SB
-            </div>
-            <h4 className="font-heading font-black text-base text-slate-900">Ms. Samina Bibi</h4>
-            <p className="text-xs font-semibold text-blue-600 mt-0.5">Innovation Judge</p>
-            <p className="text-xs text-slate-500 mt-2">Aga Khan Higher Sec. School Kuragh</p>
-          </div>
-
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:border-blue-300 transition-all">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 font-black text-sm flex items-center justify-center mb-3">
-              NA
-            </div>
-            <h4 className="font-heading font-black text-base text-slate-900">Dr. Naeem Akhtar</h4>
-            <p className="text-xs font-semibold text-blue-600 mt-0.5">External Tech Judge</p>
-            <p className="text-xs text-slate-500 mt-2">Chitral STEM Council</p>
-          </div>
-        </div>
       </section>
 
-      {/* 5. Volunteer Portal & Secure Login */}
-      <section id="volunteers" className="py-16 bg-white border-y border-slate-200 scroll-mt-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 text-left">
-            <div>
-              <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">
-                Volunteer Portal
-              </span>
-              <div className="flex items-center gap-3">
-                <h2 className="font-heading text-3xl font-black text-slate-900 tracking-tight">
-                  Volunteer Secure Work Assignment Login
-                </h2>
-                <button
-                  onClick={() => toggleSection('volunteerNetwork')}
-                  className="px-2.5 py-1 text-xs font-bold rounded bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center gap-1 cursor-pointer transition-colors"
-                  title="Expand or Collapse Volunteer Section"
-                >
-                  {sectionsExpanded.volunteerNetwork ? <><ChevronUp size={14} /> Collapse</> : <><ChevronDown size={14} /> Expand</>}
-                </button>
-              </div>
-              <p className="text-sm text-slate-600 mt-1 max-w-2xl">
-                Volunteers can log in with their assigned credentials to view their specific duties, schedule, and assigned tasks for the 31 Oct Booni event.
-              </p>
-            </div>
-          </div>
-
-          {sectionsExpanded.volunteerNetwork && (
-            <div className="grid lg:grid-cols-12 gap-8 items-start">
-              
-              {/* Left Column: Volunteer Login or Logged-in Dashboard */}
-              <div className="lg:col-span-12 text-left">
-                {loggedInVolunteer ? (
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 sm:p-8 space-y-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-heading text-2xl font-black text-slate-900">
-                            {loggedInVolunteer.name}
-                          </span>
-                          <span className="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-100 text-blue-800">
-                            {loggedInVolunteer.department}
-                          </span>
-                          <span className="text-xs font-bold px-2.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                            {loggedInVolunteer.status}
-                          </span>
-                        </div>
-                        <p className="text-xs text-slate-600">
-                          Username: <span className="font-mono font-bold text-slate-800">@{loggedInVolunteer.username}</span> | Joined: {loggedInVolunteer.dateJoined} | Total Hours: <strong className="text-blue-600">{loggedInVolunteer.hours} hrs</strong>
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => setLoggedInVolunteer(null)}
-                        className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer self-start sm:self-auto"
-                      >
-                        Log Out
-                      </button>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-heading text-sm font-black text-slate-900 uppercase tracking-wider mb-2">
-                          General Duties Summary
-                        </h4>
-                        <p className="text-xs sm:text-sm text-slate-700 bg-white p-4 rounded-xl border border-slate-200 leading-relaxed">
-                          {loggedInVolunteer.duties}
-                        </p>
-                      </div>
-
-                      <div>
-                        <h4 className="font-heading text-sm font-black text-slate-900 uppercase tracking-wider mb-2">
-                          Assigned Tasks for 31 October 2026 (Booni Upper Chitral)
-                        </h4>
-                        <div className="space-y-2">
-                          {loggedInVolunteer.assignedTasks && loggedInVolunteer.assignedTasks.length > 0 ? (
-                            loggedInVolunteer.assignedTasks.map((task, idx) => (
-                              <div key={idx} className="p-3 bg-white border border-slate-200 rounded-xl flex items-start gap-3 text-xs sm:text-sm text-slate-800">
-                                <CheckCircle2 size={16} className="text-blue-600 shrink-0 mt-0.5" />
-                                <span>{task}</span>
-                              </div>
-                            ))
-                          ) : (
-                            <p className="text-xs text-slate-500 italic">No specific sub-tasks assigned yet.</p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 sm:p-8 space-y-6">
-                    <div className="flex items-center gap-2 text-blue-600 mb-1">
-                      <Users size={22} />
-                      <h3 className="font-heading text-xl font-black text-slate-900">
-                        Volunteer Sign-In Portal
-                      </h3>
-                    </div>
-                    <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                      Enter your assigned username and password to access your personalized work assignments, shift timings, and team lead instructions.
-                    </p>
-
-                    {volLoginError && (
-                      <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl font-medium">
-                        {volLoginError}
-                      </div>
-                    )}
-
-                    <form onSubmit={handleVolunteerLogin} className="space-y-4 max-w-lg">
-                      <div>
-                        <label className="block text-[11px] font-bold uppercase text-slate-700 mb-1">
-                          Volunteer Username *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={volLoginUsername}
-                          onChange={e => setVolLoginUsername(e.target.value)}
-                          placeholder="e.g. elena, marcus, devon"
-                          className="w-full bg-white border border-slate-300 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:border-blue-600"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-[11px] font-bold uppercase text-slate-700 mb-1">
-                          Password *
-                        </label>
-                        <input
-                          type="password"
-                          required
-                          value={volLoginPassword}
-                          onChange={e => setVolLoginPassword(e.target.value)}
-                          placeholder="••••••••••••"
-                          className="w-full bg-white border border-slate-300 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:border-blue-600"
-                        />
-                      </div>
-
-                      <button
-                        type="submit"
-                        className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
-                      >
-                        Access My Assigned Work
-                      </button>
-
-                      <div className="p-3 bg-blue-50 border border-blue-100 rounded-xl text-[11px] text-blue-800 space-y-1">
-                        <div className="font-bold">Test Volunteer Credentials:</div>
-                        <div>Usernames: <code className="font-mono bg-white px-1 py-0.5 rounded border border-blue-200">elena</code>, <code className="font-mono bg-white px-1 py-0.5 rounded border border-blue-200">marcus</code>, <code className="font-mono bg-white px-1 py-0.5 rounded border border-blue-200">devon</code>, <code className="font-mono bg-white px-1 py-0.5 rounded border border-blue-200">amina</code>, <code className="font-mono bg-white px-1 py-0.5 rounded border border-blue-200">jordan</code>, <code className="font-mono bg-white px-1 py-0.5 rounded border border-blue-200">chloe</code></div>
-                        <div>Password: <code className="font-mono bg-white px-1 py-0.5 rounded border border-blue-200">collabs2026</code></div>
-                      </div>
-                    </form>
-                  </div>
-                )}
-              </div>
-
-
-
-            </div>
-          )}
-
-        </div>
-      </section>
-
-      {/* 6. Digital Certificate Generator with QR Codes & Expand/Collapse */}
-      <section id="certificates" className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto scroll-mt-24">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 text-left">
-          <div>
-            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">
-              Credentials
-            </span>
-            <div className="flex items-center gap-3 flex-wrap">
-              <h2 className="font-heading text-3xl font-black text-slate-900 tracking-tight">
-                Digital Certificate Generator & QR Verification
-              </h2>
-              <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full text-xs font-bold shadow-xs">
-                <CheckCircle2 size={13} className="text-emerald-600" /> QR Verified
-              </span>
-              <button
-                onClick={() => toggleSection('certificatePortal')}
-                className="px-2.5 py-1 text-xs font-bold rounded bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center gap-1 cursor-pointer transition-colors"
-                title="Expand or Collapse Certificate Section"
-              >
-                {sectionsExpanded.certificatePortal ? <><ChevronUp size={14} /> Collapse</> : <><ChevronDown size={14} /> Expand</>}
-              </button>
-            </div>
-            <p className="text-sm text-slate-600 mt-1 max-w-2xl">
-              Printable certificates with instant QR verification linking directly to our validation database.
-            </p>
-          </div>
-        </div>
-
-        {sectionsExpanded.certificatePortal && (
-          <div className="grid lg:grid-cols-12 gap-8 items-start">
-            
-            {/* Generator Form */}
-            <div className="lg:col-span-5 bg-white border border-slate-200 rounded-2xl p-6 text-left shadow-xs space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <FileCheck2 size={20} className="text-blue-600" />
-                  <h3 className="font-heading text-lg font-black text-slate-900">
-                    Certificate Builder
-                  </h3>
-                </div>
-              </div>
-
-              <form onSubmit={handleGenerateCertificate} className="space-y-3.5">
-                <div>
-                  <label className="block text-[11px] font-bold uppercase text-slate-700 mb-1">
-                    Recipient Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={certForm.recipientName}
-                    onChange={e => setCertForm({ ...certForm, recipientName: e.target.value })}
-                    placeholder="e.g. Jordan Hayes"
-                    className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-600"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold uppercase text-slate-700 mb-1">
-                    Achievement Category
-                  </label>
-                  <select
-                    value={certForm.achievementType}
-                    onChange={e => setCertForm({ ...certForm, achievementType: e.target.value as any })}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-600"
-                  >
-                    <option value="Excellence">Certificate of Excellence</option>
-                    <option value="Volunteer Leadership">Certificate of Volunteer Leadership</option>
-                    <option value="Active Participation">Certificate of Active Participation</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold uppercase text-slate-700 mb-1">
-                    Associated Event / Program
-                  </label>
-                  <select
-                    value={certForm.eventName}
-                    onChange={e => setCertForm({ ...certForm, eventName: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-600"
-                  >
-                    <option value="First Mega Event of Collabs">First Mega Event of Collabs (18 Oct)</option>
-                    <option value="Collaborative Problem Solving & Digital Skills Workshop">Collaborative Problem Solving & Digital Skills Workshop</option>
-                    <option value="Youth Leadership & Team Coordination Lab">Youth Leadership & Team Coordination Lab</option>
-                    <option value="Booni Volunteer Service Roster 2026">Booni Volunteer Service Roster 2026</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold uppercase text-slate-700 mb-1">
-                    Issue Date
-                  </label>
-                  <input
-                    type="text"
-                    value={certForm.issueDate}
-                    onChange={e => setCertForm({ ...certForm, issueDate: e.target.value })}
-                    placeholder="31 October 2026"
-                    className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-600"
-                  />
-                </div>
-
-                <div className="pt-2 flex flex-col sm:flex-row gap-2">
-                  <button
-                    type="submit"
-                    className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
-                  >
-                    <Sparkles size={14} /> Update Certificate & QR
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handlePrintCertificate}
-                    className="px-4 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5"
-                  >
-                    <Printer size={14} /> Print / Save PDF
-                  </button>
-                </div>
-              </form>
-
-              {/* Direct QR Link Box */}
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-                <div className="flex items-center justify-between text-xs font-bold text-slate-800">
-                  <span className="flex items-center gap-1.5">
-                    <QrCode size={14} className="text-blue-600" /> Scannable Verification Link
-                  </span>
-                  <span className="font-mono text-[10px] text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">
-                    {activeCertificate.id}
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleCopyVerificationLink(activeCertificate.id)}
-                    className="flex-1 py-1.5 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-bold text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    {copiedLink ? (
-                      <>
-                        <Check size={14} className="text-emerald-600" />
-                        <span className="text-emerald-700">Link Copied!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy size={14} /> Copy Link
-                      </>
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleOpenLookupForId(activeCertificate.id)}
-                    className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-bold text-xs rounded-lg transition-all cursor-pointer flex items-center gap-1"
-                  >
-                    <ExternalLink size={14} /> Test
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Certificate Canvas */}
-            <div className="lg:col-span-7">
-              <div className="bg-slate-100 p-2 sm:p-4 rounded-2xl border border-slate-300 shadow-inner">
-                
-                {/* Print Element */}
-                <div
-                  id="printable-certificate"
-                  className="bg-white border-8 border-double border-blue-900 p-6 sm:p-10 rounded-lg shadow-xl text-center relative overflow-hidden select-none"
-                >
-                  <div className="absolute top-2 left-2 w-8 h-8 border-t-2 border-l-2 border-blue-900 pointer-events-none" />
-                  <div className="absolute top-2 right-2 w-8 h-8 border-t-2 border-r-2 border-blue-900 pointer-events-none" />
-                  <div className="absolute bottom-2 left-2 w-8 h-8 border-b-2 border-l-2 border-blue-900 pointer-events-none" />
-                  <div className="absolute bottom-2 right-2 w-8 h-8 border-b-2 border-r-2 border-blue-900 pointer-events-none" />
-
-                  {/* Official Collabs. Header */}
-                  <div className="flex flex-col items-center mb-6">
-                    <img src={officialLogo} alt="Collabs. Official Logo" className="w-14 h-14 object-contain rounded-full mb-2 border-2 border-blue-900 shadow-sm bg-white p-0.5" />
-                    <span className="font-heading text-xl font-black text-slate-900 tracking-wider">
-                      Collabs.
-                    </span>
-                    <span className="text-[10px] uppercase font-bold tracking-widest text-slate-500">
-                      Certificate of Achievement & Recognition
-                    </span>
-                  </div>
-
-                  <div className="text-xs uppercase font-bold tracking-widest text-blue-700 mb-2">
-                    THIS CREDENTIAL IS PROUDLY CONFERRED UPON
-                  </div>
-
-                  <div className="font-heading text-2xl sm:text-4xl font-black text-slate-900 py-2 border-b-2 border-slate-200 max-w-md mx-auto mb-4 tracking-tight">
-                    {activeCertificate.recipientName}
-                  </div>
-
-                  <p className="text-xs sm:text-sm text-slate-700 max-w-lg mx-auto leading-relaxed mb-6">
-                    in formal recognition of outstanding <strong className="text-blue-900">{activeCertificate.achievementType}</strong> demonstrated during the initiative:
-                  </p>
-
-                  <div className="font-heading text-base sm:text-lg font-bold text-slate-900 bg-slate-50 p-2 rounded-lg border border-slate-200 max-w-md mx-auto mb-6">
-                    {activeCertificate.eventName}
-                  </div>
-
-                  {/* Signatures & Scannable QR Code */}
-                  <div className="grid grid-cols-3 gap-2 sm:gap-4 items-end pt-6 border-t border-slate-200 text-left">
-                    <div>
-                      <div className="font-serif italic text-base text-slate-800 border-b border-slate-400 pb-1">
-                        Alex Rivera
-                      </div>
-                      <div className="text-[9px] font-bold uppercase text-slate-500 mt-1">
-                        Lead Organizer
-                      </div>
-                      <div className="text-[8px] text-slate-400">Collabs. Community</div>
-                    </div>
-
-                    <div className="flex flex-col items-center justify-center">
-                      <div
-                        onClick={() => handleOpenLookupForId(activeCertificate.id)}
-                        className="group cursor-pointer flex flex-col items-center transition-transform hover:scale-105"
-                        title="Click or scan with camera to verify"
-                      >
-                        {qrCodeDataUrls[activeCertificate.id] ? (
-                          <div className="p-1.5 bg-white border-2 border-blue-900 rounded-lg shadow-sm">
-                            <img
-                              src={qrCodeDataUrls[activeCertificate.id]}
-                              alt={`QR verification for ${activeCertificate.id}`}
-                              className="w-16 h-16 sm:w-20 sm:h-20 object-contain block"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-slate-100 border border-slate-300 rounded flex items-center justify-center">
-                            <QrCode size={24} className="text-slate-400 animate-spin" />
-                          </div>
-                        )}
-                        <div className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-blue-900 mt-1 text-center">
-                          SCAN TO VERIFY
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="text-right">
-                      <div className="font-serif italic text-base text-slate-800 border-b border-slate-400 pb-1">
-                        Sofia Morales
-                      </div>
-                      <div className="text-[9px] font-bold uppercase text-slate-500 mt-1">
-                        Volunteer Registrar
-                      </div>
-                      <div className="text-[8px] text-slate-400">Booni Summit Secretariat</div>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-1 text-[10px] text-slate-400 font-mono">
-                    <span>Issued: {activeCertificate.issueDate}</span>
-                    <button
-                      onClick={() => handleOpenLookupForId(activeCertificate.id)}
-                      className="font-bold text-blue-700 hover:underline cursor-pointer"
-                    >
-                      REGISTRY ID: {activeCertificate.id}
-                    </button>
-                    <span className="text-[9px] text-slate-400">
-                      Booni, Chitral
-                    </span>
-                  </div>
-
-                </div>
-
-                <div className="mt-3 flex items-center justify-between text-xs text-slate-600 px-2">
-                  <span>Print-Ready with <code className="text-blue-600">@media print</code></span>
-                  <button
-                    onClick={handlePrintCertificate}
-                    className="font-bold text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
-                  >
-                    <Printer size={14} /> Direct Print
-                  </button>
-                </div>
-
-              </div>
-            </div>
-
-          </div>
-        )}
-      </section>
-
+      {/* 5. Volunteer Portal */}
       {/* 7. Hall of Fame & Awards with Expand/Collapse */}
       <section id="awards" className="py-16 bg-white border-y border-slate-200 scroll-mt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -3405,36 +3531,7 @@ export default function App() {
         </div>
       )}
 
-      {isAdminModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border border-slate-200 text-left relative">
-            <button
-              onClick={() => setIsAdminModalOpen(false)}
-              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-slate-900 flex items-center justify-center cursor-pointer"
-            >
-              <X size={18} />
-            </button>
-            <h3 className="font-heading text-xl font-black text-slate-900 mb-1">Admin Login</h3>
-            <p className="text-xs text-slate-500 mb-4">Use management credentials to access admin features.</p>
-            <form onSubmit={handleAdminLogin} className="space-y-3">
-              <div>
-                <label className="block text-[11px] font-bold uppercase text-slate-700 mb-1">Username *</label>
-                <input type="text" placeholder="admin" value={adminUsername} onChange={e => setAdminUsername(e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900" />
-              </div>
-              <div>
-                <label className="block text-[11px] font-bold uppercase text-slate-700 mb-1">Password *</label>
-                <input type="password" placeholder="••••••••" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs text-slate-900" />
-              </div>
-              {adminLoginError && <p className="text-xs text-red-600 font-medium">{adminLoginError}</p>}
-              <button type="submit" className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg cursor-pointer shadow-xs mt-1">Login to Admin Portal</button>
-            </form>
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-xl text-[11px] text-blue-800 space-y-0.5">
-              <div className="font-bold">Admin Portal:</div>
-              <div>The administrator is responsible for managing all aspects of team participation, event details, and volunteer management.</div>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {isRulesModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
