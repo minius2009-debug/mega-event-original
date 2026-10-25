@@ -40,6 +40,7 @@ interface ParsedTeamRow {
   school: string;
   campus: string;
   location: string;
+  stallNumber: string;
   teamLeader: string;
   leaderEmail: string;
   coLeader: string;
@@ -97,11 +98,11 @@ export const BulkTeamImportModal: React.FC<BulkTeamImportModalProps> = ({
         'Category': 'Climate & Smart Ag',
         'School / Institution': 'Pamir Public School & College',
         'Campus': 'Main Campus Booni',
+        'Stall Number': 'Stall 01',
         'Location / Station': 'Exhibition Stall 01',
         'Team Leader': 'Ahmad Khan',
         'Leader Email': 'ahmad.khan@pamir.edu.pk',
         'Co-Leader': 'Marcus Vance',
-        'Supervisor / Advisor': 'Prof. Jamshed Ali',
         'Capacity': 5,
         'Team Members': 'Ahmad Khan (Team Leader); Marcus Vance (Hardware Specialist); Chloe Bennett (Field Operations); Sara Bibi (Data Analyst)',
         'Project Description': 'IoT-based soil moisture and cold-snap early warning system designed specifically for high-elevation apple and walnut orchards.',
@@ -114,11 +115,11 @@ export const BulkTeamImportModal: React.FC<BulkTeamImportModalProps> = ({
         'Category': 'AI & Robotics',
         'School / Institution': 'Booni Degree College',
         'Campus': 'Upper Chitral Campus',
+        'Stall Number': 'Stall 02',
         'Location / Station': 'Tech Pod A',
         'Team Leader': 'Zeeshan Ahmad',
         'Leader Email': 'zeeshan.ahmad@collabs.org',
         'Co-Leader': 'Bilal Shah',
-        'Supervisor / Advisor': 'Dr. Tariq Hussain',
         'Capacity': 5,
         'Team Members': 'Zeeshan Ahmad (Team Lead); Bilal Shah (Robotics Eng); Nida Fatima (Sensors & Firmware); Karim Baig (Cloud Telemetry)',
         'Project Description': 'Autonomous ultrasonic water-level detection nodes that relay flash-flood alerts across mountainous valleys.',
@@ -131,11 +132,11 @@ export const BulkTeamImportModal: React.FC<BulkTeamImportModalProps> = ({
         'Category': 'Water & Environment',
         'School / Institution': 'Aga Khan Higher Secondary School Kuragh',
         'Campus': 'Kuragh Campus',
+        'Stall Number': 'Stall 03',
         'Location / Station': 'Eco Station Beta',
         'Team Leader': 'Amina Nour',
         'Leader Email': 'amina.nour@collabs.org',
         'Co-Leader': 'Devon Takahashi',
-        'Supervisor / Advisor': 'Ms. Samina Bibi',
         'Capacity': 4,
         'Team Members': 'Amina Nour (Project Lead); Devon Takahashi (Water Quality Sampling); Yasmin Ali (Public Health)',
         'Project Description': 'Community water filtration and microplastic sampling initiative along the Mastuj River tributaries.',
@@ -148,11 +149,11 @@ export const BulkTeamImportModal: React.FC<BulkTeamImportModalProps> = ({
         'Category': 'Art',
         'School / Institution': 'Chitral Model College',
         'Campus': 'Heritage Wing',
+        'Stall Number': 'Stall 04',
         'Location / Station': 'Creative Pavilion 03',
         'Team Leader': 'Afroza Gul',
         'Leader Email': 'afroza.gul@collabs.org',
         'Co-Leader': 'Salma Karim',
-        'Supervisor / Advisor': 'Mr. Inayat Ullah',
         'Capacity': 4,
         'Team Members': 'Afroza Gul (Creative Director); Salma Karim (Traditional Weaving); Faraz Baig (Digital Media & 3D Scanner)',
         'Project Description': 'Preserving traditional indigenous Chitrali embroidery patterns through digital documentation and modern craft exhibits.',
@@ -165,11 +166,11 @@ export const BulkTeamImportModal: React.FC<BulkTeamImportModalProps> = ({
         'Category': 'Food & Nutrition',
         'School / Institution': 'Government High School Booni',
         'Campus': 'Agri Lab',
+        'Stall Number': 'Stall 05',
         'Location / Station': 'Nutrition Pavilion 02',
         'Team Leader': 'Sheraz Ali',
         'Leader Email': 'sheraz.ali@collabs.org',
         'Co-Leader': 'Kamran Khan',
-        'Supervisor / Advisor': 'Engr. Rashid Latif',
         'Capacity': 5,
         'Team Members': 'Sheraz Ali (Product Lead); Kamran Khan (Thermal Tech); Mahnoor Begum (Food Safety); Danish Ali (Packaging)',
         'Project Description': 'Zero-emission solar dehydrator optimizing shelf-life and nutrient retention of Chitral mulberries and apricots for winter distribution.',
@@ -187,9 +188,9 @@ export const BulkTeamImportModal: React.FC<BulkTeamImportModalProps> = ({
       { 'Field Name': 'Category', 'Required': 'RECOMMENDED', 'Example': 'STEM / AI & Robotics / Art / Food / Climate', 'Description': 'Domain track for the exhibition competition.' },
       { 'Field Name': 'Team Members', 'Required': 'RECOMMENDED', 'Example': 'Name 1 (Role); Name 2 (Role); Name 3', 'Description': 'Semicolon (;) or comma (,) separated list of members. Roles in parentheses are automatically extracted!' },
       { 'Field Name': 'Team Code', 'Required': 'OPTIONAL', 'Example': 'CLB-STEM-01', 'Description': 'Unique code. If left blank, a code like CLB-TEAM-XX is auto-assigned.' },
+      { 'Field Name': 'Stall Number', 'Required': 'RECOMMENDED', 'Example': 'Stall 04', 'Description': 'Assigned booth or stall number at Booni event grounds.' },
       { 'Field Name': 'Campus', 'Required': 'OPTIONAL', 'Example': 'Main Campus', 'Description': 'Specific branch or campus.' },
       { 'Field Name': 'Location / Station', 'Required': 'OPTIONAL', 'Example': 'Exhibition Stall 04', 'Description': 'Booth or room number at Booni event grounds.' },
-      { 'Field Name': 'Supervisor / Advisor', 'Required': 'OPTIONAL', 'Example': 'Prof. Jamshed Ali', 'Description': 'Faculty mentor or teacher.' },
       { 'Field Name': 'Project Description', 'Required': 'OPTIONAL', 'Example': 'Detailed overview...', 'Description': 'Summary of community challenge and solution.' },
       { 'Field Name': 'Status', 'Required': 'OPTIONAL', 'Example': 'Approved / Pending', 'Description': 'Default is Approved.' },
       { 'Field Name': 'Award', 'Required': 'OPTIONAL', 'Example': 'First Place / Second Place / Third Place / Participation', 'Description': 'Default is Participation.' }
@@ -206,11 +207,11 @@ export const BulkTeamImportModal: React.FC<BulkTeamImportModalProps> = ({
       { wch: 22 }, // Category
       { wch: 32 }, // School
       { wch: 20 }, // Campus
+      { wch: 15 }, // Stall Number
       { wch: 22 }, // Location
       { wch: 20 }, // Team Leader
       { wch: 25 }, // Leader Email
       { wch: 20 }, // Co-Leader
-      { wch: 22 }, // Supervisor
       { wch: 10 }, // Capacity
       { wch: 45 }, // Members
       { wch: 50 }, // Description
@@ -363,7 +364,8 @@ export const BulkTeamImportModal: React.FC<BulkTeamImportModalProps> = ({
           `CLB-TEAM-${String(existingTeamsCount + idx + 1).padStart(2, '0')}`;
 
         const campus = mapped['campus'] || mapped['branch'] || 'Main Campus';
-        const location = mapped['locationstation'] || mapped['location'] || mapped['station'] || mapped['stall'] || 'Booni Grounds';
+        const location = mapped['locationstation'] || mapped['location'] || mapped['station'] || 'Booni Grounds';
+        const stallNumber = mapped['stallnumber'] || mapped['stall'] || mapped['stallno'] || mapped['booth'] || '';
         const coLeader = mapped['coleader'] || mapped['viceleader'] || '';
         const supervisor = mapped['supervisoradvisor'] || mapped['supervisor'] || mapped['advisor'] || mapped['mentor'] || '';
         const capacity = Number(mapped['capacity'] || mapped['teamsize']) || 5;
@@ -417,6 +419,7 @@ export const BulkTeamImportModal: React.FC<BulkTeamImportModalProps> = ({
           school: school.toString().trim(),
           campus: campus.toString().trim(),
           location: location.toString().trim(),
+          stallNumber: stallNumber.toString().trim(),
           teamLeader: teamLeader.toString().trim() || 'Unassigned',
           leaderEmail: leaderEmail.toString().trim(),
           coLeader: coLeader.toString().trim(),
@@ -522,9 +525,9 @@ export const BulkTeamImportModal: React.FC<BulkTeamImportModalProps> = ({
         school: r.school,
         campus: r.campus,
         location: r.location,
+        stallNumber: r.stallNumber || undefined,
         teamLeader: r.teamLeader,
         coLeader: r.coLeader || undefined,
-        supervisor: r.supervisor || undefined,
         capacity: r.capacity || 5,
         members: r.members,
         projectDescription: r.projectDescription,
@@ -768,8 +771,10 @@ export const BulkTeamImportModal: React.FC<BulkTeamImportModalProps> = ({
 
                         <td className="p-3 text-slate-800">
                           <div className="font-bold">{r.teamLeader}</div>
-                          {r.supervisor && (
-                            <div className="text-[10px] text-slate-400">Adv: {r.supervisor}</div>
+                          {r.stallNumber ? (
+                            <div className="text-[10px] text-indigo-600 font-semibold">{r.stallNumber}</div>
+                          ) : (
+                            <div className="text-[10px] text-slate-400 truncate">{r.location}</div>
                           )}
                         </td>
 

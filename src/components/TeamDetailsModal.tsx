@@ -60,13 +60,35 @@ export const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ team, onClos
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const stallNumber = (() => {
+    if (team.stallNumber && team.stallNumber.trim()) {
+      const s = team.stallNumber.trim();
+      return s.toLowerCase().startsWith('stall') ? s : `Stall #${s.replace(/^#/, '')}`;
+    }
+    const loc = (team.location || '').trim();
+    const stallMatch = loc.match(/stall\s*#?\s*([a-zA-Z0-9-]+)/i);
+    if (stallMatch) {
+      return `Stall #${stallMatch[1]}`;
+    }
+    const code = (team.teamCode || team.id || '').trim();
+    const numMatch = code.match(/(?:[a-zA-Z]+-)+(?:2026-)?(\d+)/i) || code.match(/-(\d+)$/);
+    if (numMatch) {
+      const num = numMatch[1].replace(/^0+/, '') || numMatch[1];
+      return `Stall #${num}`;
+    }
+    if (loc && !loc.toLowerCase().includes('grounds') && !loc.toLowerCase().includes('venue')) {
+      return loc;
+    }
+    return 'Stall Assigned';
+  })();
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
       <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 my-6 animate-fadeIn text-left flex flex-col max-h-[92vh]">
         {/* Modal Header */}
         <div className="flex items-start justify-between pb-4 border-b border-slate-100 shrink-0">
           <div>
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
               <span className="font-mono text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-lg flex items-center gap-1.5">
                 {team.teamCode || team.id}
                 <button
@@ -78,7 +100,11 @@ export const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ team, onClos
                 </button>
               </span>
               {copied && <span className="text-[10px] text-emerald-600 font-bold">Copied!</span>}
-              <span className="text-xs font-medium text-slate-500">·</span>
+              <span className="font-mono text-xs font-extrabold text-indigo-800 bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 rounded-lg flex items-center gap-1 shadow-2xs">
+                <MapPin size={11} className="text-indigo-600" />
+                <span>{stallNumber}</span>
+              </span>
+              <span className="text-xs font-medium text-slate-400">·</span>
               <span className="text-xs font-bold text-slate-600">{team.category || 'Innovation Sprint'}</span>
             </div>
             <h3 className="text-2xl font-black text-slate-900 font-heading">
@@ -104,13 +130,21 @@ export const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ team, onClos
               <div className="text-[10px] text-slate-600 truncate">{team.campus || 'Main Campus'}</div>
             </div>
 
-            <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80">
-              <div className="text-[10px] text-slate-600 uppercase font-bold tracking-wider">Location / Station</div>
-              <div className="font-bold text-slate-900 mt-1 flex items-center gap-1">
-                <MapPin size={12} className="text-blue-600 shrink-0" />
-                <span className="truncate">{team.location || 'Booni Grounds'}</span>
+            {/* Professional Stall Number Card */}
+            <div className="p-3.5 bg-gradient-to-br from-indigo-50/70 via-blue-50/50 to-white rounded-2xl border border-indigo-200/90 shadow-2xs">
+              <div className="text-[10px] text-indigo-700 uppercase font-extrabold tracking-wider flex items-center justify-between">
+                <span>Stall Number</span>
+                <span className="text-[9px] font-mono text-emerald-700 font-extrabold bg-emerald-50 border border-emerald-200/70 px-1.5 py-0.2 rounded-full">
+                  Confirmed
+                </span>
               </div>
-              <div className="text-[10px] text-slate-600">Exhibition Zone</div>
+              <div className="font-heading font-black text-slate-900 text-sm sm:text-base mt-1 flex items-center gap-1.5 text-indigo-900">
+                <MapPin size={13} className="text-indigo-600 shrink-0" />
+                <span className="truncate">{stallNumber}</span>
+              </div>
+              <div className="text-[10px] text-slate-500 truncate mt-0.5">
+                {team.location && !team.location.toLowerCase().includes('booni grounds') ? team.location : 'Exhibition Zone · Booni Grounds'}
+              </div>
             </div>
 
             <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80">
@@ -138,24 +172,6 @@ export const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ team, onClos
               {team.projectDescription}
             </div>
           </div>
-
-          {/* Supervisor / Advisor info if present */}
-          {team.supervisor && (
-            <div className="p-3.5 bg-blue-50/70 border border-blue-200 rounded-2xl flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
-                  <UserCheck size={16} />
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold uppercase text-blue-600 block">Faculty Advisor / Mentor</span>
-                  <span className="font-bold text-slate-900 text-xs">{team.supervisor}</span>
-                </div>
-              </div>
-              <span className="text-[10px] text-blue-700 bg-blue-100/70 px-2 py-0.5 rounded font-semibold">
-                Academic Endorsement
-              </span>
-            </div>
-          )}
 
           {/* Team Members Roster */}
           <div className="space-y-2">

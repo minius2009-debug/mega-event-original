@@ -153,10 +153,10 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
     customSchool: '',
     campus: 'Main Campus',
     location: 'Lab Room 101',
+    stallNumber: '',
     teamLeader: '',
     leaderEmail: '',
     coLeader: '',
-    supervisor: '',
     capacity: 5,
     status: 'Approved' as 'Approved' | 'Pending',
     members: [] as ParticipantMember[]
@@ -305,9 +305,9 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
       school: targetSchool,
       campus: wizardData.campus.trim(),
       location: wizardData.location.trim(),
+      stallNumber: wizardData.stallNumber.trim() || undefined,
       teamLeader: wizardData.teamLeader.trim(),
       coLeader: wizardData.coLeader.trim() || undefined,
-      supervisor: wizardData.supervisor.trim() || undefined,
       capacity: Number(wizardData.capacity) || 5,
       status: wizardData.status,
       members: wizardData.members,
@@ -373,10 +373,10 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
       Category: t.category || 'General',
       School: t.school || 'Unassigned',
       Campus: t.campus || 'Main',
+      StallNumber: t.stallNumber || 'Assigned',
       Location: t.location || 'TBA',
       Leader: t.teamLeader,
       CoLeader: t.coLeader || 'None',
-      Supervisor: t.supervisor || 'None',
       MemberCount: t.members?.length || 0,
       Status: t.status,
       Award: t.award || 'None',
@@ -1085,13 +1085,13 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
 
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Faculty Advisor / Supervisor
+                        Assigned Stall Number
                       </label>
                       <input
                         type="text"
-                        placeholder="e.g. Prof. Jamshed Ali"
-                        value={wizardData.supervisor}
-                        onChange={e => setWizardData({ ...wizardData, supervisor: e.target.value })}
+                        placeholder="e.g. Stall #14"
+                        value={wizardData.stallNumber}
+                        onChange={e => setWizardData({ ...wizardData, stallNumber: e.target.value })}
                         className="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white"
                       />
                     </div>
@@ -1386,10 +1386,16 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
                 <div className="text-[10px] text-slate-400">{selectedTeam.campus || 'Main Campus'}</div>
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                <div className="text-[11px] text-slate-500 font-bold uppercase">Operating Location</div>
-                <div className="font-bold text-slate-900 mt-0.5">{selectedTeam.location || 'To Be Announced'}</div>
-                <div className="text-[10px] text-slate-400">Booni Exhibition Ground</div>
+              <div className="p-3 bg-indigo-50/70 rounded-2xl border border-indigo-200/80">
+                <div className="text-[11px] text-indigo-700 font-extrabold uppercase flex items-center justify-between">
+                  <span>Stall Number</span>
+                  <span className="text-[9px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-extrabold">CONFIRMED</span>
+                </div>
+                <div className="font-heading font-black text-slate-900 mt-0.5 flex items-center gap-1">
+                  <MapPin size={12} className="text-indigo-600 shrink-0" />
+                  <span>{selectedTeam.stallNumber || (selectedTeam.teamCode?.match(/-(\d+)$/) ? `Stall #${selectedTeam.teamCode.match(/-(\d+)$/)?.[1]}` : (selectedTeam.location?.match(/stall\s*#?\s*([a-zA-Z0-9-]+)/i) ? `Stall #${selectedTeam.location.match(/stall\s*#?\s*([a-zA-Z0-9-]+)/i)?.[1]}` : 'Stall Assigned'))}</span>
+                </div>
+                <div className="text-[10px] text-slate-500 truncate">{selectedTeam.location || 'Booni Exhibition Ground'}</div>
               </div>
 
               <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">

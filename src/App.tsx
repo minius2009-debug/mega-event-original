@@ -158,6 +158,7 @@ export interface TeamParticipation {
   school?: string;
   campus?: string;
   location?: string;
+  stallNumber?: string;
   category?: string;
   capacity?: number;
   members: ParticipantMember[];
@@ -168,6 +169,33 @@ export interface TeamParticipation {
   qrCodeUrl?: string;
 }
 
+export const getTeamStallNumber = (team: {
+  stallNumber?: string;
+  location?: string;
+  teamCode?: string;
+  id?: string;
+}): string => {
+  if (team.stallNumber && team.stallNumber.trim()) {
+    const s = team.stallNumber.trim();
+    return s.toLowerCase().startsWith('stall') ? s : `Stall #${s.replace(/^#/, '')}`;
+  }
+  const loc = (team.location || '').trim();
+  const stallMatch = loc.match(/stall\s*#?\s*([a-zA-Z0-9-]+)/i);
+  if (stallMatch) {
+    return `Stall #${stallMatch[1]}`;
+  }
+  const code = (team.teamCode || team.id || '').trim();
+  const numMatch = code.match(/(?:[a-zA-Z]+-)+(?:2026-)?(\d+)/i) || code.match(/-(\d+)$/);
+  if (numMatch) {
+    const num = numMatch[1].replace(/^0+/, '') || numMatch[1];
+    return `Stall #${num}`;
+  }
+  if (loc && !loc.toLowerCase().includes('grounds') && !loc.toLowerCase().includes('venue')) {
+    return loc;
+  }
+  return 'Stall Assigned';
+};
+
 const INITIAL_TEAM_PARTICIPATIONS: TeamParticipation[] = [
   {
     id: 'tp-1',
@@ -177,10 +205,10 @@ const INITIAL_TEAM_PARTICIPATIONS: TeamParticipation[] = [
     school: 'Booni Degree College',
     campus: 'Main Science Campus',
     location: 'Lab Block A · Room 102',
+    stallNumber: '01',
     capacity: 6,
     teamLeader: 'Fatima Zahra',
     coLeader: 'Elena Rostova',
-    supervisor: 'Prof. Jamshed Ali',
     members: [
       { name: 'Fatima Zahra', role: 'Team Lead', email: 'fatima@collabs.org', school: 'Booni Degree College' },
       { name: 'Elena Rostova', role: 'Robotics Dev', email: 'elena.rostova@collabs.org', school: 'Booni Degree College' },
@@ -199,10 +227,10 @@ const INITIAL_TEAM_PARTICIPATIONS: TeamParticipation[] = [
     school: 'Pamir Public School & College',
     campus: 'Higher Secondary Wing',
     location: 'Agritech Innovation Pod',
+    stallNumber: '02',
     capacity: 5,
     teamLeader: 'Ahmad Khan',
     coLeader: 'Marcus Vance',
-    supervisor: 'Dr. Tariq Hussain',
     members: [
       { name: 'Ahmad Khan', role: 'Developer', email: 'ahmad@example.com', school: 'Pamir Public School & College' },
       { name: 'Marcus Vance', role: 'Field Operations', email: 'marcus.vance@collabs.org', school: 'Pamir Public School & College' },
@@ -221,9 +249,9 @@ const INITIAL_TEAM_PARTICIPATIONS: TeamParticipation[] = [
     school: 'Aga Khan Higher Secondary School Kuragh',
     campus: 'Kuragh Campus',
     location: 'Eco Station Beta',
+    stallNumber: '03',
     capacity: 4,
     teamLeader: 'Amina Nour',
-    supervisor: 'Ms. Samina Bibi',
     members: [
       { name: 'Amina Nour', role: 'Project Coordinator', email: 'amina.nour@collabs.org', school: 'Aga Khan Higher Secondary School Kuragh' },
       { name: 'Devon Takahashi', role: 'Data Analysis', email: 'devon.t@collabs.org', school: 'Aga Khan Higher Secondary School Kuragh' }
@@ -294,245 +322,684 @@ const INITIAL_TEAM: TeamMember[] = [
     id: 'tm-1',
     name: 'Syed Farhan Danish',
     role: 'Founder',
-    department: 'Role 1: Leadership & Strategy',
-    focus: 'Overall Exhibition Timeline, Budget & Vision',
+    department: 'Core Organizing & Management',
+    focus: 'Overall Event Supervision & Strategic Decision-Making',
     responsibilities: [
-      'Oversee the entire exhibition timeline, budget, and overall vision',
-      'Coordinate between different departments and make final executive decisions',
-      'Handle official communications, external guests, and key institutional stakeholders'
+      'Overall event supervision, strategic decision-making, and primary representation of Collabs and SAF 2026.',
+      'Coordinate between different departments and make final executive decisions.'
     ]
   },
   {
     id: 'tm-2',
-    name: 'Umme Kulsoom',
-    role: 'Director',
-    department: 'Role 1: Leadership & Strategy',
-    focus: 'Executive Direction & Department Coordination',
+    name: 'Syed Shahan Ali',
+    role: 'Relations Manager',
+    department: 'Core Organizing & Management',
+    focus: 'External Relations & Sponsor Communications',
     responsibilities: [
-      'Oversee the entire exhibition timeline, budget, and overall vision',
-      'Coordinate between different departments and make final executive decisions',
-      'Handle official communications, external guests, and key institutional stakeholders'
+      'Manage external relations, sponsor communications, and inter-organizational coordination.',
+      'Establish partnerships with regional institutions in Upper Chitral.'
     ]
   },
   {
     id: 'tm-3',
+    name: 'Umme Kulsoom',
+    role: 'Director',
+    department: 'Core Organizing & Management',
+    focus: 'High-Level Delegation & Execution Oversight',
+    responsibilities: [
+      'High-level delegation, team coordination, and final event execution oversight.',
+      'Supervise operational milestones and department synchronization.'
+    ]
+  },
+  {
+    id: 'tm-10',
     name: 'Aarish Salik',
     role: 'IT Team Lead',
-    department: 'Role 2: Operations & Logistics',
-    focus: 'IT & Tech Support, Registration & Screens',
+    department: 'Tech, IT & Media',
+    focus: 'IT Infrastructure & Digital Registrations',
     responsibilities: [
-      'Manage registration software, presentations, screens, and technical troubleshooting during the event',
-      'Ensure reliable local IT infrastructure for Booni exhibition venue'
+      'Oversee all IT infrastructure, digital registrations, registration software, and technical presentations.',
+      'Manage IT systems, presentations, screens, and technical troubleshooting during the event.'
     ]
   },
   {
     id: 'tm-4',
-    name: 'Shahan',
-    role: 'Relations Manager',
-    department: 'Role 2: Operations & Logistics',
-    focus: 'External Coordination, Sponsorships & Partnerships',
+    name: 'Afroza Sardar',
+    role: 'Collaboration Director',
+    department: 'Core Organizing & Management',
+    focus: 'Partnerships & Liaison',
     responsibilities: [
-      'Manage guest relations, sponsorships, partnerships, and institutional announcements',
-      'Coordinate external stakeholder welcomes across Upper Chitral'
+      'Liaise with Naveed e Falah and District Youth Office, ensuring all partnerships function smoothly.'
     ]
   },
   {
     id: 'tm-5',
-    name: 'Zeeshan',
-    role: 'Event Manager',
-    department: 'Role 2: Operations & Logistics',
-    focus: 'Exhibition Setup & Crowd Flow',
+    name: 'Azhar Ali Shah',
+    role: 'Operations Manager',
+    department: 'Core Organizing & Management',
+    focus: 'Logistical Operations & Venue Setup',
     responsibilities: [
-      'Handle venue setup, seating, scheduling, and general attendee management',
-      'Supervise on-ground staging and participant hospitality in Booni'
+      'Direct all logistical operations, venue setup, dismantling, and overall operational flow.'
     ]
   },
   {
     id: 'tm-6',
-    name: 'Ayan Afzal',
-    role: 'Media Team Lead',
-    department: 'Role 3: Media & Branding',
-    focus: 'Photography, Videography & Media Lead',
+    name: 'Zakir Hussain',
+    role: 'Finance Manager',
+    department: 'Core Organizing & Management',
+    focus: 'Event Budget & Vendor Bills',
     responsibilities: [
-      'Capture high-quality photography and videography throughout the exhibition',
-      'Manage media booth setup, visitor interviews, and post-event highlight reels'
+      'Manage the event budget, track vendor bills, and oversee prize distribution funds.'
     ]
   },
   {
     id: 'tm-7',
-    name: 'Mazhar',
-    role: 'Media Team',
-    department: 'Role 3: Media & Branding',
-    focus: 'Social Media Coverage & Live Updates',
+    name: 'Alina Razaq',
+    role: 'Subject Lead',
+    department: 'Zone 1: Science',
+    focus: 'Science Zone Coordination',
     responsibilities: [
-      'Manage live updates, social media coverage, and promotional content',
-      'Assist with video recording and live streaming of exhibition sessions'
+      'Overall coordination of Zone 1. Register science projects, assign spaces, and facilitate judges for Physics, Chem, Bio, Math, and CS.'
     ]
   },
   {
     id: 'tm-8',
-    name: 'Afroza',
-    role: 'Media Team',
-    department: 'Role 3: Media & Branding',
-    focus: 'Visitor Interviews & Highlight Reels',
+    name: 'Ariyan Mir',
+    role: 'Coordinator',
+    department: 'Program, Stage & Decor',
+    focus: 'Ceremonies & Stage Flow',
     responsibilities: [
-      'Handle media booth setup, visitor interviews, and post-event highlight reels',
-      'Document participant testimonials and project demos'
+      'Coordinate the opening/closing ceremonies, manage stage flow, and arrange performances.'
+    ]
+  },
+  {
+    id: 'tm-9',
+    name: 'Ali Hassan',
+    role: 'Coordinator',
+    department: 'Program, Stage & Decor',
+    focus: 'Stage Management & VIP Seating',
+    responsibilities: [
+      'Assist in stage management, VIP seating arrangements, and ensure the program stays on schedule.'
+    ]
+  },
+  {
+    id: 'tm-11',
+    name: 'Madeeha Umar',
+    role: 'Tech Manager',
+    department: 'Tech, IT & Media',
+    focus: 'Event Software & Technical Support',
+    responsibilities: [
+      'Manage event software, PA systems, and provide technical support during the Collabs Launch.'
+    ]
+  },
+  {
+    id: 'tm-12',
+    name: 'Imad Uddin',
+    role: 'Developer',
+    department: 'Tech, IT & Media',
+    focus: 'Digital Systems & Backend Management',
+    responsibilities: [
+      'Support digital systems, troubleshoot tech issues, and manage the event\'s digital backend.'
+    ]
+  },
+  {
+    id: 'tm-13',
+    name: 'Zuhaib Pirzada',
+    role: 'Media Director',
+    department: 'Tech, IT & Media',
+    focus: 'Photography, Videography & Official Coverage',
+    responsibilities: [
+      'Direct all event photography, videography, and official media coverage.'
+    ]
+  },
+  {
+    id: 'tm-14',
+    name: 'Ehan Ali',
+    role: 'Communications Lead & Event Host',
+    department: 'Tech, IT & Media',
+    focus: 'Official MC & Announcements',
+    responsibilities: [
+      'Serve as the official Host/MC for the event, manage stage announcements, and engage the audience.'
+    ]
+  },
+  {
+    id: 'tm-15',
+    name: 'Syed Mazhar',
+    role: 'Media Manager',
+    department: 'Tech, IT & Media',
+    focus: 'Social Media Updates & Behind-The-Scenes',
+    responsibilities: [
+      'Manage social media updates, capture behind-the-scenes content, and assist the Media Director.'
+    ]
+  },
+  {
+    id: 'tm-16',
+    name: 'Uroosa',
+    role: 'Field Manager',
+    department: 'Operations & Logistics',
+    focus: 'On-Ground Logistics & Venue Flow',
+    responsibilities: [
+      'Supervise on-ground logistics, direct the logistics team, and manage overall venue flow.'
+    ]
+  },
+  {
+    id: 'tm-17',
+    name: 'Akhtar Musaveer',
+    role: 'Logistics Team',
+    department: 'Operations & Logistics',
+    focus: 'Physical Assets & Venue Setup',
+    responsibilities: [
+      'Arrange tables, chairs, water stations, and manage physical assets.'
+    ]
+  },
+  {
+    id: 'tm-18',
+    name: 'Andaleeb Nawaz',
+    role: 'Ambassador',
+    department: 'VIP & Judge Escorts',
+    focus: 'VIP & Judge Guidance',
+    responsibilities: [
+      'Welcome assigned VIPs/judges, guide them through the exhibition zones, and manage their scoring sheets.'
+    ]
+  },
+  {
+    id: 'tm-19',
+    name: 'Hisham Uddin',
+    role: 'Campus Ambassador',
+    department: 'VIP & Judge Escorts',
+    focus: 'Judge Accompaniment & Hospitality',
+    responsibilities: [
+      'Accompany judges, ensure they have refreshments, and keep them on schedule.'
+    ]
+  },
+  {
+    id: 'tm-20',
+    name: 'Prince Ali',
+    role: 'Campus Ambassador',
+    department: 'VIP & Judge Escorts',
+    focus: 'Campus Representation & Chief Guest Hospitality',
+    responsibilities: [
+      'Provide dedicated campus leadership and hospitality to Chief Guests, navigate them through the crowd, and attend to their needs.'
     ]
   }
 ];
 
 const INITIAL_VOLUNTEERS: VolunteerLog[] = [
   {
-    id: 'vol-101',
-    name: 'Elena Rostova',
-    username: 'elena',
-    email: 'elena.rostova@collabs.org',
-    phone: '+92 345 1122334',
+    id: 'vol-201',
+    name: 'Salman Ali',
+    username: 'salman',
+    email: 'salman.ali@collabs.org',
+    phone: '+92 345 1010101',
     school: 'Booni Degree College',
-    role: 'Lead Systems Engineer',
-    password: 'collabs2026',
-    department: 'Technical',
-    hours: 142,
-    station: 'Main Hall A · AV & Stage Tech Pod',
-    shiftTime: '08:00 AM – 02:30 PM PKT',
+    role: 'Science Zone Volunteer',
+    department: 'Zone 1: Science',
+    hours: 48,
+    station: 'Zone 1: Science Stalls',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
     checkedIn: true,
-    checkInTime: '08:15 AM',
-    duties: 'Built attendee verification portal and managed projector/display hardware.',
-    dateJoined: 'Jan 2026',
-    status: 'Lead Volunteer',
-    assignedTasks: [
-      'Setup registration desk laptops & check-in software by 08:30 AM',
-      'Test projector and display audio in main Booni auditorium',
-      'Assist keynote speakers with slide presentations'
-    ],
-    completedTasks: [
-      'Setup registration desk laptops & check-in software by 08:30 AM'
-    ]
+    duties: 'Handle heavy lifting, technical setup, and arrange power extensions for science projects.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
   },
   {
-    id: 'vol-102',
-    name: 'Marcus Vance',
-    username: 'marcus',
-    email: 'marcus.vance@collabs.org',
-    phone: '+92 345 2233445',
-    school: 'Pamir Public School & College',
-    role: 'Logistics Supervisor',
-    password: 'collabs2026',
-    department: 'Logistics',
-    hours: 98,
-    station: 'Main Gate & Roster Verification Station',
-    shiftTime: '07:45 AM – 02:00 PM PKT',
-    checkedIn: false,
-    duties: 'Staging coordinator, registration desk supervisor, and venue equipment arrangement in Booni.',
-    dateJoined: 'Mar 2026',
-    status: 'Verified Active',
-    assignedTasks: [
-      'Supervise main entrance crowd flow at Booni venue',
-      'Coordinate seating arrangements for VIP guests and community elders',
-      'Distribute official welcome kits and badges'
-    ],
-    completedTasks: []
+    id: 'vol-202',
+    name: 'Faizan Ali Akbar',
+    username: 'faizan',
+    email: 'faizan.akbar@collabs.org',
+    phone: '+92 345 1010102',
+    school: 'Booni Degree College',
+    role: 'Science Zone Volunteer',
+    department: 'Zone 1: Science',
+    hours: 36,
+    station: 'Zone 1: Science Stalls',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Assist with stall setup, equipment checks, and participant guidance.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
   },
   {
-    id: 'vol-103',
-    name: 'Devon Takahashi',
-    username: 'devon',
-    email: 'devon.t@collabs.org',
-    phone: '+92 345 3344556',
+    id: 'vol-203',
+    name: 'Syed Sameem',
+    username: 'sameem',
+    email: 'sameem@collabs.org',
+    phone: '+92 345 1010103',
+    school: 'Pamir Public School',
+    role: 'Technical Prototype Volunteer',
+    department: 'Zone 1: Science',
+    hours: 52,
+    station: 'Zone 1: Science Stalls',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Manage power supply, wiring safety, and assist participants with technical prototype needs.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-204',
+    name: 'Manahil',
+    username: 'manahil',
+    email: 'manahil@collabs.org',
+    phone: '+92 345 1010104',
     school: 'Aga Khan Higher Secondary School Kuragh',
-    role: 'Content & Editorial Lead',
-    password: 'collabs2026',
-    department: 'Content',
-    hours: 115,
-    station: 'Press & Media Suite · Room 104',
-    shiftTime: '09:00 AM – 04:30 PM PKT',
+    role: 'Science Coordinator Volunteer',
+    department: 'Zone 1: Science',
+    hours: 40,
+    station: 'Zone 1: Science Display',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
     checkedIn: true,
-    checkInTime: '08:50 AM',
-    duties: 'Editor of event workbooks, bilingual community notices, and presentation slide packs.',
-    dateJoined: 'Nov 2025',
-    status: 'Lead Volunteer',
-    assignedTasks: [
-      'Prepare digital workshop booklets for attendees',
-      'Capture session notes and feedback forms',
-      'Coordinate bilingual announcements (Khowar & English)'
-    ],
-    completedTasks: [
-      'Prepare digital workshop booklets for attendees'
-    ]
+    duties: 'Coordinate with science participants, ensure display aesthetics, and guide visitors.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
   },
   {
-    id: 'vol-104',
-    name: 'Amina Nour',
-    username: 'amina',
-    email: 'amina.nour@collabs.org',
-    phone: '+92 345 4455667',
-    school: 'Government High School Booni',
-    role: 'Campus Outreach Liaison',
-    password: 'collabs2026',
-    department: 'Outreach',
-    hours: 84,
-    station: 'Student Lounge & Campus Welcome Pod',
-    shiftTime: '08:30 AM – 03:30 PM PKT',
-    checkedIn: false,
-    duties: 'Liaison with colleges and student networks across Chitral.',
-    dateJoined: 'Apr 2026',
-    status: 'Verified Active',
-    assignedTasks: [
-      'Liaison with Chitral student delegates and colleges',
-      'Guide participants to workshop break-out rooms',
-      'Assist registration helpdesk'
-    ],
-    completedTasks: []
+    id: 'vol-205',
+    name: 'Sania Ambareen',
+    username: 'sania',
+    email: 'sania.ambareen@collabs.org',
+    phone: '+92 345 1010105',
+    school: 'Booni Girls College',
+    role: 'Registration Volunteer',
+    department: 'Zone 1: Science',
+    hours: 38,
+    station: 'Zone 1 Registration Desk',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Assist in participant registration within Zone 1 and manage student queries.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
   },
   {
-    id: 'vol-105',
-    name: 'Jordan Hayes',
-    username: 'jordan',
-    email: 'jordan.hayes@collabs.org',
-    phone: '+92 345 5566778',
+    id: 'vol-206',
+    name: 'Sehba Rahim',
+    username: 'sehba',
+    email: 'sehba.rahim@collabs.org',
+    phone: '+92 345 1010106',
     school: 'Booni Degree College',
-    role: 'Lab & Hardware Assistant',
-    password: 'collabs2026',
-    department: 'Technical',
-    hours: 67,
-    station: 'Hardware Bench B · Power & Cable Ops',
-    shiftTime: '08:00 AM – 03:00 PM PKT',
-    checkedIn: false,
-    duties: 'Workshop assistant, laptop lab setup, and digital certificate record keeper.',
-    dateJoined: 'Jun 2026',
-    status: 'Verified Active',
-    assignedTasks: [
-      'Assist technical team with cable management and backup power',
-      'Distribute digital certificates upon completion'
-    ],
-    completedTasks: []
+    role: 'Evaluation Flow Volunteer',
+    department: 'Zone 1: Science',
+    hours: 45,
+    station: 'Zone 1 Judging Area',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Monitor the flow of visitors through the science section and assist judges during evaluation.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
   },
   {
-    id: 'vol-106',
-    name: 'Chloe Bennett',
-    username: 'chloe',
-    email: 'chloe.bennett@collabs.org',
-    phone: '+92 345 6677889',
-    school: 'Pamir Public School & College',
-    role: 'Hospitality & Badge Coordinator',
-    password: 'collabs2026',
-    department: 'Logistics',
-    hours: 56,
-    station: 'VIP Hospitality Lounge & Badge Desk',
-    shiftTime: '09:00 AM – 05:00 PM PKT',
+    id: 'vol-207',
+    name: 'Manahil Akram',
+    username: 'manahil.akram',
+    email: 'manahil.akram@collabs.org',
+    phone: '+92 345 1010107',
+    school: 'Pamir Public School',
+    role: 'Display Labeling Volunteer',
+    department: 'Zone 1: Science',
+    hours: 32,
+    station: 'Zone 1 Science Stalls',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
     checkedIn: true,
-    checkInTime: '08:45 AM',
-    duties: 'Participant badges, welcome kit distribution, and volunteer snack stations.',
-    dateJoined: 'Aug 2026',
-    status: 'Verified Active',
-    assignedTasks: [
-      'Manage volunteer break room and refreshment stations',
-      'Assist event manager with badge printing'
-    ],
-    completedTasks: [
-      'Manage volunteer break room and refreshment stations'
-    ]
+    duties: 'Ensure all science displays are properly labeled and assist female participants with setups.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-208',
+    name: 'Rubama Hayat',
+    username: 'rubama',
+    email: 'rubama.hayat@collabs.org',
+    phone: '+92 345 1010108',
+    school: 'Booni Art Wing',
+    role: 'Art Section Volunteer',
+    department: 'Zone 2: Art',
+    hours: 50,
+    station: 'Zone 2: Art Pavilion',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Coordinate the Art section, arrange easels/boards, and ensure all artwork is safely displayed.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-209',
+    name: 'Aliha',
+    username: 'aliha',
+    email: 'aliha@collabs.org',
+    phone: '+92 345 1010109',
+    school: 'Pamir Art Academy',
+    role: 'Art Aesthetics Volunteer',
+    department: 'Zone 2: Art',
+    hours: 30,
+    station: 'Zone 2: Art Pavilion',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Manage the aesthetics of the Art Zone and assist artists with their presentations.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-210',
+    name: 'Sonam',
+    username: 'sonam',
+    email: 'sonam@collabs.org',
+    phone: '+92 345 1010110',
+    school: 'Booni Art Wing',
+    role: 'Artwork Protection Volunteer',
+    department: 'Zone 2: Art',
+    hours: 34,
+    station: 'Zone 2: Art Pavilion',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Protect displayed artwork from crowd interference and assist judges in the art category.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-211',
+    name: 'Fakiha',
+    username: 'fakiha',
+    email: 'fakiha@collabs.org',
+    phone: '+92 345 1010111',
+    school: 'Booni Degree College',
+    role: 'Art Participant Facilitator',
+    department: 'Zone 2: Art',
+    hours: 28,
+    station: 'Zone 2: Art Pavilion',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Facilitate art participants, manage display areas, and ensure a smooth visitor flow.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-212',
+    name: 'Anita Mehak',
+    username: 'anita',
+    email: 'anita.mehak@collabs.org',
+    phone: '+92 345 1010112',
+    school: 'Booni Hospitality Institute',
+    role: 'Food Stall Overseer',
+    department: 'Zone 3: Food Stalls',
+    hours: 44,
+    station: 'Zone 3: Food Court',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Oversee stall assignments for food vendors/students and ensure hygiene standards are met.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-213',
+    name: 'Ifat Naseem',
+    username: 'ifat',
+    email: 'ifat.naseem@collabs.org',
+    phone: '+92 345 1010113',
+    school: 'Booni Hospitality Institute',
+    role: 'Food Handling Monitor',
+    department: 'Zone 3: Food Stalls',
+    hours: 38,
+    station: 'Zone 3: Food Court',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Monitor food handling, manage waste disposal in the food area, and assist with crowd control.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-214',
+    name: 'Sidra Ul Muntaha',
+    username: 'sidra',
+    email: 'sidra@collabs.org',
+    phone: '+92 345 1010114',
+    school: 'Booni Degree College',
+    role: 'Lunch Break Coordinator',
+    department: 'Zone 3: Food Stalls',
+    hours: 40,
+    station: 'VIP & Crew Dining Area',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Coordinate the lunch break logistics for volunteers and guests.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-215',
+    name: 'Sabbah',
+    username: 'sabbah',
+    email: 'sabbah@collabs.org',
+    phone: '+92 345 1010115',
+    school: 'Booni High School',
+    role: 'Hygiene & Support Volunteer',
+    department: 'Zone 3: Food Stalls',
+    hours: 26,
+    station: 'Zone 3: Food Court',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Ensure dustbins are utilized, maintain cleanliness, and support food participants.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-216',
+    name: 'Amina',
+    username: 'amina',
+    email: 'amina@collabs.org',
+    phone: '+92 345 1010116',
+    school: 'Pamir Public School',
+    role: 'Stall Liaison Volunteer',
+    department: 'Zone 3: Food Stalls',
+    hours: 35,
+    station: 'Zone 3: Food Court',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Facilitate communication between food stall operators and the operations team.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-217',
+    name: 'Zoha',
+    username: 'zoha',
+    email: 'zoha@collabs.org',
+    phone: '+92 345 1010117',
+    school: 'Booni Decor Crew',
+    role: 'Decor & Banners Volunteer',
+    department: 'Program, Stage & Decor',
+    hours: 42,
+    station: 'Main Stage & Auditorium',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Plan and arrange venue decorations, banners, and signage safely and aesthetically.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-218',
+    name: 'Muskan',
+    username: 'muskan',
+    email: 'muskan@collabs.org',
+    phone: '+92 345 1010118',
+    school: 'Booni Decor Crew',
+    role: 'Entrance Aesthetics Volunteer',
+    department: 'Program, Stage & Decor',
+    hours: 30,
+    station: 'Main Venue Entrance',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Maintain the stage decor and entrance aesthetics throughout the event.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-219',
+    name: 'Farina',
+    username: 'farina',
+    email: 'farina@collabs.org',
+    phone: '+92 345 1010119',
+    school: 'Booni Degree College',
+    role: 'Stage Material Assistant',
+    department: 'Program, Stage & Decor',
+    hours: 28,
+    station: 'Main Stage Backstage',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Assist in managing decorative materials and help dismantle decorations post-event.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-220',
+    name: 'Arshe',
+    username: 'arshe',
+    email: 'arshe@collabs.org',
+    phone: '+92 345 1010120',
+    school: 'Booni Girls College',
+    role: 'VIP Seating Volunteer',
+    department: 'Program, Stage & Decor',
+    hours: 36,
+    station: 'VIP & Guest Lounge',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Ensure VIP and guest seating areas are presentable and correctly labeled.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-221',
+    name: 'Ayan Ali',
+    username: 'ayan',
+    email: 'ayan.ali@collabs.org',
+    phone: '+92 345 1010121',
+    school: 'Booni Media Wing',
+    role: 'Camera Equipment Assistant',
+    department: 'Tech, IT & Media',
+    hours: 48,
+    station: 'Media Suite & Camera Pod',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Assist with camera equipment, crowd control for media shots, and general media support.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-222',
+    name: 'Shahid Nazir',
+    username: 'shahid',
+    email: 'shahid.nazir@collabs.org',
+    phone: '+92 345 1010122',
+    school: 'Booni Logistics Crew',
+    role: 'Physical Venue Setup Volunteer',
+    department: 'Operations & Logistics',
+    hours: 55,
+    station: 'Main Venue Grounds',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Assist with physical venue setup, crowd control during judging, and dismantling.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-223',
+    name: 'S.Sani',
+    username: 'sani',
+    email: 's.sani@collabs.org',
+    phone: '+92 345 1010123',
+    school: 'Booni High School',
+    role: 'Visitor Control Volunteer',
+    department: 'Operations & Logistics',
+    hours: 32,
+    station: 'Judging Pavilion Gate',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Help enforce the visitor limits during the judging phase and manage physical barriers.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-224',
+    name: 'Asin Nawaz',
+    username: 'asin',
+    email: 'asin.nawaz@collabs.org',
+    phone: '+92 345 1010124',
+    school: 'Booni Logistics Crew',
+    role: 'Logistics Transport Volunteer',
+    department: 'Operations & Logistics',
+    hours: 40,
+    station: 'Operations Storage Hub',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Support the operations manager with on-the-fly logistical needs and material transport.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-225',
+    name: 'Mazhar Ali',
+    username: 'mazhar.ali',
+    email: 'mazhar.ali@collabs.org',
+    phone: '+92 345 1010125',
+    school: 'Booni Logistics Crew',
+    role: 'Canopy & Waste Management Volunteer',
+    department: 'Operations & Logistics',
+    hours: 38,
+    station: 'Exhibition Outdoor Pavilion',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Assist in setting up tents, canopies, and managing waste disposal logistics.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-226',
+    name: 'Ania Faraz',
+    username: 'ania',
+    email: 'ania.faraz@collabs.org',
+    phone: '+92 345 1010126',
+    school: 'Booni Reception Desk',
+    role: 'Registration & Welcome Volunteer',
+    department: 'Reception & Security',
+    hours: 46,
+    station: 'Main Gate Registration Desk',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Manage the registration desk, welcome guests, and check participant IDs.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-227',
+    name: 'Wania',
+    username: 'wania',
+    email: 'wania@collabs.org',
+    phone: '+92 345 1010127',
+    school: 'Booni Reception Desk',
+    role: 'Attendance List Volunteer',
+    department: 'Reception & Security',
+    hours: 42,
+    station: 'Main Entrance Lounge',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Maintain attendance lists, direct guests to seating areas, and provide general event information.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
+  },
+  {
+    id: 'vol-228',
+    name: 'Shawana',
+    username: 'shawana',
+    email: 'shawana@collabs.org',
+    phone: '+92 345 1010128',
+    school: 'Booni Security Crew',
+    role: 'Entrance & Lanyard Volunteer',
+    department: 'Reception & Security',
+    hours: 40,
+    station: 'Main Venue Security Gate',
+    shiftTime: '08:00 AM – 05:00 PM PKT',
+    checkedIn: true,
+    duties: 'Assist at the entrance, ensure unauthorized individuals do not enter, and distribute lanyards.',
+    dateJoined: 'Oct 2026',
+    status: 'Verified Active'
   }
 ];
 
@@ -1174,10 +1641,10 @@ export default function App() {
       'Project Name',
       'Category',
       'School / Institution',
+      'Stall Number',
       'Location / Station',
       'Team Leader',
       'Co-Leader',
-      'Supervisor',
       'Members Count',
       'Members Roster',
       'Project Description',
@@ -1203,10 +1670,10 @@ export default function App() {
         escapeCSV(t.projectName),
         escapeCSV(t.category || 'Innovation Sprint'),
         escapeCSV(t.school || 'Collabs Event'),
+        escapeCSV(getTeamStallNumber(t)),
         escapeCSV(t.location || ''),
         escapeCSV(t.teamLeader),
         escapeCSV(t.coLeader || ''),
-        escapeCSV(t.supervisor || ''),
         escapeCSV(t.members?.length || 0),
         escapeCSV(memberNames),
         escapeCSV(t.projectDescription || ''),
@@ -2359,116 +2826,116 @@ export default function App() {
         </div>
       </header>
 
-      {/* Mega Event of Collabs Official Banner - Styled like reference image */}
-      <section className="bg-gradient-to-b from-blue-50/80 via-indigo-50/40 to-slate-50 pt-6 pb-10 px-4 sm:px-6 lg:px-8 border-b border-slate-200">
-        <div className="max-w-4xl mx-auto bg-white border-2 border-blue-600/20 rounded-3xl p-6 sm:p-10 shadow-xl shadow-blue-900/5 text-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-blue-400/10 to-emerald-400/10 rounded-bl-full pointer-events-none"></div>
+      {/* Mega Event of Collabs Official Banner - Styled like reference image, compact to fit fully on main screen */}
+      <section className="bg-gradient-to-b from-blue-50/80 via-indigo-50/40 to-slate-50 pt-4 pb-6 sm:pt-6 sm:pb-8 px-4 sm:px-6 lg:px-8 border-b border-slate-200">
+        <div className="max-w-3xl mx-auto bg-white border-2 border-blue-600/20 rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-lg shadow-blue-900/5 text-center relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-br from-blue-400/10 to-emerald-400/10 rounded-bl-full pointer-events-none"></div>
           
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <img src={officialLogo} alt="Collabs Official Logo" className="w-10 h-10 object-contain rounded-xl shadow-sm" />
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <img src={officialLogo} alt="Collabs Official Logo" className="w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-lg shadow-2xs" />
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tighter mb-1 uppercase">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-1 uppercase leading-tight">
             <span className="text-[#1E293B] block">Mega Event of</span>
             <span className="text-[#059669]">Collabs 2026</span>
           </h1>
 
-          <div className="h-1 bg-gradient-to-r from-blue-500 via-yellow-500 via-green-500 to-purple-500 w-32 mx-auto rounded-full my-3"></div>
+          <div className="h-1 bg-gradient-to-r from-blue-500 via-yellow-500 via-green-500 to-purple-500 w-24 mx-auto rounded-full my-2 sm:my-2.5"></div>
 
-          <div className="text-xs sm:text-sm font-extrabold tracking-widest text-[#1E3A8A] uppercase mb-2">
+          <div className="text-[10px] sm:text-xs font-extrabold tracking-widest text-[#1E3A8A] uppercase mb-1.5">
             BUILDING TOMORROW'S INNOVATORS
           </div>
 
-          <p className="text-xs sm:text-sm text-slate-600 max-w-xl mx-auto mb-5 leading-relaxed">
+          <p className="text-xs text-slate-600 max-w-lg mx-auto mb-3 leading-relaxed">
             Empowering Youth. Building Tomorrow. Part of the Global Summit on Digital Literacy & Leadership.
           </p>
 
-          <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-full px-4 py-1 text-xs font-bold text-emerald-700 mb-6">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <div className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-0.5 text-[11px] font-bold text-emerald-700 mb-3.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>Registration is Open</span>
           </div>
 
-          {/* Functional Countdown Timer for 31 October 2026 */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 max-w-lg mx-auto mb-4">
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center">
-              <div className="font-heading text-2xl sm:text-3xl font-black text-[#1E3A8A]">{timeLeft.days}</div>
-              <div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mt-0.5">Days</div>
+          {/* Functional Countdown Timer for 31 October 2026 - Compact & Clear */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 max-w-md mx-auto mb-2.5">
+            <div className="bg-slate-50 border border-slate-200 rounded-xl py-2 px-2.5 sm:py-2.5 sm:px-3 text-center">
+              <div className="font-heading text-xl sm:text-2xl font-black text-[#1E3A8A]">{timeLeft.days}</div>
+              <div className="text-[9px] uppercase tracking-wider text-slate-500 font-bold mt-0.5">Days</div>
             </div>
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center">
-              <div className="font-heading text-2xl sm:text-3xl font-black text-[#1E3A8A]">{timeLeft.hours}</div>
-              <div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mt-0.5">Hours</div>
+            <div className="bg-slate-50 border border-slate-200 rounded-xl py-2 px-2.5 sm:py-2.5 sm:px-3 text-center">
+              <div className="font-heading text-xl sm:text-2xl font-black text-[#1E3A8A]">{timeLeft.hours}</div>
+              <div className="text-[9px] uppercase tracking-wider text-slate-500 font-bold mt-0.5">Hours</div>
             </div>
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center">
-              <div className="font-heading text-2xl sm:text-3xl font-black text-[#1E3A8A]">{timeLeft.minutes}</div>
-              <div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mt-0.5">Mins</div>
+            <div className="bg-slate-50 border border-slate-200 rounded-xl py-2 px-2.5 sm:py-2.5 sm:px-3 text-center">
+              <div className="font-heading text-xl sm:text-2xl font-black text-[#1E3A8A]">{timeLeft.minutes}</div>
+              <div className="text-[9px] uppercase tracking-wider text-slate-500 font-bold mt-0.5">Mins</div>
             </div>
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center">
-              <div className="font-heading text-2xl sm:text-3xl font-black text-[#1E3A8A]">{timeLeft.seconds}</div>
-              <div className="text-[10px] uppercase tracking-wider text-slate-500 font-bold mt-0.5">Secs</div>
+            <div className="bg-slate-50 border border-slate-200 rounded-xl py-2 px-2.5 sm:py-2.5 sm:px-3 text-center">
+              <div className="font-heading text-xl sm:text-2xl font-black text-[#1E3A8A]">{timeLeft.seconds}</div>
+              <div className="text-[9px] uppercase tracking-wider text-slate-500 font-bold mt-0.5">Secs</div>
             </div>
           </div>
 
-          <div className="text-xs text-slate-500 font-medium mb-6">
+          <div className="text-[11px] text-slate-500 font-medium mb-4">
             until event day: 31 October 2026, Booni, Upper Chitral
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-2.5">
             <a 
               href="https://docs.google.com/forms/d/e/1FAIpQLSdUwKtlCvMl4JJBpsa6e7xMJ7KirLBU5_B6ram88WUwza-p-g/viewform"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-blue-600/20 transition-all flex items-center gap-2 cursor-pointer hover:scale-105"
+              className="px-4 sm:px-5 py-2 sm:py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-blue-600/20 transition-all flex items-center gap-2 cursor-pointer hover:scale-102"
             >
-              <CheckCircle2 size={15} />
+              <CheckCircle2 size={14} />
               <span>Register Now</span>
             </a>
             <button
               onClick={() => setIsRulesModalOpen(true)}
-              className="px-5 py-2.5 bg-white hover:bg-slate-50 text-[#1E3A8A] border-2 border-[#1E3A8A] font-bold text-xs sm:text-sm rounded-xl transition-all shadow-sm hover:scale-105 cursor-pointer flex items-center gap-2"
+              className="px-4 sm:px-5 py-2 sm:py-2.5 bg-white hover:bg-slate-50 text-[#1E3A8A] border-2 border-[#1E3A8A] font-bold text-xs sm:text-sm rounded-xl transition-all shadow-xs hover:scale-102 cursor-pointer flex items-center gap-1.5"
             >
               <span>Read Event Guidelines</span>
-              <ChevronRight size={15} />
+              <ChevronRight size={14} />
             </button>
           </div>
         </div>
       </section>
 
-      {/* 5 Core Pillars Section */}
-      <section className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-xs hover:border-emerald-300 transition-all flex flex-col items-center justify-center">
-            <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
-              <User size={24} />
+      {/* 5 Core Pillars Section - Sleek and Compact */}
+      <section className="py-6 sm:py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+          <div className="bg-white border border-slate-200 rounded-xl p-4 text-center shadow-2xs hover:border-emerald-300 transition-all flex flex-col items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2">
+              <User size={20} />
             </div>
-            <h3 className="font-heading text-sm sm:text-base font-bold text-slate-900">Leadership</h3>
+            <h3 className="font-heading text-xs sm:text-sm font-bold text-slate-900">Leadership</h3>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-xs hover:border-amber-300 transition-all flex flex-col items-center justify-center">
-            <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center mb-3">
-              <Lightbulb size={24} />
+          <div className="bg-white border border-slate-200 rounded-xl p-4 text-center shadow-2xs hover:border-amber-300 transition-all flex flex-col items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center mb-2">
+              <Lightbulb size={20} />
             </div>
-            <h3 className="font-heading text-sm sm:text-base font-bold text-slate-900">Innovation</h3>
+            <h3 className="font-heading text-xs sm:text-sm font-bold text-slate-900">Innovation</h3>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-xs hover:border-blue-300 transition-all flex flex-col items-center justify-center">
-            <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
-              <Target size={24} />
+          <div className="bg-white border border-slate-200 rounded-xl p-4 text-center shadow-2xs hover:border-blue-300 transition-all flex flex-col items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-2">
+              <Target size={20} />
             </div>
-            <h3 className="font-heading text-sm sm:text-base font-bold text-slate-900">Capacity Building</h3>
+            <h3 className="font-heading text-xs sm:text-sm font-bold text-slate-900">Capacity Building</h3>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-xs hover:border-purple-300 transition-all flex flex-col items-center justify-center">
-            <div className="w-12 h-12 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center mb-3">
-              <Globe size={24} />
+          <div className="bg-white border border-slate-200 rounded-xl p-4 text-center shadow-2xs hover:border-purple-300 transition-all flex flex-col items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center mb-2">
+              <Globe size={20} />
             </div>
-            <h3 className="font-heading text-sm sm:text-base font-bold text-slate-900">Creativity</h3>
+            <h3 className="font-heading text-xs sm:text-sm font-bold text-slate-900">Creativity</h3>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center shadow-xs hover:border-emerald-300 transition-all flex flex-col items-center justify-center col-span-2 sm:col-span-1">
-            <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
-              <Leaf size={24} />
+          <div className="bg-white border border-slate-200 rounded-xl p-4 text-center shadow-2xs hover:border-emerald-300 transition-all flex flex-col items-center justify-center col-span-2 sm:col-span-1">
+            <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2">
+              <Leaf size={20} />
             </div>
-            <h3 className="font-heading text-sm sm:text-base font-bold text-slate-900">Empowerment</h3>
+            <h3 className="font-heading text-xs sm:text-sm font-bold text-slate-900">Empowerment</h3>
           </div>
         </div>
       </section>
@@ -2657,9 +3124,10 @@ export default function App() {
                 onClick={() => {
                   const nextIdx = (activeTeamIndex - 1 + INITIAL_TEAM.length) % INITIAL_TEAM.length;
                   setActiveTeamIndex(nextIdx);
+                  setSelectedTeamMemberId(INITIAL_TEAM[nextIdx].id);
                   if (teamSliderRef.current) {
                     teamSliderRef.current.scrollTo({
-                      left: nextIdx * 320,
+                      left: nextIdx * 336,
                       behavior: 'smooth'
                     });
                   }
@@ -2673,9 +3141,10 @@ export default function App() {
                 onClick={() => {
                   const nextIdx = (activeTeamIndex + 1) % INITIAL_TEAM.length;
                   setActiveTeamIndex(nextIdx);
+                  setSelectedTeamMemberId(INITIAL_TEAM[nextIdx].id);
                   if (teamSliderRef.current) {
                     teamSliderRef.current.scrollTo({
-                      left: nextIdx * 320,
+                      left: nextIdx * 336,
                       behavior: 'smooth'
                     });
                   }
@@ -2695,6 +3164,19 @@ export default function App() {
             {/* Horizontal Scroll Track */}
             <div
               ref={teamSliderRef}
+              onScroll={() => {
+                if (teamSliderRef.current) {
+                  const scrollLeft = teamSliderRef.current.scrollLeft;
+                  const idx = Math.min(
+                    INITIAL_TEAM.length - 1,
+                    Math.max(0, Math.round(scrollLeft / 336))
+                  );
+                  if (idx !== activeTeamIndex) {
+                    setActiveTeamIndex(idx);
+                    setSelectedTeamMemberId(INITIAL_TEAM[idx].id);
+                  }
+                }
+              }}
               className="flex overflow-x-auto gap-4 pb-4 scroll-smooth snap-x snap-mandatory scrollbar-none p-1"
             >
               {INITIAL_TEAM.map((member, idx) => {
@@ -2748,27 +3230,33 @@ export default function App() {
               })}
             </div>
 
-            {/* Horizontal Pagination Dots */}
-            <div className="flex items-center justify-center gap-2 pt-2">
-              {INITIAL_TEAM.map((member, idx) => (
-                <button
-                  key={member.id}
-                  onClick={() => {
-                    setActiveTeamIndex(idx);
-                    setSelectedTeamMemberId(member.id);
-                    if (teamSliderRef.current) {
-                      teamSliderRef.current.scrollTo({
-                        left: idx * 320,
-                        behavior: 'smooth'
-                      });
-                    }
-                  }}
-                  className={`h-2 rounded-full transition-all cursor-pointer ${
-                    activeTeamIndex === idx ? 'w-8 bg-blue-600' : 'w-2 bg-slate-300 hover:bg-slate-400'
-                  }`}
-                  title={`Go to ${member.name}`}
-                />
-              ))}
+            {/* Animated Horizontal Pagination Dots */}
+            <div className="flex items-center justify-center gap-1.5 pt-3 pb-1">
+              {INITIAL_TEAM.map((member, idx) => {
+                const isActive = activeTeamIndex === idx;
+                return (
+                  <button
+                    key={member.id}
+                    type="button"
+                    onClick={() => {
+                      setActiveTeamIndex(idx);
+                      setSelectedTeamMemberId(member.id);
+                      if (teamSliderRef.current) {
+                        teamSliderRef.current.scrollTo({
+                          left: idx * 336,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }}
+                    className={`h-2.5 rounded-full transition-all duration-300 ease-out cursor-pointer ${
+                      isActive
+                        ? 'w-9 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 shadow-md ring-2 ring-blue-300/80 scale-105'
+                        : 'w-2.5 bg-slate-300 hover:bg-slate-400 hover:scale-110'
+                    }`}
+                    title={`Go to ${member.name} (${idx + 1}/${INITIAL_TEAM.length})`}
+                  />
+                );
+              })}
             </div>
           </div>
         )}
@@ -2790,7 +3278,7 @@ export default function App() {
         )}
 
         {/* Section Header */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-4">
           <div>
             <h2 className="font-heading text-3xl font-black text-slate-900 tracking-tight">Team Participation</h2>
             <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
@@ -2818,6 +3306,56 @@ export default function App() {
               </button>
             )}
           </div>
+        </div>
+
+        {/* Small Category Name Filter Bar */}
+        <div className="flex flex-wrap items-center gap-1.5 mb-6 pb-3 border-b border-slate-200">
+          <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider mr-1 flex items-center gap-1">
+            <Filter size={11} className="text-blue-600" />
+            <span>Category:</span>
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              setParticipationCategoryFilter('All');
+              setIsTeamsExpanded(true);
+            }}
+            className={`px-2.5 py-1 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer border flex items-center gap-1 ${
+              participationCategoryFilter === 'All'
+                ? 'bg-blue-600 text-white border-blue-600 shadow-2xs scale-105'
+                : 'bg-white text-slate-600 hover:text-slate-900 border-slate-200 hover:bg-slate-100'
+            }`}
+          >
+            <span>All Categories</span>
+            <span className={`px-1.5 py-0.2 rounded-full text-[9px] ${participationCategoryFilter === 'All' ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-500'}`}>
+              {teamParticipations.length}
+            </span>
+          </button>
+
+          {availableCategories.map(cat => {
+            const count = teamParticipations.filter(t => t.category === cat).length;
+            const isSelected = participationCategoryFilter === cat;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => {
+                  setParticipationCategoryFilter(cat);
+                  setIsTeamsExpanded(true);
+                }}
+                className={`px-2.5 py-1 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer border flex items-center gap-1 ${
+                  isSelected
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-2xs scale-105'
+                    : 'bg-white text-slate-600 hover:text-slate-900 border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                <span>{cat}</span>
+                <span className={`px-1.5 py-0.2 rounded-full text-[9px] ${isSelected ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Empty State */}
@@ -2862,14 +3400,29 @@ export default function App() {
                   <div>
                     {/* Top Header: Category Tag & Status Badge */}
                     <div className="flex items-center justify-between gap-1 mb-1.5">
-                      <span className={`inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded ${categoryBadge.style}`}>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (p.category) {
+                            setParticipationCategoryFilter(p.category);
+                            setIsTeamsExpanded(true);
+                          }
+                        }}
+                        className={`inline-flex items-center gap-1 text-[9px] font-extrabold px-1.5 py-0.5 rounded cursor-pointer transition-transform hover:scale-105 ${categoryBadge.style}`}
+                        title={`Show all ${p.category} teams`}
+                      >
                         {categoryBadge.icon}
                         <span className="truncate max-w-[80px]">{categoryBadge.label}</span>
-                      </span>
+                      </button>
 
                       <div className="flex items-center gap-1 shrink-0">
                         <span className="font-mono text-[9px] font-bold text-slate-600 bg-slate-100 border border-slate-200/80 px-1 py-0.5 rounded">
                           {p.teamCode || p.id}
+                        </span>
+                        <span className="font-mono text-[9px] font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-200/90 px-1.5 py-0.5 rounded flex items-center gap-0.5 shadow-2xs">
+                          <MapPin size={9} className="text-indigo-600" />
+                          {getTeamStallNumber(p)}
                         </span>
                         {getTeamStatusBadge(p.status)}
                         {isAdminMode && (
@@ -2911,7 +3464,7 @@ export default function App() {
                       "{p.projectDescription}"
                     </p>
 
-                    {/* Micro Data Badges: Leader, Roster & Station */}
+                    {/* Micro Data Badges: Leader, Roster & Stall */}
                     <div className="mt-2 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-600 gap-1">
                       <span className="truncate max-w-[130px] font-semibold text-slate-800">
                         <span className="text-slate-400 font-normal">Lead:</span> {p.teamLeader}
@@ -2921,12 +3474,13 @@ export default function App() {
                       </span>
                     </div>
 
-                    {p.location && (
-                      <div className="text-[9px] text-slate-400 truncate flex items-center gap-0.5 mt-0.5">
-                        <MapPin size={8} className="text-slate-400 shrink-0" />
-                        <span className="truncate">{p.location}</span>
-                      </div>
-                    )}
+                    <div className="text-[9px] text-slate-500 truncate flex items-center justify-between gap-1 mt-1 bg-slate-50 px-1.5 py-1 rounded-md border border-slate-100">
+                      <span className="font-extrabold text-indigo-700 flex items-center gap-1">
+                        <MapPin size={9} className="text-indigo-600 shrink-0" />
+                        {getTeamStallNumber(p)}
+                      </span>
+                      <span className="text-slate-400 truncate max-w-[120px]">{p.location || 'Exhibition Zone'}</span>
+                    </div>
                   </div>
 
                   {/* Card Footer: Award Badge & Quick Pass Trigger */}
@@ -2974,6 +3528,7 @@ export default function App() {
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
                   <tr>
                     <th className="p-3 pl-4">Team Code</th>
+                    <th className="p-3 text-center">Stall #</th>
                     <th className="p-3">Project & Category</th>
                     <th className="p-3">School / Institution</th>
                     <th className="p-3">Team Leader</th>
@@ -2996,6 +3551,12 @@ export default function App() {
                       >
                         <td className="p-3 pl-4 font-mono font-bold text-slate-800 text-[11px]">
                           {p.teamCode || p.id}
+                        </td>
+                        <td className="p-3 text-center">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-200/80 text-indigo-700 font-mono font-extrabold text-[10px]">
+                            <MapPin size={10} className="text-indigo-600" />
+                            {getTeamStallNumber(p)}
+                          </span>
                         </td>
                         <td className="p-3">
                           <div className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
