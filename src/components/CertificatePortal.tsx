@@ -1,4 +1,5 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
+import QRCode from 'qrcode';
 import {
   Sparkles,
   Printer,
@@ -29,7 +30,8 @@ import {
   UserCheck,
   Send,
   Zap,
-  Globe
+  Globe,
+  Image as ImageIcon
 } from 'lucide-react';
 
 export interface CertificateRecord {
@@ -64,6 +66,8 @@ interface CertificatePortalProps {
 
 export type CertificateTheme = 'gold' | 'emerald' | 'royal' | 'obsidian' | 'rosegold';
 
+const OFFICIAL_TEMPLATE_IMAGE = '/assets/aistudio/WhatsApp_Image_2026-10-25_at_06.00.52_9fa8fff0.jpeg';
+
 export const CertificatePortal: React.FC<CertificatePortalProps> = ({
   certDatabase,
   setCertDatabase,
@@ -87,7 +91,10 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
     type: null
   });
 
-  // Selected Theme (Gold Foil, Alpine Emerald, Sapphire, Obsidian, Rose Gold)
+  // Display Mode: 'officialTemplate' (default) | 'holographicStudio'
+  const [certDisplayMode, setCertDisplayMode] = useState<'officialTemplate' | 'holographicStudio'>('officialTemplate');
+
+  // Selected Foil Theme for Holographic Studio
   const [selectedTheme, setSelectedTheme] = useState<CertificateTheme>(
     (activeCertificate?.theme as CertificateTheme) || 'gold'
   );
@@ -106,9 +113,35 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
 
   // Custom Issuer State
   const [customName, setCustomName] = useState('');
-  const [customCategory, setCustomCategory] = useState('First Position Winner');
+  const [customCategory, setCustomCategory] = useState('Active Participation');
   const [customSchool, setCustomSchool] = useState('Booni Degree College');
-  const [customProject, setCustomProject] = useState('High-Altitude Autonomous Innovation Project');
+  const [customProject, setCustomProject] = useState('Science, Arts & Food Exhibition 2026');
+
+  // Dedicated QR Data URL state for live template rendering
+  const [generatedQr, setGeneratedQr] = useState<string>('');
+
+  // Generate unique verification QR code for active certificate
+  useEffect(() => {
+    if (activeCertificate?.id) {
+      const certId = activeCertificate.id;
+      if (qrCodeDataUrls[certId]) {
+        setGeneratedQr(qrCodeDataUrls[certId]);
+      } else {
+        const verifyUrl = `${window.location.origin}${window.location.pathname}?verify=${encodeURIComponent(certId)}`;
+        QRCode.toDataURL(verifyUrl, {
+          width: 320,
+          margin: 1,
+          color: {
+            dark: '#1e1b4b',
+            light: '#ffffff'
+          },
+          errorCorrectionLevel: 'M'
+        })
+          .then(url => setGeneratedQr(url))
+          .catch(err => console.error('Error generating QR code:', err));
+      }
+    }
+  }, [activeCertificate?.id, qrCodeDataUrls]);
 
   // Handle Certificate ID Retrieval
   const handleRetrieveById = (idToLookup: string) => {
@@ -184,13 +217,13 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
       id: newId,
       recipientName: customName.trim(),
       achievementType: customCategory,
-      eventName: 'First Mega Event of Collabs 2026',
-      issueDate: '31 October 2026',
+      eventName: 'Science, Arts & Food Exhibition 2026',
+      issueDate: 'October 31, 2026',
       verified: true,
-      issuer: 'Collabs. Community Executive Secretariat',
+      issuer: 'District Youth Office, Collabs, Naveed-e-Falah & Jenabai Awards',
       school: customSchool.trim() || 'Booni Degree College',
       theme: selectedTheme,
-      project: customProject.trim() || 'Summit Innovation Sprint'
+      project: customProject.trim() || 'Science, Arts & Food Exhibition 2026'
     };
 
     setCertDatabase([newRecord, ...certDatabase]);
@@ -220,7 +253,7 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
     });
   }, [certDatabase, registrySearch, registryCategoryFilter]);
 
-  // Theme styling configurations
+  // Theme styling configurations for Holographic Studio
   const themeStyles = {
     gold: {
       name: 'Imperial Gold',
@@ -311,15 +344,15 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-bold uppercase tracking-widest">
               <ShieldCheck size={14} className="text-blue-400" />
-              <span>Collabs 2026 Official Credential Verification System</span>
+              <span>Collabs & District Youth Office Official Certification</span>
             </div>
             
             <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-tight">
-              Certificate <span className="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-500 bg-clip-text text-transparent">Verification Portal</span>
+              Official Certificate <span className="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-500 bg-clip-text text-transparent">Verification Portal</span>
             </h1>
 
             <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
-              Verify, preview, and download officially authenticated credentials from the First Mega Event of Collabs 2026 in Booni, Upper Chitral.
+              In collaboration with District Youth Office Upper Chitral, Naveed-e-Falah & Jenabai Awards for Science, Arts & Food Exhibition 2026.
             </p>
           </div>
 
@@ -329,7 +362,7 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
               onClick={handlePrintCertificate}
               className="px-5 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95"
             >
-              <Printer size={16} /> Print / Download PDF
+              <Printer size={16} /> Print / Save PDF
             </button>
 
             <button
@@ -361,7 +394,7 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
             }`}
           >
             <Award size={15} />
-            <span>Interactive Certificate Studio</span>
+            <span>Official Master Certificate View</span>
           </button>
 
           <button
@@ -387,7 +420,7 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
             }`}
           >
             <Sparkles size={15} className="text-amber-400" />
-            <span>Custom Certificate Generator</span>
+            <span>Issue New Certificate</span>
           </button>
         </div>
       </div>
@@ -454,10 +487,10 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
               <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-slate-300">
                 <span className="font-semibold text-slate-400 text-xs">Featured Credentials:</span>
                 {[
-                  { id: 'CLB-2026-892', name: 'Fatima Zahra (1st Winner)', theme: 'gold' },
-                  { id: 'CLB-2026-401', name: 'Elena Rostova (Lead Ops)', theme: 'emerald' },
-                  { id: 'CLB-2026-774', name: 'Marcus Vance (Innovation)', theme: 'royal' },
-                  { id: 'CLB-2026-520', name: 'Asad Ullah (Participant)', theme: 'obsidian' }
+                  { id: 'CLB-2026-892', name: 'Fatima Zahra', theme: 'gold' },
+                  { id: 'CLB-2026-401', name: 'Elena Rostova', theme: 'emerald' },
+                  { id: 'CLB-2026-774', name: 'Marcus Vance', theme: 'royal' },
+                  { id: 'CLB-2026-520', name: 'Asad Ullah', theme: 'obsidian' }
                 ].map((item) => (
                   <button
                     key={item.id}
@@ -502,250 +535,247 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
             </div>
           </div>
 
-          {/* TAB 1: INTERACTIVE CERTIFICATE STUDIO CANVAS */}
+          {/* TAB 1: OFFICIAL CERTIFICATE CANVAS */}
           {activeTab === 'certificate' && (
             <div className="bg-slate-900/5 p-4 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs">
               
-              {/* Foil Finish & Controls Toolbar */}
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-200/80">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-700 mr-1">
-                    Foil Finish:
-                  </span>
-                  {[
-                    { id: 'gold', label: 'Imperial Gold', color: 'bg-amber-100 text-amber-900 border-amber-300' },
-                    { id: 'emerald', label: 'Alpine Emerald', color: 'bg-emerald-100 text-emerald-900 border-emerald-300' },
-                    { id: 'royal', label: 'Sapphire Honor', color: 'bg-blue-100 text-blue-900 border-blue-300' },
-                    { id: 'obsidian', label: 'Cyber Obsidian', color: 'bg-slate-900 text-amber-400 border-amber-600' },
-                    { id: 'rosegold', label: 'Rose Gold Crest', color: 'bg-rose-100 text-rose-900 border-rose-300' }
-                  ].map((t) => (
-                    <button
-                      key={t.id}
-                      type="button"
-                      onClick={() => setSelectedTheme(t.id as CertificateTheme)}
-                      className={`px-3 py-1.5 rounded-xl border font-bold text-xs transition-all cursor-pointer ${
-                        selectedTheme === t.id
-                          ? `${t.color} ring-2 ring-blue-500 shadow-sm scale-105`
-                          : 'bg-white hover:bg-slate-50 text-slate-600 border-slate-200'
-                      }`}
-                    >
-                      {t.label}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex items-center gap-4 text-xs text-slate-600">
+              {/* Display Mode Toolbar Switcher */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-200">
+                <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => setIsTiltEnabled(!isTiltEnabled)}
-                    className="hover:text-slate-900 font-bold flex items-center gap-1.5 cursor-pointer bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-2xs"
-                  >
-                    <Sparkles size={14} className={isTiltEnabled ? 'text-amber-500' : 'text-slate-400'} />
-                    <span>3D Holographic Tilt: {isTiltEnabled ? 'Active' : 'Off'}</span>
-                  </button>
-
-                  <div className="font-mono text-blue-700 font-bold bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-xl">
-                    ID: {activeCertificate?.id || 'CLB-2026-892'}
-                  </div>
-                </div>
-              </div>
-
-              {/* Certificate Canvas Frame */}
-              <div
-                ref={certCardRef}
-                onMouseMove={handleMouseMove}
-                onMouseLeave={handleMouseLeave}
-                style={{
-                  transform:
-                    isTiltEnabled && tilt.active
-                      ? `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale3d(1.01, 1.01, 1.01)`
-                      : 'perspective(1000px) rotateX(0deg) rotateY(0deg)',
-                  transition: tilt.active ? 'none' : 'transform 0.5s ease-out'
-                }}
-                id="printable-certificate"
-                className={`relative rounded-3xl border-8 ${themeStyles.borderOuter} ${themeStyles.cardBg} p-8 sm:p-14 shadow-2xl overflow-hidden select-none text-center transition-all duration-300`}
-              >
-                {/* Dynamic Specular Holographic Glare Sheen */}
-                {isTiltEnabled && tilt.active && (
-                  <div
-                    className="pointer-events-none absolute inset-0 rounded-3xl z-20 mix-blend-overlay transition-opacity duration-150"
-                    style={{
-                      background: `radial-gradient(circle 500px at ${tilt.glareX}% ${tilt.glareY}%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 70%)`,
-                      opacity: 0.85
-                    }}
-                  />
-                )}
-
-                {/* Shimmer line */}
-                <div className="holographic-sheen absolute -inset-x-20 -inset-y-20 pointer-events-none opacity-20 z-10" />
-
-                {/* Guilloche Filigree Inner Perimeter Border */}
-                <div
-                  className={`absolute inset-3 sm:inset-5 border-2 ${themeStyles.borderInner} rounded-2xl pointer-events-none`}
-                />
-                <div
-                  className={`absolute inset-5 sm:inset-7 border border-dashed ${themeStyles.borderInner} rounded-xl pointer-events-none opacity-60`}
-                />
-
-                {/* Corner Rosettes */}
-                <div className={`absolute top-6 left-6 w-8 h-8 border-t-4 border-l-4 ${themeStyles.cornerAccent} pointer-events-none`} />
-                <div className={`absolute top-6 right-6 w-8 h-8 border-t-4 border-r-4 ${themeStyles.cornerAccent} pointer-events-none`} />
-                <div className={`absolute bottom-6 left-6 w-8 h-8 border-b-4 border-l-4 ${themeStyles.cornerAccent} pointer-events-none`} />
-                <div className={`absolute bottom-6 right-6 w-8 h-8 border-b-4 border-r-4 ${themeStyles.cornerAccent} pointer-events-none`} />
-
-                {/* Background Crest Watermark */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-5">
-                  <svg viewBox="0 0 400 400" className="w-[500px] h-[500px]">
-                    <polygon points="200,60 320,130 320,270 200,340 80,270 80,130" fill="none" stroke="currentColor" strokeWidth="4" />
-                    <path d="M 120 250 L 170 170 L 210 220 L 250 160 L 290 250 Z" fill="none" stroke="currentColor" strokeWidth="6" />
-                  </svg>
-                </div>
-
-                {/* Header Crest */}
-                <div className="relative z-10 flex flex-col items-center mb-6">
-                  <div className="relative mb-3">
-                    <img
-                      src={officialLogo}
-                      alt="Collabs Logo"
-                      className="w-20 h-20 object-contain rounded-full border-2 border-amber-500 p-1 bg-white shadow-xl"
-                    />
-                    <div className="absolute -bottom-1 -right-1 bg-amber-500 text-slate-900 rounded-full p-1 shadow-md">
-                      <CheckCircle2 size={16} className="text-white fill-blue-700" />
-                    </div>
-                  </div>
-
-                  <div className="font-heading font-black text-2xl sm:text-4xl tracking-widest uppercase">
-                    <span className="font-cinzel tracking-widest">Collabs. Summit 2026</span>
-                  </div>
-
-                  <div className="text-xs sm:text-sm uppercase tracking-widest font-bold text-slate-500 mt-1">
-                    First Mega Event of Collabs · Booni, Upper Chitral
-                  </div>
-                  <div className="h-0.5 w-36 bg-gradient-to-r from-transparent via-amber-500 to-transparent mt-3" />
-                </div>
-
-                {/* Conferral Statement */}
-                <div className="relative z-10 space-y-3 mb-8">
-                  <div className="text-xs uppercase font-bold tracking-widest text-blue-700">
-                    THIS OFFICIAL DIPLOMA OF ACCREDITATION IS PROUDLY CONFERRED UPON
-                  </div>
-
-                  <div
-                    className={`font-cinzel text-3xl sm:text-5xl font-extrabold tracking-tight py-2 max-w-2xl mx-auto ${
-                      selectedTheme === 'obsidian' ? 'text-white' : 'text-slate-950'
+                    onClick={() => setCertDisplayMode('officialTemplate')}
+                    className={`px-4 py-2 rounded-xl border font-bold text-xs transition-all flex items-center gap-2 cursor-pointer ${
+                      certDisplayMode === 'officialTemplate'
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                     }`}
                   >
-                    {activeCertificate?.recipientName || 'Fatima Zahra'}
-                  </div>
-
-                  <div className="text-sm text-slate-600 max-w-lg mx-auto">
-                    Representing <strong className="font-bold text-slate-900">{activeCertificate?.school || 'Booni Degree College'}</strong>
-                  </div>
-
-                  <p className="text-xs sm:text-base text-slate-700 max-w-xl mx-auto leading-relaxed pt-2">
-                    In formal recognition of outstanding performance as <strong className={themeStyles.goldAccent}>{activeCertificate?.achievementType || 'First Position Winner'}</strong> in the grand competition initiative:
-                  </p>
-
-                  <div className="font-heading text-base sm:text-xl font-bold text-slate-900 max-w-lg mx-auto pt-1">
-                    "{activeCertificate?.project || activeCertificate?.eventName || 'Autonomous High-Altitude Robotics Sprint'}"
-                  </div>
-                </div>
-
-                {/* Signatures & Seal */}
-                <div className="relative z-10 grid grid-cols-3 gap-4 items-end pt-6 border-t border-slate-200/80 mt-6">
-                  {/* Signature 1 */}
-                  <div className="text-left">
-                    <div className="font-signature text-2xl sm:text-4xl text-slate-900 border-b-2 border-slate-400 pb-1 leading-none">
-                      Alex Rivera
-                    </div>
-                    <div className="text-xs font-bold uppercase tracking-wider text-slate-800 mt-1.5">
-                      Alex Rivera
-                    </div>
-                    <div className="text-[10px] text-slate-500 font-medium">Executive Director · Collabs</div>
-                  </div>
-
-                  {/* Embossed Metallic Seal & QR Code */}
-                  <div className="flex flex-col items-center justify-center">
-                    <div
-                      onClick={() => handleOpenLookupForId(activeCertificate?.id || 'CLB-2026-892')}
-                      className="group cursor-pointer flex flex-col items-center transition-transform hover:scale-105"
-                      title="Click or scan to verify in official registry"
-                    >
-                      <div className="relative mb-2">
-                        <div
-                          className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr ${themeStyles.sealGradient} border-2 ${themeStyles.sealBorder} shadow-xl flex items-center justify-center p-1.5 relative`}
-                        >
-                          <div className="w-full h-full rounded-full border border-dashed border-amber-900/40 flex flex-col items-center justify-center text-amber-950 text-center leading-none">
-                            <Award size={22} className="text-amber-950 drop-shadow-xs" />
-                            <span className="text-[7px] font-black uppercase tracking-tighter mt-1">
-                              AUTHENTICATED
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Ribbon Tails */}
-                        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1 pointer-events-none">
-                          <div
-                            className={`w-3 h-5 bg-gradient-to-b ${themeStyles.sealRibbon} shadow-xs -rotate-12`}
-                            style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%)' }}
-                          />
-                          <div
-                            className={`w-3 h-5 bg-gradient-to-b ${themeStyles.sealRibbon} shadow-xs rotate-12`}
-                            style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%)' }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Live QR Code */}
-                      <div className={`p-2 bg-white border ${themeStyles.qrBorder} rounded-xl shadow-md mt-2`}>
-                        {activeCertificate && qrCodeDataUrls[activeCertificate.id] ? (
-                          <img
-                            src={qrCodeDataUrls[activeCertificate.id]}
-                            alt={`QR verification for ${activeCertificate.id}`}
-                            className="w-16 h-16 sm:w-20 sm:h-20 object-contain block"
-                          />
-                        ) : (
-                          <div className="w-16 h-16 bg-slate-100 flex items-center justify-center">
-                            <QrCode size={24} className="animate-spin text-slate-400" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="text-[9px] font-black uppercase tracking-widest text-blue-900 mt-1.5">
-                        SCAN TO VERIFY
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Signature 2 */}
-                  <div className="text-right">
-                    <div className="font-signature text-2xl sm:text-4xl text-slate-900 border-b-2 border-slate-400 pb-1 leading-none">
-                      Sofia Morales
-                    </div>
-                    <div className="text-xs font-bold uppercase tracking-wider text-slate-800 mt-1.5">
-                      Sofia Morales
-                    </div>
-                    <div className="text-[10px] text-slate-500 font-medium">Registrar · Booni Secretariat</div>
-                  </div>
-                </div>
-
-                {/* Footer Baseline */}
-                <div className="relative z-10 mt-6 pt-4 border-t border-slate-200/60 flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] text-slate-500 font-mono">
-                  <span>Issued: {activeCertificate?.issueDate || '31 October 2026'}</span>
-                  <button
-                    onClick={() => handleOpenLookupForId(activeCertificate?.id || 'CLB-2026-892')}
-                    className="font-bold text-blue-700 hover:underline cursor-pointer"
-                  >
-                    REGISTRY ID: {activeCertificate?.id || 'CLB-2026-892'}
+                    <ImageIcon size={15} />
+                    <span>Official Template (Uploaded Design)</span>
                   </button>
-                  <span>{cryptoHash}</span>
+
+                  <button
+                    type="button"
+                    onClick={() => setCertDisplayMode('holographicStudio')}
+                    className={`px-4 py-2 rounded-xl border font-bold text-xs transition-all flex items-center gap-2 cursor-pointer ${
+                      certDisplayMode === 'holographicStudio'
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Sparkles size={15} className="text-amber-500" />
+                    <span>3D Holographic Foil View</span>
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-3 text-xs">
+                  <span className="font-mono text-blue-700 font-bold bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-xl">
+                    CERT ID: {activeCertificate?.id || 'CLB-2026-892'}
+                  </span>
                 </div>
               </div>
+
+              {/* MODE A: OFFICIAL TEMPLATE IMAGE VIEW (Default & Exact User Design) */}
+              {certDisplayMode === 'officialTemplate' && (
+                <div
+                  id="printable-certificate"
+                  className="relative w-full max-w-4xl mx-auto rounded-2xl overflow-hidden shadow-2xl border-4 border-slate-300/80 bg-white select-none transition-all"
+                >
+                  <div className="relative w-full aspect-[1.414/1] bg-white">
+                    {/* Official Template Image Background */}
+                    <img
+                      src={OFFICIAL_TEMPLATE_IMAGE}
+                      alt="Official Certificate of Participation"
+                      className="w-full h-full object-cover block pointer-events-none"
+                    />
+
+                    {/* Recipient Name Overlay - Positioned precisely below "This certificate awarded to" */}
+                    <div className="absolute top-[35.5%] sm:top-[36%] left-0 right-0 text-center px-8 z-10 pointer-events-none">
+                      <h2 className="font-serif text-2xl sm:text-4xl md:text-5xl font-extrabold text-[#0f172a] tracking-tight drop-shadow-2xs font-cinzel leading-none">
+                        {activeCertificate?.recipientName || 'Fatima Zahra'}
+                      </h2>
+                    </div>
+
+                    {/* Live Unique Scannable QR Code Overlay - Fitted EXACTLY inside the rounded square box at bottom center */}
+                    <div
+                      onClick={() => handleOpenLookupForId(activeCertificate?.id || 'CLB-2026-892')}
+                      className="absolute bottom-[3.2%] sm:bottom-[3.6%] left-[48.3%] sm:left-[48.5%] -translate-x-1/2 w-[11.8%] h-[14.2%] z-20 flex items-center justify-center p-0.5 bg-white rounded-md shadow-2xs group cursor-pointer border border-slate-200/90 hover:scale-105 transition-transform"
+                      title="Click or scan to verify credential authenticity"
+                    >
+                      {generatedQr ? (
+                        <img
+                          src={generatedQr}
+                          alt={`Unique Verification QR for ${activeCertificate?.id}`}
+                          className="w-full h-full object-contain rounded-xs block"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-slate-100 flex items-center justify-center rounded-xs">
+                          <QrCode size={18} className="animate-spin text-slate-400" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Top Right Certificate ID Badge */}
+                    <div className="absolute top-4 right-4 z-10 px-2.5 py-1 bg-white/95 backdrop-blur-md rounded-lg border border-slate-300 shadow-2xs font-mono text-[9px] sm:text-[11px] font-bold text-slate-900 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      <span>ID: {activeCertificate?.id || 'CLB-2026-892'}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* MODE B: 3D HOLOGRAPHIC FOIL CANVAS */}
+              {certDisplayMode === 'holographicStudio' && (
+                <div>
+                  {/* Theme Selector Toolbar */}
+                  <div className="flex items-center gap-2 flex-wrap mb-4 px-1">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-700 mr-1">
+                      Foil Finish:
+                    </span>
+                    {[
+                      { id: 'gold', label: 'Imperial Gold', color: 'bg-amber-100 text-amber-900 border-amber-300' },
+                      { id: 'emerald', label: 'Alpine Emerald', color: 'bg-emerald-100 text-emerald-900 border-emerald-300' },
+                      { id: 'royal', label: 'Sapphire Honor', color: 'bg-blue-100 text-blue-900 border-blue-300' },
+                      { id: 'obsidian', label: 'Cyber Obsidian', color: 'bg-slate-900 text-amber-400 border-amber-600' },
+                      { id: 'rosegold', label: 'Rose Gold Crest', color: 'bg-rose-100 text-rose-900 border-rose-300' }
+                    ].map((t) => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => setSelectedTheme(t.id as CertificateTheme)}
+                        className={`px-3 py-1.5 rounded-xl border font-bold text-xs transition-all cursor-pointer ${
+                          selectedTheme === t.id
+                            ? `${t.color} ring-2 ring-blue-500 shadow-sm scale-105`
+                            : 'bg-white hover:bg-slate-50 text-slate-600 border-slate-200'
+                        }`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div
+                    ref={certCardRef}
+                    onMouseMove={handleMouseMove}
+                    onMouseLeave={handleMouseLeave}
+                    style={{
+                      transform:
+                        isTiltEnabled && tilt.active
+                          ? `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale3d(1.01, 1.01, 1.01)`
+                          : 'perspective(1000px) rotateX(0deg) rotateY(0deg)',
+                      transition: tilt.active ? 'none' : 'transform 0.5s ease-out'
+                    }}
+                    className={`relative rounded-3xl border-8 ${themeStyles.borderOuter} ${themeStyles.cardBg} p-8 sm:p-14 shadow-2xl overflow-hidden select-none text-center transition-all duration-300`}
+                  >
+                    {/* Dynamic Specular Glare Sheen */}
+                    {isTiltEnabled && tilt.active && (
+                      <div
+                        className="pointer-events-none absolute inset-0 rounded-3xl z-20 mix-blend-overlay transition-opacity duration-150"
+                        style={{
+                          background: `radial-gradient(circle 500px at ${tilt.glareX}% ${tilt.glareY}%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 70%)`,
+                          opacity: 0.85
+                        }}
+                      />
+                    )}
+
+                    {/* Guilloche Filigree Inner Border */}
+                    <div className={`absolute inset-3 sm:inset-5 border-2 ${themeStyles.borderInner} rounded-2xl pointer-events-none`} />
+
+                    {/* Header Crest */}
+                    <div className="relative z-10 flex flex-col items-center mb-6">
+                      <div className="relative mb-3">
+                        <img
+                          src={officialLogo}
+                          alt="Collabs Logo"
+                          className="w-16 h-16 object-contain rounded-full border-2 border-amber-500 p-1 bg-white shadow-xl"
+                        />
+                      </div>
+
+                      <div className="font-heading font-black text-2xl sm:text-3xl tracking-widest uppercase">
+                        <span className="font-cinzel tracking-widest">Certificate of Participation</span>
+                      </div>
+
+                      <div className="text-xs uppercase tracking-widest font-bold text-slate-500 mt-1">
+                        Science, Arts & Food Exhibition 2026 · Booni, Upper Chitral
+                      </div>
+                      <div className="h-0.5 w-36 bg-gradient-to-r from-transparent via-amber-500 to-transparent mt-3" />
+                    </div>
+
+                    {/* Conferral Statement */}
+                    <div className="relative z-10 space-y-3 mb-8">
+                      <div className="text-xs uppercase font-bold tracking-widest text-blue-700">
+                        THIS CERTIFICATE IS AWARDED TO
+                      </div>
+
+                      <div
+                        className={`font-cinzel text-3xl sm:text-5xl font-extrabold tracking-tight py-2 max-w-2xl mx-auto ${
+                          selectedTheme === 'obsidian' ? 'text-white' : 'text-slate-950'
+                        }`}
+                      >
+                        {activeCertificate?.recipientName || 'Fatima Zahra'}
+                      </div>
+
+                      <p className="text-xs sm:text-base text-slate-700 max-w-xl mx-auto leading-relaxed pt-2">
+                        In recognition of successful participation in <strong className={themeStyles.goldAccent}>{activeCertificate?.project || activeCertificate?.eventName || 'Science, Arts & Food Exhibition 2026'}</strong>, jointly hosted by <strong>Collabs</strong> and <strong>Naveed-e-Falah</strong> in collaboration with <strong>Jenabai Awards</strong> and the <strong>District Youth Office</strong>.
+                      </p>
+                    </div>
+
+                    {/* Signatures & Seal */}
+                    <div className="relative z-10 grid grid-cols-3 gap-4 items-end pt-6 border-t border-slate-200/80 mt-6">
+                      <div className="text-left">
+                        <div className="font-signature text-2xl sm:text-3xl text-slate-900 border-b-2 border-slate-400 pb-1 leading-none">
+                          Founder
+                        </div>
+                        <div className="text-xs font-bold uppercase tracking-wider text-slate-800 mt-1.5">
+                          Founder, Collabs
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col items-center justify-center">
+                        <div className={`p-2 bg-white border ${themeStyles.qrBorder} rounded-xl shadow-md`}>
+                          {generatedQr ? (
+                            <img
+                              src={generatedQr}
+                              alt="QR code"
+                              className="w-16 h-16 sm:w-20 sm:h-20 object-contain block"
+                            />
+                          ) : (
+                            <QrCode size={24} className="animate-spin text-slate-400" />
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <div className="font-signature text-2xl sm:text-3xl text-slate-900 border-b-2 border-slate-400 pb-1 leading-none">
+                          Youth Officer
+                        </div>
+                        <div className="text-xs font-bold uppercase tracking-wider text-slate-800 mt-1.5">
+                          District Youth Officer
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Footer Baseline */}
+                    <div className="relative z-10 mt-6 pt-4 border-t border-slate-200/60 flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] text-slate-500 font-mono">
+                      <span>Presented: {activeCertificate?.issueDate || 'October 31, 2026'}</span>
+                      <button
+                        onClick={() => handleOpenLookupForId(activeCertificate?.id || 'CLB-2026-892')}
+                        className="font-bold text-blue-700 hover:underline cursor-pointer"
+                      >
+                        REGISTRY ID: {activeCertificate?.id || 'CLB-2026-892'}
+                      </button>
+                      <span>{cryptoHash}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Bottom Action Bar */}
               <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
                 <div className="flex items-center gap-2">
                   <BadgeCheck size={16} className="text-emerald-600" />
-                  <span className="font-semibold text-slate-800">Verified A4 Landscape Layout · Print & PDF Ready</span>
+                  <span className="font-semibold text-slate-800">Verified Official Template with Unique QR Code</span>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -761,7 +791,7 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
                     className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
                   >
                     {copiedLink ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
-                    <span>{copiedLink ? 'Link Copied!' : 'Copy Link'}</span>
+                    <span>{copiedLink ? 'Link Copied!' : 'Copy Verification Link'}</span>
                   </button>
 
                   <button
@@ -808,7 +838,6 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
                   >
                     <option value="All">All Categories</option>
                     <option value="First Position">First Position</option>
-                    <option value="Runner-Up">Runner-Up</option>
                     <option value="Excellence">Excellence</option>
                     <option value="Volunteer">Volunteer</option>
                     <option value="Active Participation">Active Participation</option>
@@ -855,7 +884,7 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
                     </div>
 
                     <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-blue-600 font-bold">
-                      <span>View Credential Canvas</span>
+                      <span>View Official Certificate</span>
                       <Eye size={13} />
                     </div>
                   </div>
@@ -870,10 +899,10 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
               <div>
                 <h3 className="font-heading text-xl font-black text-slate-900 flex items-center gap-2">
                   <Sparkles className="text-amber-500" size={20} />
-                  Live Custom Certificate Studio
+                  Issue New Certificate
                 </h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  Issue an authenticated demo certificate with instant QR code verification in seconds.
+                  Type any recipient name to generate an official certificate with a unique scannable QR code.
                 </p>
               </div>
 
@@ -894,18 +923,17 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
 
                 <div>
                   <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
-                    Achievement Title / Rank
+                    Achievement Category
                   </label>
                   <select
                     value={customCategory}
                     onChange={(e) => setCustomCategory(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:border-blue-600 font-semibold"
                   >
-                    <option value="First Position Winner">1st Position (Gold Cash Prize)</option>
-                    <option value="Runner-Up Innovation Award">Runner-Up Innovation Award</option>
+                    <option value="Active Participation">Certificate of Participation</option>
+                    <option value="First Position Winner">1st Position (Science, Arts & Food Exhibition)</option>
                     <option value="Excellence in Technology">Certificate of Excellence</option>
                     <option value="Volunteer Leadership">Certificate of Volunteer Leadership</option>
-                    <option value="Active Participation">Certificate of Active Participation</option>
                   </select>
                 </div>
 
@@ -924,13 +952,13 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
 
                 <div>
                   <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
-                    Project Title / Category
+                    Exhibition / Event
                   </label>
                   <input
                     type="text"
                     value={customProject}
                     onChange={(e) => setCustomProject(e.target.value)}
-                    placeholder="e.g. High-Altitude Autonomous Robotics"
+                    placeholder="Science, Arts & Food Exhibition 2026"
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:border-blue-600 font-semibold"
                   />
                 </div>
@@ -940,7 +968,7 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
                     type="submit"
                     className="w-full sm:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm rounded-xl transition-all cursor-pointer shadow-md flex items-center justify-center gap-2"
                   >
-                    <Sparkles size={16} /> Generate & View Authentic Certificate
+                    <Sparkles size={16} /> Generate & View Official Certificate
                   </button>
                 </div>
               </form>
