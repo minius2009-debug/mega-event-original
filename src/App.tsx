@@ -85,7 +85,6 @@ import {
 import { BulkTeamImportModal } from './components/BulkTeamImportModal';
 import { TeamDetailsModal } from './components/TeamDetailsModal';
 import { CertificatePortal, CertificateRecord } from './components/CertificatePortal';
-import { VolunteerDutyTracker } from './components/VolunteerDutyTracker';
 import {
   subscribeTeams,
   deleteTeamFromFirestore,
@@ -2139,14 +2138,6 @@ export default function App() {
             </div>
 
             <div className="space-y-8 text-left">
-              {/* Dedicated Volunteer Task & Duty Clearance Tracker (ID Lookup + Admin Decision Form) */}
-              <VolunteerDutyTracker
-                volunteers={volunteers}
-                setVolunteers={setVolunteers}
-                isAdminMode={isAdminMode}
-                setIsAdminMode={setIsAdminAuthenticated}
-              />
-
               {/* Team Pass QR Scanner & Station Quick Check-In Card */}
               <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white border border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
@@ -3126,43 +3117,43 @@ export default function App() {
           {/* Horizontal Next-by-Next Controls */}
           <div className="flex items-center gap-3 shrink-0">
             <span className="text-xs font-semibold text-slate-500">
-              <strong className="text-slate-900">{activeTeamIndex + 1}</strong> / {INITIAL_TEAM.length}
+              Member {activeTeamIndex + 1} of {INITIAL_TEAM.length}
             </span>
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => {
-                  const targetIdx = (activeTeamIndex - 1 + INITIAL_TEAM.length) % INITIAL_TEAM.length;
-                  setActiveTeamIndex(targetIdx);
-                  setSelectedTeamMemberId(INITIAL_TEAM[targetIdx].id);
+                  const nextIdx = (activeTeamIndex - 1 + INITIAL_TEAM.length) % INITIAL_TEAM.length;
+                  setActiveTeamIndex(nextIdx);
+                  setSelectedTeamMemberId(INITIAL_TEAM[nextIdx].id);
                   if (teamSliderRef.current) {
-                    const card = teamSliderRef.current.children[targetIdx] as HTMLElement;
-                    if (card) {
-                      card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                    }
+                    teamSliderRef.current.scrollTo({
+                      left: nextIdx * 336,
+                      behavior: 'smooth'
+                    });
                   }
                 }}
-                className="p-2.5 bg-white hover:bg-slate-100 text-slate-700 rounded-xl border border-slate-200 transition-all cursor-pointer active:scale-95 shadow-2xs"
+                className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors cursor-pointer active:scale-95 shadow-2xs"
                 title="Previous Member"
               >
-                <ChevronLeft size={16} />
+                <ChevronLeft size={18} />
               </button>
               <button
                 onClick={() => {
-                  const targetIdx = (activeTeamIndex + 1) % INITIAL_TEAM.length;
-                  setActiveTeamIndex(targetIdx);
-                  setSelectedTeamMemberId(INITIAL_TEAM[targetIdx].id);
+                  const nextIdx = (activeTeamIndex + 1) % INITIAL_TEAM.length;
+                  setActiveTeamIndex(nextIdx);
+                  setSelectedTeamMemberId(INITIAL_TEAM[nextIdx].id);
                   if (teamSliderRef.current) {
-                    const card = teamSliderRef.current.children[targetIdx] as HTMLElement;
-                    if (card) {
-                      card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                    }
+                    teamSliderRef.current.scrollTo({
+                      left: nextIdx * 336,
+                      behavior: 'smooth'
+                    });
                   }
                 }}
-                className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all cursor-pointer active:scale-95 shadow-xs flex items-center gap-1 text-xs"
+                className="p-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors cursor-pointer active:scale-95 shadow-2xs flex items-center gap-1 text-xs"
                 title="Next Member"
               >
                 <span>Next</span>
-                <ChevronRight size={16} />
+                <ChevronRight size={18} />
               </button>
             </div>
           </div>
@@ -3170,41 +3161,27 @@ export default function App() {
 
         {sectionsExpanded.teamDirectory && (
           <div className="space-y-6 text-left">
-            {/* Horizontal Scroll Track with High-Precision Centering */}
+            {/* Horizontal Scroll Track */}
             <div
               ref={teamSliderRef}
               onScroll={() => {
                 if (teamSliderRef.current) {
-                  const container = teamSliderRef.current;
-                  const centerPoint = container.scrollLeft + container.clientWidth / 2;
-                  let closestIndex = 0;
-                  let minDistance = Infinity;
-
-                  Array.from(container.children).forEach((child, idx) => {
-                    const el = child as HTMLElement;
-                    const elCenter = el.offsetLeft + el.offsetWidth / 2;
-                    const dist = Math.abs(centerPoint - elCenter);
-                    if (dist < minDistance) {
-                      minDistance = dist;
-                      closestIndex = idx;
-                    }
-                  });
-
-                  if (closestIndex !== activeTeamIndex && closestIndex < INITIAL_TEAM.length) {
-                    setActiveTeamIndex(closestIndex);
-                    setSelectedTeamMemberId(INITIAL_TEAM[closestIndex].id);
+                  const scrollLeft = teamSliderRef.current.scrollLeft;
+                  const idx = Math.min(
+                    INITIAL_TEAM.length - 1,
+                    Math.max(0, Math.round(scrollLeft / 336))
+                  );
+                  if (idx !== activeTeamIndex) {
+                    setActiveTeamIndex(idx);
+                    setSelectedTeamMemberId(INITIAL_TEAM[idx].id);
                   }
                 }
               }}
-              className="flex overflow-x-auto gap-4 pb-4 pt-1 px-1 scroll-smooth snap-x snap-mandatory scrollbar-none"
+              className="flex overflow-x-auto gap-4 pb-4 scroll-smooth snap-x snap-mandatory scrollbar-none p-1"
             >
               {INITIAL_TEAM.map((member, idx) => {
                 const isSelected = selectedTeamMemberId === member.id || activeTeamIndex === idx;
-                const roleNum = member.department.includes('Role 1')
-                  ? 'LEADERSHIP'
-                  : member.department.includes('Role 2')
-                  ? 'OPERATIONS'
-                  : 'MEDIA & BRAND';
+                const roleNum = member.department.includes('Role 1') ? 'ROLE 1' : member.department.includes('Role 2') ? 'ROLE 2' : 'ROLE 3';
 
                 return (
                   <div
@@ -3213,94 +3190,48 @@ export default function App() {
                       setActiveTeamIndex(idx);
                       setSelectedTeamMemberId(member.id);
                       setSelectedTeamMemberModal(member);
-                      if (teamSliderRef.current) {
-                        const card = teamSliderRef.current.children[idx] as HTMLElement;
-                        if (card) {
-                          card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                        }
-                      }
                     }}
-                    className={`snap-center w-[280px] sm:w-[320px] shrink-0 rounded-2xl p-5 border transition-all duration-300 cursor-pointer relative overflow-hidden group flex flex-col justify-between shadow-xs min-h-[225px] ${
-                      isSelected
-                        ? 'bg-slate-900 border-blue-500/80 text-white shadow-xl ring-2 ring-blue-500/30 -translate-y-1 scale-[1.01]'
-                        : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-900 hover:-translate-y-0.5 hover:shadow-md'
+                    className={`snap-start w-[280px] sm:w-[320px] shrink-0 rounded-2xl p-5 border transition-all duration-300 cursor-pointer relative overflow-hidden group flex flex-col justify-between shadow-xs hover:-translate-y-1 hover:shadow-lg min-h-[220px] ${
+                      isSelected 
+                        ? 'bg-gradient-to-br from-purple-600 via-indigo-600 to-pink-600 border-transparent text-white shadow-xl ring-2 ring-purple-400/50' 
+                        : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-900'
                     }`}
                   >
-                    {/* Subtle Top Ambient Glow when Active */}
-                    {isSelected && (
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
-                    )}
-
-                    <div className="relative z-10">
-                      <div className="flex items-center justify-between mb-3.5">
-                        <div
-                          className={`w-9 h-9 rounded-xl font-bold text-xs flex items-center justify-center shadow-xs transition-colors ${
-                            isSelected
-                              ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white ring-2 ring-blue-400/40'
-                              : 'bg-blue-50 text-blue-700'
-                          }`}
-                        >
-                          {member.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className={`px-2.5 py-1 rounded-lg font-bold text-xs shadow-2xs ${
+                          isSelected ? 'bg-white/25 text-white' : 'bg-blue-50 text-blue-700'
+                        }`}>
+                          {member.name.split(' ').map(n => n[0]).join('')}
                         </div>
-                        <span
-                          className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full tracking-wider border ${
-                            isSelected
-                              ? 'bg-blue-500/20 text-blue-300 border-blue-400/30'
-                              : 'bg-slate-100 text-slate-500 border-slate-200'
-                          }`}
-                        >
+                        <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                          isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                        }`}>
                           {roleNum}
                         </span>
                       </div>
 
-                      <h3
-                        className={`font-heading text-base font-black tracking-tight mb-1 transition-colors ${
-                          isSelected ? 'text-white' : 'text-slate-900 group-hover:text-blue-600'
-                        }`}
-                      >
+                      <h3 className={`font-heading text-base font-black tracking-tight mb-1 ${isSelected ? 'text-white' : 'text-slate-900'}`}>
                         {member.name}
                       </h3>
-                      <p
-                        className={`text-xs font-bold transition-colors ${
-                          isSelected ? 'text-blue-300' : 'text-blue-600'
-                        }`}
-                      >
+                      <p className={`text-xs font-bold ${isSelected ? 'text-purple-100' : 'text-blue-600'}`}>
                         {member.role}
-                      </p>
-
-                      <p
-                        className={`text-[11px] mt-2 line-clamp-2 leading-relaxed transition-colors ${
-                          isSelected ? 'text-slate-300' : 'text-slate-500'
-                        }`}
-                      >
-                        {member.focus}
                       </p>
                     </div>
 
-                    <div
-                      className={`relative z-10 mt-4 pt-3 border-t flex items-center justify-between text-xs font-semibold transition-colors ${
-                        isSelected
-                          ? 'border-slate-800 text-blue-300'
-                          : 'border-slate-100 text-slate-600 group-hover:text-slate-900'
-                      }`}
-                    >
-                      <span>{isSelected ? 'Active Profile' : 'View Full Profile'}</span>
-                      <ChevronRight
-                        size={14}
-                        className={`transform transition-transform ${
-                          isSelected
-                            ? 'translate-x-1 text-blue-400'
-                            : 'group-hover:translate-x-1 text-slate-400'
-                        }`}
-                      />
+                    <div className={`mt-5 pt-3 border-t flex items-center justify-between text-xs font-semibold ${
+                      isSelected ? 'border-white/20 text-white' : 'border-slate-100 text-slate-600 group-hover:text-slate-900'
+                    }`}>
+                      <span>{isSelected ? 'Active Profile' : 'View Responsibilities'}</span>
+                      <ChevronRight size={14} className={`transform transition-transform ${isSelected ? 'translate-x-1 text-white' : 'group-hover:translate-x-1'}`} />
                     </div>
                   </div>
                 );
               })}
             </div>
 
-            {/* Smooth Animated Horizontal Pagination Dots */}
-            <div className="flex items-center justify-center gap-1.5 pt-2 pb-1">
+            {/* Animated Horizontal Pagination Dots */}
+            <div className="flex items-center justify-center gap-1.5 pt-3 pb-1">
               {INITIAL_TEAM.map((member, idx) => {
                 const isActive = activeTeamIndex === idx;
                 return (
@@ -3311,16 +3242,16 @@ export default function App() {
                       setActiveTeamIndex(idx);
                       setSelectedTeamMemberId(member.id);
                       if (teamSliderRef.current) {
-                        const card = teamSliderRef.current.children[idx] as HTMLElement;
-                        if (card) {
-                          card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                        }
+                        teamSliderRef.current.scrollTo({
+                          left: idx * 336,
+                          behavior: 'smooth'
+                        });
                       }
                     }}
-                    className={`h-2 rounded-full transition-all duration-300 ease-out cursor-pointer ${
+                    className={`h-2.5 rounded-full transition-all duration-300 ease-out cursor-pointer ${
                       isActive
-                        ? 'w-8 bg-blue-600 shadow-xs ring-2 ring-blue-300/60 scale-105'
-                        : 'w-2 bg-slate-300 hover:bg-slate-400 hover:scale-125'
+                        ? 'w-9 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 shadow-md ring-2 ring-blue-300/80 scale-105'
+                        : 'w-2.5 bg-slate-300 hover:bg-slate-400 hover:scale-110'
                     }`}
                     title={`Go to ${member.name} (${idx + 1}/${INITIAL_TEAM.length})`}
                   />

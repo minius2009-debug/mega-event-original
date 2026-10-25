@@ -23,12 +23,10 @@ import {
   ChevronUp,
   UserPlus,
   ArrowUpDown,
-  Check,
-  ClipboardList
+  Check
 } from 'lucide-react';
 import { VolunteerLog } from '../App';
 import { AddVolunteerModal } from './AddVolunteerModal';
-import { VolunteerDutyTracker } from './VolunteerDutyTracker';
 
 interface VolunteerManagementProps {
   volunteers: VolunteerLog[];
@@ -62,7 +60,6 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
   const [roleFilter, setRoleFilter] = useState('All');
   const [sortField, setSortField] = useState<'name' | 'hours' | 'dateJoined' | 'school'>('hours');
   const [sortAsc, setSortAsc] = useState(false);
-  const [managementTab, setManagementTab] = useState<'roster' | 'dutyTracker'>('roster');
 
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -378,34 +375,6 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
               <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                 Monitor volunteer rosters, filter by school institution, supervise work assignments, and manage credentials.
               </p>
-
-              {/* View Switcher Tabs */}
-              <div className="flex items-center gap-2 pt-3 flex-wrap">
-                <button
-                  type="button"
-                  onClick={() => setManagementTab('roster')}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                    managementTab === 'roster'
-                      ? 'bg-blue-600 text-white shadow-xs'
-                      : isDark ? 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
-                  }`}
-                >
-                  <span>Roster Directory</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setManagementTab('dutyTracker')}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                    managementTab === 'dutyTracker'
-                      ? 'bg-blue-600 text-white shadow-xs'
-                      : isDark ? 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
-                  }`}
-                >
-                  <ClipboardList size={14} />
-                  <span>Duty Assignment & Clearance Tracker (Form View)</span>
-                </button>
-              </div>
             </div>
 
             <div className="flex items-center gap-3 shrink-0">
@@ -591,18 +560,9 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
           </div>
         </div>
 
-        {managementTab === 'dutyTracker' ? (
-          <div className="p-4 sm:p-6">
-            <VolunteerDutyTracker
-              volunteers={volunteers}
-              setVolunteers={setVolunteers}
-              isAdminMode={true}
-            />
-          </div>
-        ) : (
-          /* Data Table */
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+        {/* Data Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
             <thead>
               <tr className={`border-b text-[11px] font-bold uppercase tracking-wider ${
                 isDark ? 'bg-slate-900/90 border-slate-800 text-slate-400' : 'bg-slate-50/70 border-slate-200 text-slate-500'
@@ -810,7 +770,6 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
             </tbody>
           </table>
         </div>
-      )}
       </div>
 
       {/* ========================================================================= */}
