@@ -31,7 +31,10 @@ import {
   Send,
   Zap,
   Globe,
-  Image as ImageIcon
+  Image as ImageIcon,
+  CheckCircle,
+  FileText,
+  User
 } from 'lucide-react';
 
 export interface CertificateRecord {
@@ -170,6 +173,17 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
     setTimeout(() => {
       setLookupMessage({ text: '', type: null });
     }, 4500);
+  };
+
+  // Download generated QR Code Image
+  const handleDownloadQrImage = () => {
+    if (!generatedQr) return;
+    const a = document.createElement('a');
+    a.href = generatedQr;
+    a.download = `QR-Verification-${activeCertificate?.id || 'CLB-2026'}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
   // 3D Tilt calculation
@@ -336,7 +350,7 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
     <section id="certificates" className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto scroll-mt-24 text-left">
       
       {/* Top Banner Header with Editorial Styling */}
-      <div className="relative overflow-hidden rounded-3xl bg-slate-950 text-white p-6 sm:p-8 shadow-2xl border border-slate-800 mb-8">
+      <div className="relative overflow-hidden rounded-3xl bg-slate-950 text-white p-6 sm:p-8 shadow-2xl border border-slate-800 mb-6">
         <div className="absolute top-0 right-0 -mt-12 -mr-12 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-1/3 -mb-16 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -344,7 +358,7 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-bold uppercase tracking-widest">
               <ShieldCheck size={14} className="text-blue-400" />
-              <span>Collabs & District Youth Office Official Certification</span>
+              <span>District Youth Office Upper Chitral & Collabs Official Credential</span>
             </div>
             
             <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-tight">
@@ -352,7 +366,7 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
             </h1>
 
             <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
-              In collaboration with District Youth Office Upper Chitral, Naveed-e-Falah & Jenabai Awards for Science, Arts & Food Exhibition 2026.
+              Jointly hosted by <strong>Collabs</strong> and <strong>Naveed-e-Falah</strong> in collaboration with <strong>Jenabai Awards</strong> and the <strong>District Youth Office</strong> for Science, Arts & Food Exhibition 2026.
             </p>
           </div>
 
@@ -382,8 +396,51 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
           </div>
         </div>
 
+        {/* Live Credential Metrics Ticker Bar */}
+        <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 mt-6 border-t border-white/10 text-xs">
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-3 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center font-bold">
+              <Award size={18} />
+            </div>
+            <div>
+              <div className="font-bold text-white text-sm">Official Template</div>
+              <div className="text-[10px] text-slate-400">Authentic Design</div>
+            </div>
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-3 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-300 flex items-center justify-center font-bold">
+              <QrCode size={18} />
+            </div>
+            <div>
+              <div className="font-bold text-white text-sm">Dynamic QR Code</div>
+              <div className="text-[10px] text-slate-400">Unique for Recipient</div>
+            </div>
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-3 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-bold">
+              <ShieldCheck size={18} />
+            </div>
+            <div>
+              <div className="font-bold text-white text-sm">Instant Verify</div>
+              <div className="text-[10px] text-slate-400">District Approved</div>
+            </div>
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-3 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center font-bold">
+              <Layers size={18} />
+            </div>
+            <div>
+              <div className="font-bold text-white text-sm">{certDatabase.length} Records</div>
+              <div className="text-[10px] text-slate-400">Active Database</div>
+            </div>
+          </div>
+        </div>
+
         {/* Navigation Tabs Bar inside Hero */}
-        <div className="relative z-10 flex items-center gap-2 pt-6 mt-6 border-t border-white/10 overflow-x-auto no-scrollbar">
+        <div className="relative z-10 flex items-center gap-2 pt-6 mt-4 border-t border-white/10 overflow-x-auto no-scrollbar">
           <button
             type="button"
             onClick={() => setActiveTab('certificate')}
@@ -537,10 +594,57 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
 
           {/* TAB 1: OFFICIAL CERTIFICATE CANVAS */}
           {activeTab === 'certificate' && (
-            <div className="bg-slate-900/5 p-4 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs">
+            <div className="bg-slate-900/5 p-4 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs space-y-6">
               
+              {/* Recipient Spotlight Summary Card */}
+              <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold text-lg shadow-md shrink-0">
+                    <User size={24} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-heading font-black text-slate-900 text-lg sm:text-xl">
+                        {activeCertificate?.recipientName || 'Fatima Zahra'}
+                      </h3>
+                      <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-full border border-emerald-300 flex items-center gap-1">
+                        <CheckCircle size={12} /> Verified Recipient
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-2 flex-wrap">
+                      <span>{activeCertificate?.school || 'Booni Degree College'}</span>
+                      <span>·</span>
+                      <span className="font-semibold text-blue-700">{activeCertificate?.achievementType || 'Certificate of Participation'}</span>
+                      <span>·</span>
+                      <span className="font-mono text-slate-600 font-bold">ID: {activeCertificate?.id || 'CLB-2026-892'}</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0 flex-wrap justify-center">
+                  <button
+                    type="button"
+                    onClick={handleDownloadQrImage}
+                    className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5 border border-slate-200"
+                    title="Download high resolution QR code PNG"
+                  >
+                    <Download size={14} className="text-blue-600" />
+                    <span>Download QR</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleCopyVerificationLink(activeCertificate?.id || 'CLB-2026-892')}
+                    className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5 border border-slate-200"
+                  >
+                    {copiedLink ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                    <span>{copiedLink ? 'Link Copied!' : 'Copy Verification URL'}</span>
+                  </button>
+                </div>
+              </div>
+
               {/* Display Mode Toolbar Switcher */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-200">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
@@ -569,10 +673,8 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
                   </button>
                 </div>
 
-                <div className="flex items-center gap-3 text-xs">
-                  <span className="font-mono text-blue-700 font-bold bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-xl">
-                    CERT ID: {activeCertificate?.id || 'CLB-2026-892'}
-                  </span>
+                <div className="text-xs text-slate-500 font-medium">
+                  Click or scan the QR code to verify on live registry
                 </div>
               </div>
 
@@ -590,37 +692,32 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
                       className="w-full h-full object-cover block pointer-events-none"
                     />
 
-                    {/* Recipient Name Overlay - Positioned precisely below "This certificate awarded to" */}
-                    <div className="absolute top-[35.5%] sm:top-[36%] left-0 right-0 text-center px-8 z-10 pointer-events-none">
-                      <h2 className="font-serif text-2xl sm:text-4xl md:text-5xl font-extrabold text-[#0f172a] tracking-tight drop-shadow-2xs font-cinzel leading-none">
+                    {/* Recipient Name Overlay - Refined smaller font size matching "Science, Arts & Food Exhibition 2026" */}
+                    <div className="absolute top-[35.8%] sm:top-[36.2%] left-0 right-0 text-center px-8 z-10 pointer-events-none">
+                      <h2 className="font-serif text-base sm:text-xl md:text-2xl lg:text-3xl font-bold text-[#0f172a] tracking-normal font-cinzel leading-tight">
                         {activeCertificate?.recipientName || 'Fatima Zahra'}
                       </h2>
                     </div>
 
-                    {/* Live Unique Scannable QR Code Overlay - Fitted EXACTLY inside the rounded square box at bottom center */}
+                    {/* Live Unique Scannable QR Code Overlay - Fitted EXACTLY & neatly inside the rounded square box at bottom center with padding */}
                     <div
                       onClick={() => handleOpenLookupForId(activeCertificate?.id || 'CLB-2026-892')}
-                      className="absolute bottom-[3.2%] sm:bottom-[3.6%] left-[48.3%] sm:left-[48.5%] -translate-x-1/2 w-[11.8%] h-[14.2%] z-20 flex items-center justify-center p-0.5 bg-white rounded-md shadow-2xs group cursor-pointer border border-slate-200/90 hover:scale-105 transition-transform"
+                      className="absolute bottom-[4.2%] sm:bottom-[4.5%] left-[48.4%] sm:left-[48.5%] -translate-x-1/2 w-[9.2%] h-[11.8%] z-20 flex items-center justify-center p-1 bg-white rounded-lg shadow-xs group cursor-pointer border border-slate-200/60 hover:scale-105 transition-transform"
                       title="Click or scan to verify credential authenticity"
                     >
                       {generatedQr ? (
                         <img
                           src={generatedQr}
                           alt={`Unique Verification QR for ${activeCertificate?.id}`}
-                          className="w-full h-full object-contain rounded-xs block"
+                          className="w-full h-full object-contain rounded-xs block p-0.5"
                         />
                       ) : (
                         <div className="w-full h-full bg-slate-100 flex items-center justify-center rounded-xs">
-                          <QrCode size={18} className="animate-spin text-slate-400" />
+                          <QrCode size={16} className="animate-spin text-slate-400" />
                         </div>
                       )}
                     </div>
 
-                    {/* Top Right Certificate ID Badge */}
-                    <div className="absolute top-4 right-4 z-10 px-2.5 py-1 bg-white/95 backdrop-blur-md rounded-lg border border-slate-300 shadow-2xs font-mono text-[9px] sm:text-[11px] font-bold text-slate-900 flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                      <span>ID: {activeCertificate?.id || 'CLB-2026-892'}</span>
-                    </div>
                   </div>
                 </div>
               )}
@@ -709,7 +806,7 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
                       </div>
 
                       <div
-                        className={`font-cinzel text-3xl sm:text-5xl font-extrabold tracking-tight py-2 max-w-2xl mx-auto ${
+                        className={`font-cinzel text-xl sm:text-3xl font-bold tracking-normal py-2 max-w-2xl mx-auto ${
                           selectedTheme === 'obsidian' ? 'text-white' : 'text-slate-950'
                         }`}
                       >
@@ -733,12 +830,12 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
                       </div>
 
                       <div className="flex flex-col items-center justify-center">
-                        <div className={`p-2 bg-white border ${themeStyles.qrBorder} rounded-xl shadow-md`}>
+                        <div className={`p-1.5 bg-white border ${themeStyles.qrBorder} rounded-xl shadow-md`}>
                           {generatedQr ? (
                             <img
                               src={generatedQr}
                               alt="QR code"
-                              className="w-16 h-16 sm:w-20 sm:h-20 object-contain block"
+                              className="w-14 h-14 sm:w-16 sm:h-16 object-contain block p-0.5"
                             />
                           ) : (
                             <QrCode size={24} className="animate-spin text-slate-400" />
