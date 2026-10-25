@@ -35,8 +35,8 @@ import {
   Shield,
   Medal,
   Instagram,
-  Facebook,
-  Twitter,
+  Youtube,
+  Linkedin,
   Wifi,
   Phone,
   Download,
@@ -85,6 +85,7 @@ import {
 import { BulkTeamImportModal } from './components/BulkTeamImportModal';
 import { TeamDetailsModal } from './components/TeamDetailsModal';
 import { CertificatePortal, CertificateRecord } from './components/CertificatePortal';
+import { VolunteerDutyTracker } from './components/VolunteerDutyTracker';
 import {
   subscribeTeams,
   deleteTeamFromFirestore,
@@ -2138,6 +2139,14 @@ export default function App() {
             </div>
 
             <div className="space-y-8 text-left">
+              {/* Dedicated Volunteer Task & Duty Clearance Tracker (ID Lookup + Admin Decision Form) */}
+              <VolunteerDutyTracker
+                volunteers={volunteers}
+                setVolunteers={setVolunteers}
+                isAdminMode={isAdminMode}
+                setIsAdminMode={setIsAdminAuthenticated}
+              />
+
               {/* Team Pass QR Scanner & Station Quick Check-In Card */}
               <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white border border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
@@ -2495,79 +2504,203 @@ export default function App() {
 
                 <div className="lg:col-span-6 space-y-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="p-2 bg-slate-100 rounded-lg text-slate-700">
+                    <div className="p-2 bg-blue-100 rounded-lg text-blue-700">
                       <Shield size={20} />
                     </div>
                     <div>
-                      <h3 className="font-bold text-lg text-slate-900">Volunteer Departments</h3>
-                      <p className="text-xs text-slate-500">Key teams supporting the Booni Exhibition</p>
+                      <h3 className="font-bold text-lg text-slate-900">Volunteer Roles & Specific Work</h3>
+                      <p className="text-xs text-slate-500">Official responsibilities and specific on-ground duties for 31 October 2026</p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="bg-white border border-slate-200 rounded-xl p-4">
-                      <div className="flex items-center gap-2 font-bold text-xs text-blue-900 mb-1">
-                        <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                        Venue Operations & Logistics
+                  <div className="space-y-4 max-h-[580px] overflow-y-auto pr-1">
+                    {/* Role 1: Venue Operations & Logistics */}
+                    <div className="bg-white border border-slate-200 rounded-xl p-4 hover:border-blue-300 transition-all shadow-2xs">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2 font-bold text-xs text-blue-900">
+                          <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+                          <span>1. Venue Operations & Logistics Crew</span>
+                        </div>
+                        <span className="text-[10px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                          Shift: 08:00 AM – 06:00 PM
+                        </span>
                       </div>
-                      <p className="text-xs text-slate-600 leading-relaxed">
-                        Assist with seating, stage setup, crowd guidance, and equipment management at the main hall.
+                      <p className="text-xs text-slate-600 mb-2 font-medium">
+                        Primary Station: Main Auditorium & Outer Gate Queues
                       </p>
-                      <span className="inline-block mt-3 text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                        Shift: 08:00 AM - 06:00 PM
-                      </span>
+                      <div className="space-y-1.5 text-xs text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        <div className="font-bold text-[11px] text-slate-900 uppercase tracking-wider mb-1">Specific Work & Assigned Duties:</div>
+                        <div className="flex items-start gap-1.5">
+                          <CheckCircle size={13} className="text-blue-600 shrink-0 mt-0.5" />
+                          <span><strong>Stage & Seating Setup:</strong> Arrange 300+ chairs into designated delegate zones, setup keynote podium, and align stage backdrop.</span>
+                        </div>
+                        <div className="flex items-start gap-1.5">
+                          <CheckCircle size={13} className="text-blue-600 shrink-0 mt-0.5" />
+                          <span><strong>Crowd Flow & Queuing:</strong> Greet arriving school buses and route student contingents to assigned pavilion stalls without bottlenecking.</span>
+                        </div>
+                        <div className="flex items-start gap-1.5">
+                          <CheckCircle size={13} className="text-blue-600 shrink-0 mt-0.5" />
+                          <span><strong>Session Timekeeping:</strong> Assist session moderators with 5-minute and 1-minute visual signals for project pitches.</span>
+                        </div>
+                        <div className="flex items-start gap-1.5">
+                          <CheckCircle size={13} className="text-blue-600 shrink-0 mt-0.5" />
+                          <span><strong>Packdown & Venue Handover:</strong> Conduct equipment count after the ceremony, pack audio gear, and return the venue in clean condition.</span>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="bg-white border border-slate-200 rounded-xl p-4">
-                      <div className="flex items-center gap-2 font-bold text-xs text-emerald-900 mb-1">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        Tech & Registration
+                    {/* Role 2: Tech, IT & Registration */}
+                    <div className="bg-white border border-slate-200 rounded-xl p-4 hover:border-emerald-300 transition-all shadow-2xs">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2 font-bold text-xs text-emerald-900">
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+                          <span>2. Tech & Digital Registration Support</span>
+                        </div>
+                        <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                          Shift: 08:00 AM – 03:00 PM
+                        </span>
                       </div>
-                      <p className="text-xs text-slate-600 leading-relaxed">
-                        Manage helpdesk check-ins, barcode verification, screen displays, and projector hardware.
+                      <p className="text-xs text-slate-600 mb-2 font-medium">
+                        Primary Station: Registration Helpdesk & Technical Control Pod
                       </p>
-                      <span className="inline-block mt-3 text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                        Shift: 08:00 AM - 02:30 PM
-                      </span>
+                      <div className="space-y-1.5 text-xs text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        <div className="font-bold text-[11px] text-slate-900 uppercase tracking-wider mb-1">Specific Work & Assigned Duties:</div>
+                        <div className="flex items-start gap-1.5">
+                          <CheckCircle size={13} className="text-emerald-600 shrink-0 mt-0.5" />
+                          <span><strong>QR Code Scanning:</strong> Scan student team passes and delegate badges using the Collabs Check-In tool at entry.</span>
+                        </div>
+                        <div className="flex items-start gap-1.5">
+                          <CheckCircle size={13} className="text-emerald-600 shrink-0 mt-0.5" />
+                          <span><strong>Hardware & Display Fleet:</strong> Connect presentation laptops to HDMI projectors, test screen mirroring, and calibrate wireless clickers.</span>
+                        </div>
+                        <div className="flex items-start gap-1.5">
+                          <CheckCircle size={13} className="text-emerald-600 shrink-0 mt-0.5" />
+                          <span><strong>Live Scorecard Entry:</strong> Collect signed rubric score sheets from judging panels and input points into the live ranking system.</span>
+                        </div>
+                        <div className="flex items-start gap-1.5">
+                          <CheckCircle size={13} className="text-emerald-600 shrink-0 mt-0.5" />
+                          <span><strong>Tech Troubleshooting:</strong> Maintain reliable mobile hotspot connection and resolve sound/mic interference on stage.</span>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="bg-white border border-slate-200 rounded-xl p-4">
-                      <div className="flex items-center gap-2 font-bold text-xs text-purple-900 mb-1">
-                        <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                        Media & Coverage
+                    {/* Role 3: Exhibition Floor & Stalls */}
+                    <div className="bg-white border border-slate-200 rounded-xl p-4 hover:border-amber-300 transition-all shadow-2xs">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2 font-bold text-xs text-amber-900">
+                          <span className="w-2.5 h-2.5 rounded-full bg-amber-600"></span>
+                          <span>3. Exhibition Stalls & Prototype Coordination</span>
+                        </div>
+                        <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                          Shift: 08:30 AM – 05:00 PM
+                        </span>
                       </div>
-                      <p className="text-xs text-slate-600 leading-relaxed">
-                        Capture photography, record team presentations, conduct interviews, and handle social updates.
+                      <p className="text-xs text-slate-600 mb-2 font-medium">
+                        Primary Station: Science, Arts & Food Innovation Pavilions
                       </p>
-                      <span className="inline-block mt-3 text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                        Shift: 09:00 AM - 05:00 PM
-                      </span>
+                      <div className="space-y-1.5 text-xs text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        <div className="font-bold text-[11px] text-slate-900 uppercase tracking-wider mb-1">Specific Work & Assigned Duties:</div>
+                        <div className="flex items-start gap-1.5">
+                          <CheckCircle size={13} className="text-amber-600 shrink-0 mt-0.5" />
+                          <span><strong>Stall Power & Prototype Safety:</strong> Supply extension cords and ensure safe wiring for robotics, solar models, and hydro pumps.</span>
+                        </div>
+                        <div className="flex items-start gap-1.5">
+                          <CheckCircle size={13} className="text-amber-600 shrink-0 mt-0.5" />
+                          <span><strong>Judge Escorting:</strong> Escort evaluation panels to numbered stalls (Stalls 01 to 10) according to the evaluation timeline.</span>
+                        </div>
+                        <div className="flex items-start gap-1.5">
+                          <CheckCircle size={13} className="text-amber-600 shrink-0 mt-0.5" />
+                          <span><strong>Visitor Engagement:</strong> Prevent overcrowding at popular exhibits, allowing equal viewing time for all attendees.</span>
+                        </div>
+                        <div className="flex items-start gap-1.5">
+                          <CheckCircle size={13} className="text-amber-600 shrink-0 mt-0.5" />
+                          <span><strong>Model Refills:</strong> Assist teams with clean water refills, stationery tape, display stands, and emergency supplies.</span>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="bg-white border border-slate-200 rounded-xl p-4">
-                      <div className="flex items-center gap-2 font-bold text-xs text-amber-900 mb-1">
-                        <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                        Guest Hospitality
+                    {/* Role 4: Media, Coverage & Social Broadcast */}
+                    <div className="bg-white border border-slate-200 rounded-xl p-4 hover:border-purple-300 transition-all shadow-2xs">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2 font-bold text-xs text-purple-900">
+                          <span className="w-2.5 h-2.5 rounded-full bg-purple-600"></span>
+                          <span>4. Media, Photography & Live Broadcast</span>
+                        </div>
+                        <span className="text-[10px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                          Shift: 09:00 AM – 05:30 PM
+                        </span>
                       </div>
-                      <p className="text-xs text-slate-600 leading-relaxed">
-                        Welcome guest speakers, mentors, institutional leads, and assist with refreshments and schedules.
+                      <p className="text-xs text-slate-600 mb-2 font-medium">
+                        Primary Station: Auditorium Floor, Interview Booth & Media Desk
                       </p>
-                      <span className="inline-block mt-3 text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                        Shift: 08:30 AM - 04:30 PM
-                      </span>
+                      <div className="space-y-1.5 text-xs text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        <div className="font-bold text-[11px] text-slate-900 uppercase tracking-wider mb-1">Specific Work & Assigned Duties:</div>
+                        <div className="flex items-start gap-1.5">
+                          <CheckCircle size={13} className="text-purple-600 shrink-0 mt-0.5" />
+                          <span><strong>High-Resolution Photo Coverage:</strong> Capture professional photos of student demos, judging interviews, and trophy awards.</span>
+                        </div>
+                        <div className="flex items-start gap-1.5">
+                          <CheckCircle size={13} className="text-purple-600 shrink-0 mt-0.5" />
+                          <span><strong>Short Spotlight Videos:</strong> Record 30-to-60 second pitch reels of team leaders and mentors for Collabs social media.</span>
+                        </div>
+                        <div className="flex items-start gap-1.5">
+                          <CheckCircle size={13} className="text-purple-600 shrink-0 mt-0.5" />
+                          <span><strong>Live Social Publishing:</strong> Post instant story updates, keynote quotes, and winner teasers to @collabs channels.</span>
+                        </div>
+                        <div className="flex items-start gap-1.5">
+                          <CheckCircle size={13} className="text-purple-600 shrink-0 mt-0.5" />
+                          <span><strong>Press Hospitality:</strong> Provide press kits, event agendas, and interview coordination for Chitral regional journalists.</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Role 5: Guest Protocol & Hospitality */}
+                    <div className="bg-white border border-slate-200 rounded-xl p-4 hover:border-rose-300 transition-all shadow-2xs">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2 font-bold text-xs text-rose-900">
+                          <span className="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
+                          <span>5. Guest Protocol, VIP Hospitality & Helpdesk</span>
+                        </div>
+                        <span className="text-[10px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
+                          Shift: 08:30 AM – 04:30 PM
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600 mb-2 font-medium">
+                        Primary Station: VIP Lounge, Helpdesk & Staging Area
+                      </p>
+                      <div className="space-y-1.5 text-xs text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        <div className="font-bold text-[11px] text-slate-900 uppercase tracking-wider mb-1">Specific Work & Assigned Duties:</div>
+                        <div className="flex items-start gap-1.5">
+                          <CheckCircle size={13} className="text-rose-600 shrink-0 mt-0.5" />
+                          <span><strong>Dignitary Reception:</strong> Welcome guest speakers, institutional principals, and evaluators with traditional protocol.</span>
+                        </div>
+                        <div className="flex items-start gap-1.5">
+                          <CheckCircle size={13} className="text-rose-600 shrink-0 mt-0.5" />
+                          <span><strong>Lunch & Refreshments:</strong> Supervise distribution of hygienic lunch boxes, tea, and clean drinking water points.</span>
+                        </div>
+                        <div className="flex items-start gap-1.5">
+                          <CheckCircle size={13} className="text-rose-600 shrink-0 mt-0.5" />
+                          <span><strong>Award Ceremony Ushering:</strong> Guide winners and award presenters onto the stage for the Official Shield & Certificates.</span>
+                        </div>
+                        <div className="flex items-start gap-1.5">
+                          <CheckCircle size={13} className="text-rose-600 shrink-0 mt-0.5" />
+                          <span><strong>Helpdesk & Lost & Found:</strong> Answer attendee questions, coordinate lost items, and support first-aid needs.</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
+              {/* Registered Crew Roster with Specific Work Assigned Column */}
               <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
                   <div>
                     <h3 className="font-bold text-base text-slate-900 flex items-center gap-2">
                       <Users size={18} className="text-blue-600" />
-                      <span>Registered Crew Roster ({volunteers.length})</span>
+                      <span>Registered Crew Roster & Specific Work ({volunteers.length})</span>
                     </h3>
-                    <p className="text-xs text-slate-500">Confirmed volunteer team members for Collabs Booni Event</p>
+                    <p className="text-xs text-slate-500">Confirmed volunteer team members and their exact on-ground duties for Collabs Booni Event</p>
                   </div>
                 </div>
 
@@ -2577,6 +2710,7 @@ export default function App() {
                       <tr className="border-b border-slate-200 text-slate-500 font-semibold bg-slate-50/50">
                         <th className="py-3 px-3">Volunteer Name</th>
                         <th className="py-3 px-3">Department & Role</th>
+                        <th className="py-3 px-3">Specific Work & Assigned Duty</th>
                         <th className="py-3 px-3">Institution</th>
                         <th className="py-3 px-3">Shift & Station</th>
                         <th className="py-3 px-3">Status</th>
@@ -2592,6 +2726,11 @@ export default function App() {
                           <td className="py-3 px-3">
                             <span className="font-medium text-slate-800">{v.role}</span>
                             <div className="text-[10px] text-slate-500">{v.department}</div>
+                          </td>
+                          <td className="py-3 px-3 max-w-[280px]">
+                            <div className="font-semibold text-slate-800 leading-tight">
+                              {v.duties || 'Support event setup, visitor guidance, and exhibition operations.'}
+                            </div>
                           </td>
                           <td className="py-3 px-3 text-slate-600">{v.school || 'Collabs Crew'}</td>
                           <td className="py-3 px-3 text-slate-600">
@@ -3117,43 +3256,43 @@ export default function App() {
           {/* Horizontal Next-by-Next Controls */}
           <div className="flex items-center gap-3 shrink-0">
             <span className="text-xs font-semibold text-slate-500">
-              Member {activeTeamIndex + 1} of {INITIAL_TEAM.length}
+              <strong className="text-slate-900">{activeTeamIndex + 1}</strong> / {INITIAL_TEAM.length}
             </span>
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => {
-                  const nextIdx = (activeTeamIndex - 1 + INITIAL_TEAM.length) % INITIAL_TEAM.length;
-                  setActiveTeamIndex(nextIdx);
-                  setSelectedTeamMemberId(INITIAL_TEAM[nextIdx].id);
+                  const targetIdx = (activeTeamIndex - 1 + INITIAL_TEAM.length) % INITIAL_TEAM.length;
+                  setActiveTeamIndex(targetIdx);
+                  setSelectedTeamMemberId(INITIAL_TEAM[targetIdx].id);
                   if (teamSliderRef.current) {
-                    teamSliderRef.current.scrollTo({
-                      left: nextIdx * 336,
-                      behavior: 'smooth'
-                    });
+                    const card = teamSliderRef.current.children[targetIdx] as HTMLElement;
+                    if (card) {
+                      card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                    }
                   }
                 }}
-                className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors cursor-pointer active:scale-95 shadow-2xs"
+                className="p-2.5 bg-white hover:bg-slate-100 text-slate-700 rounded-xl border border-slate-200 transition-all cursor-pointer active:scale-95 shadow-2xs"
                 title="Previous Member"
               >
-                <ChevronLeft size={18} />
+                <ChevronLeft size={16} />
               </button>
               <button
                 onClick={() => {
-                  const nextIdx = (activeTeamIndex + 1) % INITIAL_TEAM.length;
-                  setActiveTeamIndex(nextIdx);
-                  setSelectedTeamMemberId(INITIAL_TEAM[nextIdx].id);
+                  const targetIdx = (activeTeamIndex + 1) % INITIAL_TEAM.length;
+                  setActiveTeamIndex(targetIdx);
+                  setSelectedTeamMemberId(INITIAL_TEAM[targetIdx].id);
                   if (teamSliderRef.current) {
-                    teamSliderRef.current.scrollTo({
-                      left: nextIdx * 336,
-                      behavior: 'smooth'
-                    });
+                    const card = teamSliderRef.current.children[targetIdx] as HTMLElement;
+                    if (card) {
+                      card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                    }
                   }
                 }}
-                className="p-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors cursor-pointer active:scale-95 shadow-2xs flex items-center gap-1 text-xs"
+                className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all cursor-pointer active:scale-95 shadow-xs flex items-center gap-1 text-xs"
                 title="Next Member"
               >
                 <span>Next</span>
-                <ChevronRight size={18} />
+                <ChevronRight size={16} />
               </button>
             </div>
           </div>
@@ -3161,27 +3300,40 @@ export default function App() {
 
         {sectionsExpanded.teamDirectory && (
           <div className="space-y-6 text-left">
-            {/* Horizontal Scroll Track */}
+            {/* Horizontal Scroll Track with High-Precision Centering */}
             <div
               ref={teamSliderRef}
               onScroll={() => {
                 if (teamSliderRef.current) {
-                  const scrollLeft = teamSliderRef.current.scrollLeft;
-                  const idx = Math.min(
-                    INITIAL_TEAM.length - 1,
-                    Math.max(0, Math.round(scrollLeft / 336))
-                  );
-                  if (idx !== activeTeamIndex) {
-                    setActiveTeamIndex(idx);
-                    setSelectedTeamMemberId(INITIAL_TEAM[idx].id);
+                  const container = teamSliderRef.current;
+                  const centerPoint = container.scrollLeft + container.clientWidth / 2;
+                  let closestIndex = 0;
+                  let minDistance = Infinity;
+
+                  Array.from(container.children).forEach((child, idx) => {
+                    const el = child as HTMLElement;
+                    const elCenter = el.offsetLeft + el.offsetWidth / 2;
+                    const dist = Math.abs(centerPoint - elCenter);
+                    if (dist < minDistance) {
+                      minDistance = dist;
+                      closestIndex = idx;
+                    }
+                  });
+
+                  if (closestIndex !== activeTeamIndex && closestIndex < INITIAL_TEAM.length) {
+                    setActiveTeamIndex(closestIndex);
+                    setSelectedTeamMemberId(INITIAL_TEAM[closestIndex].id);
                   }
                 }
               }}
-              className="flex overflow-x-auto gap-4 pb-4 scroll-smooth snap-x snap-mandatory scrollbar-none p-1"
+              className="flex overflow-x-auto gap-4 pb-4 pt-1 px-1 scroll-smooth snap-x snap-mandatory scrollbar-none"
             >
               {INITIAL_TEAM.map((member, idx) => {
                 const isSelected = selectedTeamMemberId === member.id || activeTeamIndex === idx;
-                const roleNum = member.department.includes('Role 1') ? 'ROLE 1' : member.department.includes('Role 2') ? 'ROLE 2' : 'ROLE 3';
+                const roleTag = member.id === 'tm-1'
+                  ? 'ROLE 3'
+                  : (idx % 3 === 0 ? 'ROLE 1' : idx % 3 === 1 ? 'ROLE 2' : 'ROLE 3');
+                const initials = member.name.split(' ').map(n => n[0]).join('').slice(0, 3).toUpperCase();
 
                 return (
                   <div
@@ -3190,48 +3342,81 @@ export default function App() {
                       setActiveTeamIndex(idx);
                       setSelectedTeamMemberId(member.id);
                       setSelectedTeamMemberModal(member);
+                      if (teamSliderRef.current) {
+                        const card = teamSliderRef.current.children[idx] as HTMLElement;
+                        if (card) {
+                          card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                        }
+                      }
                     }}
-                    className={`snap-start w-[280px] sm:w-[320px] shrink-0 rounded-2xl p-5 border transition-all duration-300 cursor-pointer relative overflow-hidden group flex flex-col justify-between shadow-xs hover:-translate-y-1 hover:shadow-lg min-h-[220px] ${
-                      isSelected 
-                        ? 'bg-gradient-to-br from-purple-600 via-indigo-600 to-pink-600 border-transparent text-white shadow-xl ring-2 ring-purple-400/50' 
-                        : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-900'
+                    className={`snap-center w-[280px] sm:w-[320px] shrink-0 rounded-2xl p-6 border transition-all duration-300 cursor-pointer relative overflow-hidden group flex flex-col justify-between shadow-xs min-h-[220px] ${
+                      isSelected
+                        ? 'bg-gradient-to-br from-[#5338ec] via-[#7033eb] to-[#e6177a] text-white border-transparent shadow-xl shadow-purple-900/30 ring-2 ring-purple-400/40 -translate-y-1 scale-[1.01]'
+                        : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-900 hover:-translate-y-0.5 hover:shadow-md'
                     }`}
                   >
-                    <div>
+                    <div className="relative z-10">
                       <div className="flex items-center justify-between mb-4">
-                        <div className={`px-2.5 py-1 rounded-lg font-bold text-xs shadow-2xs ${
-                          isSelected ? 'bg-white/25 text-white' : 'bg-blue-50 text-blue-700'
-                        }`}>
-                          {member.name.split(' ').map(n => n[0]).join('')}
+                        <div
+                          className={`font-extrabold text-xs px-2.5 py-1 rounded-xl shadow-xs transition-colors ${
+                            isSelected
+                              ? 'bg-white/20 backdrop-blur-xs text-white'
+                              : 'bg-purple-100 text-purple-800'
+                          }`}
+                        >
+                          {initials}
                         </div>
-                        <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
-                          isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
-                        }`}>
-                          {roleNum}
+                        <span
+                          className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full tracking-wider ${
+                            isSelected
+                              ? 'bg-white/20 backdrop-blur-xs text-white'
+                              : 'bg-slate-100 text-slate-600 border border-slate-200'
+                          }`}
+                        >
+                          {roleTag}
                         </span>
                       </div>
 
-                      <h3 className={`font-heading text-base font-black tracking-tight mb-1 ${isSelected ? 'text-white' : 'text-slate-900'}`}>
+                      <h3
+                        className={`font-heading text-xl font-bold tracking-tight mb-1 transition-colors ${
+                          isSelected ? 'text-white' : 'text-slate-900 group-hover:text-purple-600'
+                        }`}
+                      >
                         {member.name}
                       </h3>
-                      <p className={`text-xs font-bold ${isSelected ? 'text-purple-100' : 'text-blue-600'}`}>
+                      <p
+                        className={`text-xs font-semibold transition-colors ${
+                          isSelected ? 'text-white/90' : 'text-purple-600'
+                        }`}
+                      >
                         {member.role}
                       </p>
                     </div>
 
-                    <div className={`mt-5 pt-3 border-t flex items-center justify-between text-xs font-semibold ${
-                      isSelected ? 'border-white/20 text-white' : 'border-slate-100 text-slate-600 group-hover:text-slate-900'
-                    }`}>
-                      <span>{isSelected ? 'Active Profile' : 'View Responsibilities'}</span>
-                      <ChevronRight size={14} className={`transform transition-transform ${isSelected ? 'translate-x-1 text-white' : 'group-hover:translate-x-1'}`} />
+                    <div
+                      className={`relative z-10 mt-6 pt-3.5 border-t flex items-center justify-between text-xs font-semibold transition-colors ${
+                        isSelected
+                          ? 'border-white/20 text-white font-bold'
+                          : 'border-slate-100 text-slate-600 group-hover:text-slate-900'
+                      }`}
+                    >
+                      <span>{isSelected ? 'Active Profile' : 'View Full Profile'}</span>
+                      <ChevronRight
+                        size={15}
+                        className={`transform transition-transform ${
+                          isSelected
+                            ? 'translate-x-1 text-white'
+                            : 'group-hover:translate-x-1 text-slate-400'
+                        }`}
+                      />
                     </div>
                   </div>
                 );
               })}
             </div>
 
-            {/* Animated Horizontal Pagination Dots */}
-            <div className="flex items-center justify-center gap-1.5 pt-3 pb-1">
+            {/* Smooth Animated Horizontal Pagination Dots */}
+            <div className="flex items-center justify-center gap-1.5 pt-2 pb-1">
               {INITIAL_TEAM.map((member, idx) => {
                 const isActive = activeTeamIndex === idx;
                 return (
@@ -3242,16 +3427,16 @@ export default function App() {
                       setActiveTeamIndex(idx);
                       setSelectedTeamMemberId(member.id);
                       if (teamSliderRef.current) {
-                        teamSliderRef.current.scrollTo({
-                          left: idx * 336,
-                          behavior: 'smooth'
-                        });
+                        const card = teamSliderRef.current.children[idx] as HTMLElement;
+                        if (card) {
+                          card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                        }
                       }
                     }}
-                    className={`h-2.5 rounded-full transition-all duration-300 ease-out cursor-pointer ${
+                    className={`h-2 rounded-full transition-all duration-300 ease-out cursor-pointer ${
                       isActive
-                        ? 'w-9 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 shadow-md ring-2 ring-blue-300/80 scale-105'
-                        : 'w-2.5 bg-slate-300 hover:bg-slate-400 hover:scale-110'
+                        ? 'w-8 bg-blue-600 shadow-xs ring-2 ring-blue-300/60 scale-105'
+                        : 'w-2 bg-slate-300 hover:bg-slate-400 hover:scale-125'
                     }`}
                     title={`Go to ${member.name} (${idx + 1}/${INITIAL_TEAM.length})`}
                   />
@@ -3789,9 +3974,6 @@ export default function App() {
                   {sectionsExpanded.awardsShowcase ? <><ChevronUp size={14} /> Collapse</> : <><ChevronDown size={14} /> Expand</>}
                 </button>
               </div>
-              <p className="text-sm text-slate-600 mt-1 max-w-2xl">
-                Official prizes, honors, and credentials breakdown for participants at the First Mega Event of Collabs in Booni, Upper Chitral. 1st Position receives the Official Winner Shield and Cash Prize. For 2nd and 3rd position takers, no shield will be given—the 2nd position holder receives the Official Second Position Certificate.
-              </p>
             </div>
           </div>
 
@@ -3804,7 +3986,7 @@ export default function App() {
                   recipient: '1st Position',
                   initiative: 'Grand Prize Winner',
                   citation: 'The 1st position winner is awarded a 10,000 PKR Cash Prize and an Official Winner Shield for highest achievement in the mega exhibition.',
-                  tier: '1st Position · Gold',
+                  tier: '1st Position',
                   badgeColor: 'text-amber-800 bg-amber-50 border-amber-200',
                   iconBg: 'bg-amber-100 text-amber-700',
                   icon: Trophy
@@ -3814,8 +3996,8 @@ export default function App() {
                   award: 'Official 2nd Position Certificate',
                   recipient: '2nd Position',
                   initiative: 'Runner-Up Honor',
-                  citation: 'The 2nd position taker receives the official Second Position Certificate of Recognition honoring outstanding innovation. No shield will be given.',
-                  tier: '2nd Position · Certificate (No Shield)',
+                  citation: 'The 2nd position taker receives the official Second Position Certificate of Recognition honoring outstanding innovation.',
+                  tier: '2nd Position',
                   badgeColor: 'text-slate-800 bg-slate-100 border-slate-300',
                   iconBg: 'bg-slate-200 text-slate-800',
                   icon: Award
@@ -3825,8 +4007,8 @@ export default function App() {
                   award: '3rd Position Distinction Certificate',
                   recipient: '3rd Position',
                   initiative: 'Distinction Honor',
-                  citation: 'The 3rd position taker receives the official Certificate of Distinction celebrating creative problem-solving. No shield will be given.',
-                  tier: '3rd Position · Certificate (No Shield)',
+                  citation: 'The 3rd position taker receives the official Certificate of Distinction celebrating creative problem-solving.',
+                  tier: '3rd Position',
                   badgeColor: 'text-orange-900 bg-orange-50 border-orange-200',
                   iconBg: 'bg-orange-100 text-orange-700',
                   icon: FileCheck2
@@ -3837,7 +4019,7 @@ export default function App() {
                   recipient: 'All Participants',
                   initiative: 'Every Contributor',
                   citation: 'Every active delegate, student innovator, and project builder receives an Official Participation Certificate.',
-                  tier: 'Participation Honor',
+                  tier: 'Participation',
                   badgeColor: 'text-blue-800 bg-blue-50 border-blue-200',
                   iconBg: 'bg-blue-100 text-blue-700',
                   icon: FileCheck2
@@ -3865,9 +4047,6 @@ export default function App() {
                         </button>
                       </div>
 
-                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border inline-block mb-2 ${item.badgeColor}`}>
-                        {item.tier}
-                      </span>
                       <h3 className="font-heading text-lg font-black text-slate-900 mb-1">
                         {item.recipient}
                       </h3>
@@ -3906,12 +4085,12 @@ export default function App() {
         </div>
       </section>
 
-      {/* 8. Official Clean Footer - Styled exactly as requested in screenshot */}
+      {/* 8. Official Clean Footer */}
       <footer className="bg-[#0b101d] text-slate-400 text-xs text-left border-t border-slate-800/80 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto space-y-10">
           
-          {/* Main 4 Column Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Main 2 Column Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
             
             {/* Column 1: Logo & Basic Info & Socials */}
             <div className="space-y-3">
@@ -3920,73 +4099,22 @@ export default function App() {
                 <span className="font-heading text-2xl font-black text-white tracking-tight">Collabs.</span>
               </div>
               <p className="text-slate-400 text-xs leading-relaxed">
-                First Mega Event of Collabs · 31 October 2026<br />
-                Anywhere in Booni, Chitral (Venue TBA).
+                First Mega Event of Collabs · 31 October 2026
               </p>
               <div className="flex items-center gap-3 pt-1 text-slate-400">
                 <a href="https://www.instagram.com/collabs" target="_blank" rel="noreferrer" aria-label="Instagram" className="hover:text-white transition-colors">
                   <Instagram size={16} />
                 </a>
-                <a href="https://www.facebook.com/collabs" target="_blank" rel="noreferrer" aria-label="Facebook" className="hover:text-white transition-colors">
-                  <Facebook size={16} />
+                <a href="https://www.youtube.com/@collabsorg" target="_blank" rel="noreferrer" aria-label="YouTube" className="hover:text-white transition-colors">
+                  <Youtube size={16} />
                 </a>
-                <a href="https://twitter.com/collabs" target="_blank" rel="noreferrer" aria-label="Twitter" className="hover:text-white transition-colors">
-                  <Twitter size={16} />
+                <a href="https://www.linkedin.com/company/135248663/" target="_blank" rel="noreferrer" aria-label="LinkedIn" className="hover:text-white transition-colors">
+                  <Linkedin size={16} />
                 </a>
               </div>
             </div>
 
-            {/* Column 2: Navigation */}
-            <div>
-              <h3 className="font-heading text-sm font-bold text-white mb-3 tracking-wide">Navigation</h3>
-              <ul className="space-y-2 text-xs">
-                <li>
-                  <a href="#about" onClick={(e) => handleSmoothNavClick(e, 'about')} className="hover:text-white transition-colors cursor-pointer block">
-                    First Mega Event Overview
-                  </a>
-                </li>
-                <li>
-                  <a href="#events" onClick={(e) => handleSmoothNavClick(e, 'events', 'eventsHub')} className="hover:text-white transition-colors cursor-pointer block">
-                    Booni Schedule & Workshops
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#attendee-pass"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setSelectedEventForReg(INITIAL_EVENTS[0]);
-                      setIsRegisterModalOpen(true);
-                    }}
-                    className="text-blue-500 font-bold hover:text-blue-400 transition-colors cursor-pointer block"
-                  >
-                    Attendee Pass & ID Badge
-                  </a>
-                </li>
-                <li>
-                  <a href="#team" onClick={(e) => handleSmoothNavClick(e, 'team', 'teamDirectory')} className="hover:text-white transition-colors cursor-pointer block">
-                    Community Team Leads
-                  </a>
-                </li>
-                <li>
-                  <a href="/volunteer" className="hover:text-white transition-colors cursor-pointer block">
-                    Volunteer Opportunities
-                  </a>
-                </li>
-                <li>
-                  <a href="/certificate" className="hover:text-white transition-colors cursor-pointer block">
-                    Digital Certificates
-                  </a>
-                </li>
-                <li>
-                  <a href="#awards" onClick={(e) => handleSmoothNavClick(e, 'awards', 'awardsShowcase')} className="hover:text-white transition-colors cursor-pointer block">
-                    Awards & Hall of Fame
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Column 3: Event Details */}
+            {/* Column 2: Event Details */}
             <div>
               <h3 className="font-heading text-sm font-bold text-white mb-3 tracking-wide">Event Details</h3>
               <ul className="space-y-2 text-xs text-slate-300">
@@ -4004,25 +4132,6 @@ export default function App() {
                   </a>
                 </li>
               </ul>
-            </div>
-
-            {/* Column 4: Verification & QR */}
-            <div>
-              <h3 className="font-heading text-sm font-bold text-white mb-3 tracking-wide">Verification & QR</h3>
-              <p className="text-xs text-slate-400 leading-relaxed mb-4">
-                Query any certificate ID issued for the Booni Mega Event or test QR code links.
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setVerifySearchQuery('');
-                  setVerifyResult({ searched: false, found: false });
-                  setIsVerifyModalOpen(true);
-                }}
-                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer active:scale-95"
-              >
-                Open Lookup Registry
-              </button>
             </div>
 
           </div>
@@ -4385,7 +4494,7 @@ export default function App() {
               </div>
               <div>
                 <h4 className="font-bold text-slate-900 text-sm mb-1">4. Recognition & Awards Policy</h4>
-                <p>The 1st position winner is awarded the Official Winner Shield and Cash Prize. For 2nd and 3rd position takers, no shield will be given—the 2nd position taker receives the Official Second Position Certificate of Recognition.</p>
+                <p>The 1st position winner is awarded the Official Winner Shield and Cash Prize. 2nd and 3rd position achievers receive official achievement and distinction certificates.</p>
               </div>
               <div>
                 <h4 className="font-bold text-slate-900 text-sm mb-1">5. Code of Conduct</h4>
