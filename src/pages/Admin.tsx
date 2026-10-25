@@ -2619,44 +2619,39 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               </button>
             </div>
 
-            {/* Certificate Template Card */}
+            {/* Official Certificate Template Card */}
             <div
-              className={`p-6 rounded-2xl border-2 text-center space-y-4 relative shadow-inner ${
-                isDark
-                  ? 'border-purple-500/30 bg-linear-to-b from-slate-950 via-slate-900 to-slate-950 text-white'
-                  : 'border-purple-200 bg-linear-to-b from-purple-50/40 to-white text-slate-900'
-              }`}
+              className="relative w-full rounded-2xl shadow-xl overflow-hidden select-none bg-white border border-slate-200"
+              style={{ aspectRatio: '2560 / 1810' }}
             >
-              <div className="text-[11px] font-bold text-purple-500 tracking-widest uppercase">
-                First Mega Event of Collabs · Upper Chitral
-              </div>
-              <h3 className={`font-heading font-black text-2xl tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                Certificate of {previewCert.achievementType}
-              </h3>
-              <p className="text-xs text-slate-400">This official credential proudly honors</p>
+              <img
+                src="/assets/certificate_of_participation_template.jpeg"
+                alt="Official Certificate of Participation"
+                className="w-full h-full object-cover block select-none pointer-events-none"
+              />
               <div
-                className={`text-xl font-black border-b pb-2 max-w-xs mx-auto ${
-                  isDark ? 'text-purple-300 border-purple-500/30' : 'text-purple-900 border-purple-200'
-                }`}
+                className="absolute text-center w-full px-4 pointer-events-none"
+                style={{
+                  top: '41.2%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                }}
               >
-                {previewCert.recipientName}
-              </div>
-              <p className={`text-xs max-w-md mx-auto leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-                For exemplary contribution and innovation at the First Mega Event of Collabs held in Booni on 31 October 2026.
-              </p>
-
-              <div className={`pt-4 flex items-center justify-between border-t text-left text-xs ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
-                <div>
-                  <div className="font-mono text-[10px] text-slate-400">CREDENTIAL ID</div>
-                  <div className={`font-mono font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{previewCert.id}</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">{previewCert.issueDate}</div>
+                <div className="font-heading font-black text-slate-900 tracking-normal leading-tight text-xl sm:text-2xl md:text-3xl lg:text-4xl">
+                  {previewCert.recipientName}
                 </div>
-
+              </div>
+              <div
+                className="absolute flex items-center justify-center p-0.5 sm:p-1"
+                style={{
+                  left: '42.9%',
+                  top: '82.65%',
+                  width: '11.13%',
+                  height: '14.58%',
+                }}
+              >
                 {previewCertQr && (
-                  <div className="text-center">
-                    <img src={previewCertQr} alt="QR" className="w-16 h-16 rounded border bg-white p-0.5 inline-block" />
-                    <div className="text-[9px] text-slate-400 font-mono mt-0.5">Scan to Verify</div>
-                  </div>
+                  <img src={previewCertQr} alt="QR" className="w-full h-full object-contain rounded-md" />
                 )}
               </div>
             </div>

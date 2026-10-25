@@ -608,7 +608,7 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                 isDark ? 'bg-slate-900/90 border-slate-800 text-slate-400' : 'bg-slate-50/70 border-slate-200 text-slate-500'
               }`}>
                 <th className="py-4 px-6">Volunteer Profile</th>
-                <th className="py-4 px-6">School / Institution</th>
+                <th className="py-4 px-6">Unique Volunteer ID</th>
                 <th className="py-4 px-6">Role & Track</th>
                 <th className="py-4 px-6">Status</th>
                 <th className="py-4 px-6 text-right">Hours Logged</th>
@@ -678,13 +678,14 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
                         </div>
                       </td>
 
-                      {/* School / Institution */}
+                      {/* Unique Volunteer ID */}
                       <td className="py-4 px-6">
-                        <div className={`font-medium flex items-center gap-1.5 ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
-                          <Building2 size={14} className="text-slate-400 shrink-0" />
-                          <span>{vol.school || 'Collabs Central Organization'}</span>
-                        </div>
-                        <div className="text-[11px] text-slate-400 pl-5">Upper Chitral District</div>
+                        <span className={`font-mono font-bold text-xs px-2.5 py-1 rounded-lg border inline-block ${
+                          isDark ? 'bg-blue-950/50 text-blue-300 border-blue-800' : 'bg-blue-50 text-blue-700 border-blue-200'
+                        }`}>
+                          {vol.id.toUpperCase()}
+                        </span>
+                        <div className="text-[11px] text-slate-400 mt-0.5">Crew Credential ID</div>
                       </td>
 
                       {/* Role & Department */}
@@ -875,10 +876,10 @@ export const VolunteerManagement: React.FC<VolunteerManagementProps> = ({
             {/* Quick Details Grid */}
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className={`p-3 rounded-2xl border ${isDark ? 'bg-slate-800/80 border-slate-700/80' : 'bg-slate-50 border-slate-100'}`}>
-                <div className="text-[11px] font-semibold text-slate-400 uppercase">Institutional Affiliation</div>
-                <div className={`font-bold mt-0.5 flex items-center gap-1.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                  <Building2 size={13} className="text-blue-500 shrink-0" />
-                  <span>{selectedVolunteer.school || 'Collabs Central Organization'}</span>
+                <div className="text-[11px] font-semibold text-slate-400 uppercase">Unique ID & Credential</div>
+                <div className={`font-bold mt-0.5 flex items-center gap-1.5 font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  <Shield size={13} className="text-blue-500 shrink-0" />
+                  <span>{selectedVolunteer.id.toUpperCase()}</span>
                 </div>
               </div>
 

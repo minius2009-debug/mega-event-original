@@ -532,7 +532,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'salman',
     email: 'salman.ali@collabs.org',
     phone: '+92 345 1010101',
-    school: 'Booni Degree College',
     role: 'Science Zone Volunteer',
     department: 'Zone 1: Science',
     hours: 48,
@@ -549,7 +548,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'faizan',
     email: 'faizan.akbar@collabs.org',
     phone: '+92 345 1010102',
-    school: 'Booni Degree College',
     role: 'Science Zone Volunteer',
     department: 'Zone 1: Science',
     hours: 36,
@@ -566,7 +564,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'sameem',
     email: 'sameem@collabs.org',
     phone: '+92 345 1010103',
-    school: 'Pamir Public School',
     role: 'Technical Prototype Volunteer',
     department: 'Zone 1: Science',
     hours: 52,
@@ -583,7 +580,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'manahil',
     email: 'manahil@collabs.org',
     phone: '+92 345 1010104',
-    school: 'Aga Khan Higher Secondary School Kuragh',
     role: 'Science Coordinator Volunteer',
     department: 'Zone 1: Science',
     hours: 40,
@@ -600,7 +596,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'sania',
     email: 'sania.ambareen@collabs.org',
     phone: '+92 345 1010105',
-    school: 'Booni Girls College',
     role: 'Registration Volunteer',
     department: 'Zone 1: Science',
     hours: 38,
@@ -617,7 +612,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'sehba',
     email: 'sehba.rahim@collabs.org',
     phone: '+92 345 1010106',
-    school: 'Booni Degree College',
     role: 'Evaluation Flow Volunteer',
     department: 'Zone 1: Science',
     hours: 45,
@@ -634,7 +628,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'manahil.akram',
     email: 'manahil.akram@collabs.org',
     phone: '+92 345 1010107',
-    school: 'Pamir Public School',
     role: 'Display Labeling Volunteer',
     department: 'Zone 1: Science',
     hours: 32,
@@ -651,7 +644,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'rubama',
     email: 'rubama.hayat@collabs.org',
     phone: '+92 345 1010108',
-    school: 'Booni Art Wing',
     role: 'Art Section Volunteer',
     department: 'Zone 2: Art',
     hours: 50,
@@ -668,7 +660,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'aliha',
     email: 'aliha@collabs.org',
     phone: '+92 345 1010109',
-    school: 'Pamir Art Academy',
     role: 'Art Aesthetics Volunteer',
     department: 'Zone 2: Art',
     hours: 30,
@@ -685,7 +676,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'sonam',
     email: 'sonam@collabs.org',
     phone: '+92 345 1010110',
-    school: 'Booni Art Wing',
     role: 'Artwork Protection Volunteer',
     department: 'Zone 2: Art',
     hours: 34,
@@ -702,7 +692,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'fakiha',
     email: 'fakiha@collabs.org',
     phone: '+92 345 1010111',
-    school: 'Booni Degree College',
     role: 'Art Participant Facilitator',
     department: 'Zone 2: Art',
     hours: 28,
@@ -719,7 +708,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'anita',
     email: 'anita.mehak@collabs.org',
     phone: '+92 345 1010112',
-    school: 'Booni Hospitality Institute',
     role: 'Food Stall Overseer',
     department: 'Zone 3: Food Stalls',
     hours: 44,
@@ -736,7 +724,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'ifat',
     email: 'ifat.naseem@collabs.org',
     phone: '+92 345 1010113',
-    school: 'Booni Hospitality Institute',
     role: 'Food Handling Monitor',
     department: 'Zone 3: Food Stalls',
     hours: 38,
@@ -753,7 +740,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'sidra',
     email: 'sidra@collabs.org',
     phone: '+92 345 1010114',
-    school: 'Booni Degree College',
     role: 'Lunch Break Coordinator',
     department: 'Zone 3: Food Stalls',
     hours: 40,
@@ -770,7 +756,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'sabbah',
     email: 'sabbah@collabs.org',
     phone: '+92 345 1010115',
-    school: 'Booni High School',
     role: 'Hygiene & Support Volunteer',
     department: 'Zone 3: Food Stalls',
     hours: 26,
@@ -787,7 +772,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'amina',
     email: 'amina@collabs.org',
     phone: '+92 345 1010116',
-    school: 'Pamir Public School',
     role: 'Stall Liaison Volunteer',
     department: 'Zone 3: Food Stalls',
     hours: 35,
@@ -804,7 +788,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'zoha',
     email: 'zoha@collabs.org',
     phone: '+92 345 1010117',
-    school: 'Booni Decor Crew',
     role: 'Decor & Banners Volunteer',
     department: 'Program, Stage & Decor',
     hours: 42,
@@ -821,7 +804,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'muskan',
     email: 'muskan@collabs.org',
     phone: '+92 345 1010118',
-    school: 'Booni Decor Crew',
     role: 'Entrance Aesthetics Volunteer',
     department: 'Program, Stage & Decor',
     hours: 30,
@@ -838,7 +820,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'farina',
     email: 'farina@collabs.org',
     phone: '+92 345 1010119',
-    school: 'Booni Degree College',
     role: 'Stage Material Assistant',
     department: 'Program, Stage & Decor',
     hours: 28,
@@ -855,7 +836,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'arshe',
     email: 'arshe@collabs.org',
     phone: '+92 345 1010120',
-    school: 'Booni Girls College',
     role: 'VIP Seating Volunteer',
     department: 'Program, Stage & Decor',
     hours: 36,
@@ -872,7 +852,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'ayan',
     email: 'ayan.ali@collabs.org',
     phone: '+92 345 1010121',
-    school: 'Booni Media Wing',
     role: 'Camera Equipment Assistant',
     department: 'Tech, IT & Media',
     hours: 48,
@@ -889,7 +868,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'shahid',
     email: 'shahid.nazir@collabs.org',
     phone: '+92 345 1010122',
-    school: 'Booni Logistics Crew',
     role: 'Physical Venue Setup Volunteer',
     department: 'Operations & Logistics',
     hours: 55,
@@ -906,7 +884,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'sani',
     email: 's.sani@collabs.org',
     phone: '+92 345 1010123',
-    school: 'Booni High School',
     role: 'Visitor Control Volunteer',
     department: 'Operations & Logistics',
     hours: 32,
@@ -923,7 +900,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'asin',
     email: 'asin.nawaz@collabs.org',
     phone: '+92 345 1010124',
-    school: 'Booni Logistics Crew',
     role: 'Logistics Transport Volunteer',
     department: 'Operations & Logistics',
     hours: 40,
@@ -940,7 +916,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'mazhar.ali',
     email: 'mazhar.ali@collabs.org',
     phone: '+92 345 1010125',
-    school: 'Booni Logistics Crew',
     role: 'Canopy & Waste Management Volunteer',
     department: 'Operations & Logistics',
     hours: 38,
@@ -957,7 +932,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'ania',
     email: 'ania.faraz@collabs.org',
     phone: '+92 345 1010126',
-    school: 'Booni Reception Desk',
     role: 'Registration & Welcome Volunteer',
     department: 'Reception & Security',
     hours: 46,
@@ -974,7 +948,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'wania',
     email: 'wania@collabs.org',
     phone: '+92 345 1010127',
-    school: 'Booni Reception Desk',
     role: 'Attendance List Volunteer',
     department: 'Reception & Security',
     hours: 42,
@@ -991,7 +964,6 @@ const INITIAL_VOLUNTEERS: VolunteerLog[] = [
     username: 'shawana',
     email: 'shawana@collabs.org',
     phone: '+92 345 1010128',
-    school: 'Booni Security Crew',
     role: 'Entrance & Lanyard Volunteer',
     department: 'Reception & Security',
     hours: 40,
@@ -1008,62 +980,57 @@ const INITIAL_CERTIFICATES: CertificateRecord[] = [
   {
     id: 'CLB-2026-892',
     recipientName: 'Fatima Zahra',
-    achievementType: 'First Position Winner',
-    eventName: 'First Mega Event of Collabs 2026',
-    issueDate: '31 October 2026',
+    achievementType: 'Certificate of Participation',
+    eventName: 'Science, Arts & Food Exhibition 2026',
+    issueDate: 'October 31, 2026',
     verified: true,
-    issuer: 'Collabs. Community Executive Secretariat',
+    issuer: 'Collabs, Naveed-e-Falah, Jenabai Awards & District Youth Office',
     school: 'Booni Degree College',
-    project: 'Autonomous High-Altitude Robotics Sprint',
-    theme: 'gold'
+    project: 'Autonomous High-Altitude Robotics Sprint'
   },
   {
     id: 'CLB-2026-401',
     recipientName: 'Elena Rostova',
-    achievementType: 'Volunteer Leadership',
-    eventName: 'First Mega Event of Collabs Operations',
-    issueDate: '31 October 2026',
+    achievementType: 'Certificate of Participation',
+    eventName: 'Science, Arts & Food Exhibition 2026',
+    issueDate: 'October 31, 2026',
     verified: true,
-    issuer: 'Collabs. Community Executive Secretariat',
+    issuer: 'Collabs, Naveed-e-Falah, Jenabai Awards & District Youth Office',
     school: 'Booni Degree College',
-    project: 'Lead Systems Engineer & Volunteer Coordinator',
-    theme: 'emerald'
+    project: 'Lead Systems Engineer & Volunteer Coordinator'
   },
   {
     id: 'CLB-2026-774',
     recipientName: 'Marcus Vance',
-    achievementType: 'Second Position Certificate',
-    eventName: 'First Mega Event of Collabs 2026',
-    issueDate: '31 October 2026',
+    achievementType: 'Certificate of Participation',
+    eventName: 'Science, Arts & Food Exhibition 2026',
+    issueDate: 'October 31, 2026',
     verified: true,
-    issuer: 'Collabs. Community Executive Secretariat',
+    issuer: 'Collabs, Naveed-e-Falah, Jenabai Awards & District Youth Office',
     school: 'Chitral University · Tech Wing',
-    project: 'Clean Mountain Hydro-Turbine Prototype',
-    theme: 'royal'
+    project: 'Clean Mountain Hydro-Turbine Prototype'
   },
   {
     id: 'CLB-2026-105',
     recipientName: 'Ahmad Khan',
-    achievementType: 'Excellence',
-    eventName: 'First Mega Event of Collabs',
-    issueDate: '31 October 2026',
+    achievementType: 'Certificate of Participation',
+    eventName: 'Science, Arts & Food Exhibition 2026',
+    issueDate: 'October 31, 2026',
     verified: true,
-    issuer: 'Collabs. Community Executive Secretariat',
+    issuer: 'Collabs, Naveed-e-Falah, Jenabai Awards & District Youth Office',
     school: 'Pamir Public School & College Booni',
-    project: 'Smart High-Altitude Agriculture & Soil Sensor',
-    theme: 'emerald'
+    project: 'Smart High-Altitude Agriculture & Soil Sensor'
   },
   {
     id: 'CLB-2026-520',
     recipientName: 'Asad Ullah',
-    achievementType: 'Active Participation',
-    eventName: 'First Mega Event of Collabs',
-    issueDate: '31 October 2026',
+    achievementType: 'Certificate of Participation',
+    eventName: 'Science, Arts & Food Exhibition 2026',
+    issueDate: 'October 31, 2026',
     verified: true,
-    issuer: 'Collabs. Community Executive Secretariat',
+    issuer: 'Collabs, Naveed-e-Falah, Jenabai Awards & District Youth Office',
     school: 'Chitral Community Model School',
-    project: 'Chitral Code Guild · Digital Literacy',
-    theme: 'obsidian'
+    project: 'Chitral Code Guild · Digital Literacy'
   }
 ];
 
@@ -1950,13 +1917,12 @@ export default function App() {
     const newCert: CertificateRecord = {
       id: newId,
       recipientName: certForm.recipientName.trim(),
-      achievementType: certForm.achievementType,
-      eventName: certForm.eventName,
-      issueDate: certForm.issueDate || '31 October 2026',
+      achievementType: 'Certificate of Participation',
+      eventName: 'Science, Arts & Food Exhibition 2026',
+      issueDate: 'October 31, 2026',
       verified: true,
-      issuer: 'Collabs. Community Executive Secretariat',
-      school: certRecipientSchool,
-      theme: certTheme
+      issuer: 'Collabs, Naveed-e-Falah, Jenabai Awards & District Youth Office',
+      school: certRecipientSchool
     };
     setCertDatabase([newCert, ...certDatabase]);
     setCurrentCertId(newId);
@@ -2454,31 +2420,6 @@ export default function App() {
                         </div>
 
                         <div>
-                          <label className="block text-xs font-bold text-slate-700 mb-1">School / Institution</label>
-                          <input
-                            type="text"
-                            name="school"
-                            placeholder="e.g. Booni Degree College"
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 mb-1">Preferred Department</label>
-                          <select
-                            name="department"
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none"
-                          >
-                            <option value="Venue Operations">Venue Operations & Logistics</option>
-                            <option value="Technical">Tech & Registration Support</option>
-                            <option value="Media & Coverage">Media & Coverage</option>
-                            <option value="Guest Hospitality">Guest Hospitality & Protocol</option>
-                          </select>
-                        </div>
-
-                        <div>
                           <label className="block text-xs font-bold text-slate-700 mb-1">Preferred Shift</label>
                           <select
                             name="shift"
@@ -2489,6 +2430,19 @@ export default function App() {
                             <option value="08:00 AM – 06:00 PM PKT">Full Event Day (08:00 AM - 06:00 PM)</option>
                           </select>
                         </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Preferred Department</label>
+                        <select
+                          name="department"
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none"
+                        >
+                          <option value="Venue Operations">Venue Operations & Logistics</option>
+                          <option value="Technical">Tech & Registration Support</option>
+                          <option value="Media & Coverage">Media & Coverage</option>
+                          <option value="Guest Hospitality">Guest Hospitality & Protocol</option>
+                        </select>
                       </div>
 
                       <button
@@ -2692,15 +2646,15 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Registered Crew Roster with Specific Work Assigned Column */}
+              {/* Registered Crew Roster with Unique ID & Specific Work Assigned */}
               <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
                   <div>
                     <h3 className="font-bold text-base text-slate-900 flex items-center gap-2">
                       <Users size={18} className="text-blue-600" />
-                      <span>Registered Crew Roster & Specific Work ({volunteers.length})</span>
+                      <span>Registered Crew Roster & Unique IDs ({volunteers.length})</span>
                     </h3>
-                    <p className="text-xs text-slate-500">Confirmed volunteer team members and their exact on-ground duties for Collabs Booni Event</p>
+                    <p className="text-xs text-slate-500">Search any Unique Volunteer ID above to view their full assigned responsibilities</p>
                   </div>
                 </div>
 
@@ -2708,17 +2662,23 @@ export default function App() {
                   <table className="w-full text-xs text-left">
                     <thead>
                       <tr className="border-b border-slate-200 text-slate-500 font-semibold bg-slate-50/50">
+                        <th className="py-3 px-3">Unique ID</th>
                         <th className="py-3 px-3">Volunteer Name</th>
                         <th className="py-3 px-3">Department & Role</th>
                         <th className="py-3 px-3">Specific Work & Assigned Duty</th>
-                        <th className="py-3 px-3">Institution</th>
                         <th className="py-3 px-3">Shift & Station</th>
                         <th className="py-3 px-3">Status</th>
+                        <th className="py-3 px-3 text-right">Duty Lookup</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {volunteers.map((v) => (
                         <tr key={v.id} className="hover:bg-slate-50/60 transition-colors">
+                          <td className="py-3 px-3">
+                            <span className="font-mono text-xs font-black px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 inline-block tracking-wider">
+                              {v.id.toUpperCase()}
+                            </span>
+                          </td>
                           <td className="py-3 px-3 font-semibold text-slate-900">
                             <div>{v.name}</div>
                             <div className="text-[10px] text-slate-400 font-normal">{v.email}</div>
@@ -2732,7 +2692,6 @@ export default function App() {
                               {v.duties || 'Support event setup, visitor guidance, and exhibition operations.'}
                             </div>
                           </td>
-                          <td className="py-3 px-3 text-slate-600">{v.school || 'Collabs Crew'}</td>
                           <td className="py-3 px-3 text-slate-600">
                             <div>{v.shiftTime}</div>
                             <div className="text-[10px] text-slate-400">{v.station}</div>
@@ -2746,6 +2705,20 @@ export default function App() {
                               <CheckCircle size={10} />
                               {v.status}
                             </span>
+                          </td>
+                          <td className="py-3 px-3 text-right">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const el = document.getElementById('volunteers');
+                                if (el) el.scrollIntoView({ behavior: 'smooth' });
+                                window.dispatchEvent(new CustomEvent('collabs-lookup-volunteer', { detail: v.id }));
+                              }}
+                              className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] rounded-lg transition-all cursor-pointer shadow-xs inline-flex items-center gap-1 active:scale-95"
+                            >
+                              <span>View Duties</span>
+                              <span>→</span>
+                            </button>
                           </td>
                         </tr>
                       ))}
@@ -4102,7 +4075,7 @@ export default function App() {
                 First Mega Event of Collabs · 31 October 2026
               </p>
               <div className="flex items-center gap-3 pt-1 text-slate-400">
-                <a href="https://www.instagram.com/collabs" target="_blank" rel="noreferrer" aria-label="Instagram" className="hover:text-white transition-colors">
+                <a href="https://www.instagram.com/collabs_org/" target="_blank" rel="noreferrer" aria-label="Instagram" className="hover:text-white transition-colors">
                   <Instagram size={16} />
                 </a>
                 <a href="https://www.youtube.com/@collabsorg" target="_blank" rel="noreferrer" aria-label="YouTube" className="hover:text-white transition-colors">

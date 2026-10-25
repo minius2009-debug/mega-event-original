@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   CheckCircle2,
   Clock,
@@ -50,7 +50,7 @@ export const VolunteerDutyTracker: React.FC<VolunteerDutyTrackerProps> = ({
   setIsAdminMode
 }) => {
   // Input search / upload state
-  const [inputVolunteerId, setInputVolunteerId] = useState<string>('vol-201');
+  const [inputVolunteerId, setInputVolunteerId] = useState<string>('VOL-201');
   const [selectedVolunteerId, setSelectedVolunteerId] = useState<string>('vol-201');
   const [idNotFound, setIdNotFound] = useState<string | null>(null);
 
@@ -66,6 +66,17 @@ export const VolunteerDutyTracker: React.FC<VolunteerDutyTrackerProps> = ({
 
   // Upload file state
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
+
+  // Listen for global custom event to lookup volunteer from anywhere
+  useEffect(() => {
+    const handleCustomLookup = (e: any) => {
+      if (e.detail) {
+        handleLookupId(e.detail);
+      }
+    };
+    window.addEventListener('collabs-lookup-volunteer', handleCustomLookup);
+    return () => window.removeEventListener('collabs-lookup-volunteer', handleCustomLookup);
+  }, [volunteers]);
 
   // Lookup current volunteer
   const activeVolunteer = useMemo(() => {
@@ -131,18 +142,28 @@ export const VolunteerDutyTracker: React.FC<VolunteerDutyTrackerProps> = ({
     const cleanId = idToLookup.trim();
     if (!cleanId) return;
 
-    const match = volunteers.find(
-      v => v.id.toLowerCase() === cleanId.toLowerCase() ||
-           v.name.toLowerCase() === cleanId.toLowerCase() ||
-           v.username.toLowerCase() === cleanId.toLowerCase()
-    );
+    const normalizedQuery = cleanId.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    const match = volunteers.find(v => {
+      const vIdNorm = v.id.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const vNum = v.id.toLowerCase().replace('vol-', '').replace('vol', '');
+      const queryNum = cleanId.toLowerCase().replace('vol-', '').replace('vol', '');
+      
+      return (
+        v.id.toLowerCase() === cleanId.toLowerCase() ||
+        vIdNorm === normalizedQuery ||
+        (queryNum && vNum === queryNum) ||
+        v.name.toLowerCase().includes(cleanId.toLowerCase()) ||
+        v.username.toLowerCase() === cleanId.toLowerCase()
+      );
+    });
 
     if (match) {
       setSelectedVolunteerId(match.id);
-      setInputVolunteerId(match.id);
+      setInputVolunteerId(match.id.toUpperCase());
       setIdNotFound(null);
     } else {
-      setIdNotFound(`No volunteer found matching "${cleanId}". Try vol-201, vol-202, or select from the quick list below.`);
+      setIdNotFound(`No volunteer found matching "${cleanId}". Try VOL-201, VOL-202, or click a volunteer in the roster below.`);
     }
   };
 
@@ -431,11 +452,6 @@ export const VolunteerDutyTracker: React.FC<VolunteerDutyTrackerProps> = ({
                 </div>
 
                 <div className="flex items-center gap-3 text-xs text-slate-600 mt-1.5 flex-wrap">
-                  <span className="font-semibold text-slate-800 flex items-center gap-1">
-                    <Building2 size={13} className="text-blue-600" />
-                    {activeVolunteer.school || 'Booni Degree College'}
-                  </span>
-                  <span>·</span>
                   <span className="font-semibold text-blue-700">
                     {activeVolunteer.department} ({activeVolunteer.role || 'Crew Member'})
                   </span>
@@ -470,6 +486,33 @@ export const VolunteerDutyTracker: React.FC<VolunteerDutyTrackerProps> = ({
               <div className="text-[10px] text-slate-500 mt-1.5 text-center font-medium">
                 {isFullyCleared ? 'All specific assigned tasks verified!' : 'Awaiting admin verification & sign-off'}
               </div>
+            </div>
+          </div>
+
+          {/* Primary Specific Work & Responsibility Spotlight Card */}
+          <div className="p-5 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border border-blue-200 rounded-2xl mb-6 shadow-2xs">
+            <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+                <span className="text-[11px] font-black uppercase text-blue-900 tracking-wider">
+                  Assigned Responsibilities & Specific Work for {activeVolunteer.name} ({activeVolunteer.id.toUpperCase()})
+                </span>
+              </div>
+              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-white text-blue-700 border border-blue-200 shadow-2xs">
+                Station: {activeVolunteer.station || 'Main Venue'}
+              </span>
+            </div>
+            <div className="p-3.5 bg-white rounded-xl border border-blue-100 shadow-2xs">
+              <p className="text-sm font-bold text-slate-900 leading-relaxed">
+                "{activeVolunteer.duties || 'Support event setup, visitor guidance, and exhibition operations.'}"
+              </p>
+            </div>
+            <div className="mt-3 flex items-center gap-4 text-xs font-semibold text-slate-600 flex-wrap">
+              <span><strong>Shift Timing:</strong> {activeVolunteer.shiftTime || '08:00 AM – 05:00 PM PKT'}</span>
+              <span>•</span>
+              <span><strong>Assigned Department:</strong> {activeVolunteer.department}</span>
+              <span>•</span>
+              <span><strong>Role:</strong> {activeVolunteer.role || 'Crew Member'}</span>
             </div>
           </div>
 
