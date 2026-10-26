@@ -112,9 +112,9 @@ interface TeamMember {
   id: string;
   name: string;
   role: string;
-  focus: string;
-  department: string;
-  responsibilities: string[];
+  focus?: string;
+  department?: string;
+  responsibilities?: string[];
 }
 
 export interface VolunteerLog {
@@ -255,650 +255,64 @@ const MANAGEMENT_ROLES = [
 ];
 
 const INITIAL_TEAM: TeamMember[] = [
-  {
-    id: 'tm-2',
-    name: 'Syed Shahan Ali',
-    role: 'Relations Manager',
-    department: 'Core Organizing & Management',
-    focus: 'External Relations & Sponsor Communications',
-    responsibilities: [
-      'Manage external relations, sponsor communications, and inter-organizational coordination.',
-      'Establish partnerships with regional institutions in Upper Chitral.'
-    ]
-  },
-  {
-    id: 'tm-3',
-    name: 'Umme Kulsoom',
-    role: 'Director',
-    department: 'Core Organizing & Management',
-    focus: 'High-Level Delegation & Execution Oversight',
-    responsibilities: [
-      'High-level delegation, team coordination, and final event execution oversight.',
-      'Supervise operational milestones and department synchronization.'
-    ]
-  },
-  {
-    id: 'tm-10',
-    name: 'Aarish Salik',
-    role: 'IT Lead',
-    department: 'Tech, IT & Media',
-    focus: 'IT Infrastructure & Digital Registrations',
-    responsibilities: [
-      'Oversee all IT infrastructure, digital registrations, registration software, and technical presentations.',
-      'Manage IT systems, presentations, screens, and technical troubleshooting during the event.'
-    ]
-  },
-  {
-    id: 'tm-4',
-    name: 'Afroza Sardar',
-    role: 'Collaboration Director',
-    department: 'Core Organizing & Management',
-    focus: 'Partnerships & Liaison',
-    responsibilities: [
-      'Liaise with Naveed e Falah and District Youth Office, ensuring all partnerships function smoothly.'
-    ]
-  },
-  {
-    id: 'tm-5',
-    name: 'Azhar Ali Shah',
-    role: 'Operations Manager',
-    department: 'Core Organizing & Management',
-    focus: 'Logistical Operations & Venue Setup',
-    responsibilities: [
-      'Direct all logistical operations, venue setup, dismantling, and overall operational flow.'
-    ]
-  },
-  {
-    id: 'tm-6',
-    name: 'Zakir Hussain',
-    role: 'Finance Manager',
-    department: 'Core Organizing & Management',
-    focus: 'Event Budget & Vendor Bills',
-    responsibilities: [
-      'Manage the event budget, track vendor bills, and oversee prize distribution funds.'
-    ]
-  },
-  {
-    id: 'tm-7',
-    name: 'Alina Razaq',
-    role: 'Subject Lead',
-    department: 'Zone 1: Science',
-    focus: 'Science Zone Coordination',
-    responsibilities: [
-      'Overall coordination of Zone 1. Register science projects, assign spaces, and facilitate judges for Physics, Chem, Bio, Math, and CS.'
-    ]
-  },
-  {
-    id: 'tm-8',
-    name: 'Ariyan Mir',
-    role: 'Coordinator',
-    department: 'Program, Stage & Decor',
-    focus: 'Ceremonies & Stage Flow',
-    responsibilities: [
-      'Coordinate the opening/closing ceremonies, manage stage flow, and arrange performances.'
-    ]
-  },
-  {
-    id: 'tm-9',
-    name: 'Ali Hassan',
-    role: 'Coordinator',
-    department: 'Program, Stage & Decor',
-    focus: 'Stage Management & VIP Seating',
-    responsibilities: [
-      'Assist in stage management, VIP seating arrangements, and ensure the program stays on schedule.'
-    ]
-  },
-  {
-    id: 'tm-11',
-    name: 'Madeeha Umar',
-    role: 'Tech Manager',
-    department: 'Tech, IT & Media',
-    focus: 'Event Software & Technical Support',
-    responsibilities: [
-      'Manage event software, PA systems, and provide technical support during the Collabs Launch.'
-    ]
-  },
-  {
-    id: 'tm-12',
-    name: 'Imad Uddin',
-    role: 'Developer',
-    department: 'Tech, IT & Media',
-    focus: 'Digital Systems & Backend Management',
-    responsibilities: [
-      'Support digital systems, troubleshoot tech issues, and manage the event\'s digital backend.'
-    ]
-  },
-  {
-    id: 'tm-13',
-    name: 'Zuhaib Pirzada',
-    role: 'Media Director',
-    department: 'Tech, IT & Media',
-    focus: 'Photography, Videography & Official Coverage',
-    responsibilities: [
-      'Direct all event photography, videography, and official media coverage.'
-    ]
-  },
-  {
-    id: 'tm-14',
-    name: 'Ehan Ali',
-    role: 'Communications Lead & Event Host',
-    department: 'Tech, IT & Media',
-    focus: 'Official MC & Announcements',
-    responsibilities: [
-      'Serve as the official Host/MC for the event, manage stage announcements, and engage the audience.'
-    ]
-  },
-  {
-    id: 'tm-15',
-    name: 'Syed Mazhar',
-    role: 'Media Manager',
-    department: 'Tech, IT & Media',
-    focus: 'Social Media Updates & Behind-The-Scenes',
-    responsibilities: [
-      'Manage social media updates, capture behind-the-scenes content, and assist the Media Director.'
-    ]
-  },
-  {
-    id: 'tm-16',
-    name: 'Uroosa',
-    role: 'Field Manager',
-    department: 'Operations & Logistics',
-    focus: 'On-Ground Logistics & Venue Flow',
-    responsibilities: [
-      'Supervise on-ground logistics, direct the logistics team, and manage overall venue flow.'
-    ]
-  },
-  {
-    id: 'tm-17',
-    name: 'Akhtar Musaveer',
-    role: 'Logistics Team',
-    department: 'Operations & Logistics',
-    focus: 'Physical Assets & Venue Setup',
-    responsibilities: [
-      'Arrange tables, chairs, water stations, and manage physical assets.'
-    ]
-  },
-  {
-    id: 'tm-18',
-    name: 'Andaleeb Nawaz',
-    role: 'Ambassador',
-    department: 'VIP & Judge Escorts',
-    focus: 'VIP & Judge Guidance',
-    responsibilities: [
-      'Welcome assigned VIPs/judges, guide them through the exhibition zones, and manage their scoring sheets.'
-    ]
-  },
-  {
-    id: 'tm-19',
-    name: 'Hisham Uddin',
-    role: 'Campus Ambassador',
-    department: 'VIP & Judge Escorts',
-    focus: 'Judge Accompaniment & Hospitality',
-    responsibilities: [
-      'Accompany judges, ensure they have refreshments, and keep them on schedule.'
-    ]
-  },
-  {
-    id: 'tm-20',
-    name: 'Prince Ali',
-    role: 'Campus Ambassador',
-    department: 'VIP & Judge Escorts',
-    focus: 'Campus Representation & Chief Guest Hospitality',
-    responsibilities: [
-      'Provide dedicated campus leadership and hospitality to Chief Guests, navigate them through the crowd, and attend to their needs.'
-    ]
-  }
+  { id: 'tm-1', name: 'Syed Farhan Danish', role: 'Founder', department: 'Executive' },
+  { id: 'tm-2', name: 'Umme Kulsoom', role: 'Director', department: 'Executive' },
+  { id: 'tm-3', name: 'Arish Wazir', role: 'IT Lead', department: 'Tech' },
+  { id: 'tm-4', name: 'Madeeha Umar', role: 'Tech Manager', department: 'Tech' },
+  { id: 'tm-5', name: 'Azhar Ali Shah', role: 'Operations Manager', department: 'Operations' },
+  { id: 'tm-6', name: 'Andaleeb Nawaz', role: 'Ambassador', department: 'Outreach' },
+  { id: 'tm-7', name: 'Syed Shahan Ali', role: 'Relations Manager', department: 'Relations' },
+  { id: 'tm-8', name: 'Afroza Sardar', role: 'Collaboration Director', department: 'Relations' },
+  { id: 'tm-9', name: 'Ehan Ali', role: 'Communications Lead & Event Host', department: 'Media' },
+  { id: 'tm-10', name: 'Zakir Hussain', role: 'Finance Manager', department: 'Finance' },
+  { id: 'tm-11', name: 'Alina Razaq', role: 'Subject Lead', department: 'Academics' },
+  { id: 'tm-12', name: 'Ariyan Mir', role: 'Coordinator', department: 'Operations' },
+  { id: 'tm-13', name: 'Ali Hassan', role: 'Coordinator', department: 'Operations' },
+  { id: 'tm-14', name: 'Zuhaib Pirzada', role: 'Media Director', department: 'Media' },
+  { id: 'tm-15', name: 'Imad Uddin', role: 'Developer', department: 'Tech' },
+  { id: 'tm-16', name: 'Syed Mazhar', role: 'Media Manager', department: 'Media' },
+  { id: 'tm-17', name: 'Uroosa', role: 'Field Manager', department: 'Operations' },
+  { id: 'tm-18', name: 'Akhtar Musaveer', role: 'Logistics Team', department: 'Logistics' },
+  { id: 'tm-19', name: 'Hisham Uddin', role: 'Campus Ambassador', department: 'Outreach' },
+  { id: 'tm-20', name: 'Prince Ali', role: 'Campus Ambassador', department: 'Outreach' },
+  { id: 'tm-21', name: 'Daniyal Saifullah', role: 'Campus Ambassador', department: 'Outreach' },
+  { id: 'tm-22', name: 'Noman Khalid', role: 'Campus Ambassador', department: 'Outreach' },
+  { id: 'tm-23', name: 'Syed Rehmat Hussain', role: 'Campus Ambassador', department: 'Outreach' },
+  { id: 'tm-24', name: 'Shah Inam Ul Haq', role: 'Campus Ambassador', department: 'Outreach' },
+  { id: 'tm-25', name: 'Saleem Yousuf', role: 'Discipline Committee', department: 'Management' }
 ];
 
 const INITIAL_VOLUNTEERS: VolunteerLog[] = [
-  {
-    id: 'vol-201',
-    name: 'Salman Ali',
-    username: 'salman',
-    email: 'salman.ali@collabs.org',
-    phone: '+92 345 1010101',
-    role: 'Science Zone Volunteer',
-    department: 'Zone 1: Science',
-    hours: 48,
-    station: 'Zone 1: Science Stalls',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Handle heavy lifting, technical setup, and arrange power extensions for science projects.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-202',
-    name: 'Faizan Ali Akbar',
-    username: 'faizan',
-    email: 'faizan.akbar@collabs.org',
-    phone: '+92 345 1010102',
-    role: 'Science Zone Volunteer',
-    department: 'Zone 1: Science',
-    hours: 36,
-    station: 'Zone 1: Science Stalls',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Assist with stall setup, equipment checks, and participant guidance.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-203',
-    name: 'Syed Sameem',
-    username: 'sameem',
-    email: 'sameem@collabs.org',
-    phone: '+92 345 1010103',
-    role: 'Technical Prototype Volunteer',
-    department: 'Zone 1: Science',
-    hours: 52,
-    station: 'Zone 1: Science Stalls',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Manage power supply, wiring safety, and assist participants with technical prototype needs.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-204',
-    name: 'Manahil',
-    username: 'manahil',
-    email: 'manahil@collabs.org',
-    phone: '+92 345 1010104',
-    role: 'Science Coordinator Volunteer',
-    department: 'Zone 1: Science',
-    hours: 40,
-    station: 'Zone 1: Science Display',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Coordinate with science participants, ensure display aesthetics, and guide visitors.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-205',
-    name: 'Sania Ambareen',
-    username: 'sania',
-    email: 'sania.ambareen@collabs.org',
-    phone: '+92 345 1010105',
-    role: 'Registration Volunteer',
-    department: 'Zone 1: Science',
-    hours: 38,
-    station: 'Zone 1 Registration Desk',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Assist in participant registration within Zone 1 and manage student queries.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-206',
-    name: 'Sehba Rahim',
-    username: 'sehba',
-    email: 'sehba.rahim@collabs.org',
-    phone: '+92 345 1010106',
-    role: 'Evaluation Flow Volunteer',
-    department: 'Zone 1: Science',
-    hours: 45,
-    station: 'Zone 1 Judging Area',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Monitor the flow of visitors through the science section and assist judges during evaluation.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-207',
-    name: 'Manahil Akram',
-    username: 'manahil.akram',
-    email: 'manahil.akram@collabs.org',
-    phone: '+92 345 1010107',
-    role: 'Display Labeling Volunteer',
-    department: 'Zone 1: Science',
-    hours: 32,
-    station: 'Zone 1 Science Stalls',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Ensure all science displays are properly labeled and assist female participants with setups.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-208',
-    name: 'Rubama Hayat',
-    username: 'rubama',
-    email: 'rubama.hayat@collabs.org',
-    phone: '+92 345 1010108',
-    role: 'Art Section Volunteer',
-    department: 'Zone 2: Art',
-    hours: 50,
-    station: 'Zone 2: Art Pavilion',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Coordinate the Art section, arrange easels/boards, and ensure all artwork is safely displayed.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-209',
-    name: 'Aliha',
-    username: 'aliha',
-    email: 'aliha@collabs.org',
-    phone: '+92 345 1010109',
-    role: 'Art Aesthetics Volunteer',
-    department: 'Zone 2: Art',
-    hours: 30,
-    station: 'Zone 2: Art Pavilion',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Manage the aesthetics of the Art Zone and assist artists with their presentations.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-210',
-    name: 'Sonam',
-    username: 'sonam',
-    email: 'sonam@collabs.org',
-    phone: '+92 345 1010110',
-    role: 'Artwork Protection Volunteer',
-    department: 'Zone 2: Art',
-    hours: 34,
-    station: 'Zone 2: Art Pavilion',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Protect displayed artwork from crowd interference and assist judges in the art category.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-211',
-    name: 'Fakiha',
-    username: 'fakiha',
-    email: 'fakiha@collabs.org',
-    phone: '+92 345 1010111',
-    role: 'Art Participant Facilitator',
-    department: 'Zone 2: Art',
-    hours: 28,
-    station: 'Zone 2: Art Pavilion',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Facilitate art participants, manage display areas, and ensure a smooth visitor flow.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-212',
-    name: 'Anita Mehak',
-    username: 'anita',
-    email: 'anita.mehak@collabs.org',
-    phone: '+92 345 1010112',
-    role: 'Food Stall Overseer',
-    department: 'Zone 3: Food Stalls',
-    hours: 44,
-    station: 'Zone 3: Food Court',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Oversee stall assignments for food vendors/students and ensure hygiene standards are met.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-213',
-    name: 'Ifat Naseem',
-    username: 'ifat',
-    email: 'ifat.naseem@collabs.org',
-    phone: '+92 345 1010113',
-    role: 'Food Handling Monitor',
-    department: 'Zone 3: Food Stalls',
-    hours: 38,
-    station: 'Zone 3: Food Court',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Monitor food handling, manage waste disposal in the food area, and assist with crowd control.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-214',
-    name: 'Sidra Ul Muntaha',
-    username: 'sidra',
-    email: 'sidra@collabs.org',
-    phone: '+92 345 1010114',
-    role: 'Lunch Break Coordinator',
-    department: 'Zone 3: Food Stalls',
-    hours: 40,
-    station: 'VIP & Crew Dining Area',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Coordinate the lunch break logistics for volunteers and guests.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-215',
-    name: 'Sabbah',
-    username: 'sabbah',
-    email: 'sabbah@collabs.org',
-    phone: '+92 345 1010115',
-    role: 'Hygiene & Support Volunteer',
-    department: 'Zone 3: Food Stalls',
-    hours: 26,
-    station: 'Zone 3: Food Court',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Ensure dustbins are utilized, maintain cleanliness, and support food participants.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-216',
-    name: 'Amina',
-    username: 'amina',
-    email: 'amina@collabs.org',
-    phone: '+92 345 1010116',
-    role: 'Stall Liaison Volunteer',
-    department: 'Zone 3: Food Stalls',
-    hours: 35,
-    station: 'Zone 3: Food Court',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Facilitate communication between food stall operators and the operations team.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-217',
-    name: 'Zoha',
-    username: 'zoha',
-    email: 'zoha@collabs.org',
-    phone: '+92 345 1010117',
-    role: 'Decor & Banners Volunteer',
-    department: 'Program, Stage & Decor',
-    hours: 42,
-    station: 'Main Stage & Auditorium',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Plan and arrange venue decorations, banners, and signage safely and aesthetically.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-218',
-    name: 'Muskan',
-    username: 'muskan',
-    email: 'muskan@collabs.org',
-    phone: '+92 345 1010118',
-    role: 'Entrance Aesthetics Volunteer',
-    department: 'Program, Stage & Decor',
-    hours: 30,
-    station: 'Main Venue Entrance',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Maintain the stage decor and entrance aesthetics throughout the event.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-219',
-    name: 'Farina',
-    username: 'farina',
-    email: 'farina@collabs.org',
-    phone: '+92 345 1010119',
-    role: 'Stage Material Assistant',
-    department: 'Program, Stage & Decor',
-    hours: 28,
-    station: 'Main Stage Backstage',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Assist in managing decorative materials and help dismantle decorations post-event.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-220',
-    name: 'Arshe',
-    username: 'arshe',
-    email: 'arshe@collabs.org',
-    phone: '+92 345 1010120',
-    role: 'VIP Seating Volunteer',
-    department: 'Program, Stage & Decor',
-    hours: 36,
-    station: 'VIP & Guest Lounge',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Ensure VIP and guest seating areas are presentable and correctly labeled.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-221',
-    name: 'Ayan Ali',
-    username: 'ayan',
-    email: 'ayan.ali@collabs.org',
-    phone: '+92 345 1010121',
-    role: 'Camera Equipment Assistant',
-    department: 'Tech, IT & Media',
-    hours: 48,
-    station: 'Media Suite & Camera Pod',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Assist with camera equipment, crowd control for media shots, and general media support.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-222',
-    name: 'Shahid Nazir',
-    username: 'shahid',
-    email: 'shahid.nazir@collabs.org',
-    phone: '+92 345 1010122',
-    role: 'Physical Venue Setup Volunteer',
-    department: 'Operations & Logistics',
-    hours: 55,
-    station: 'Main Venue Grounds',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Assist with physical venue setup, crowd control during judging, and dismantling.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-223',
-    name: 'S.Sani',
-    username: 'sani',
-    email: 's.sani@collabs.org',
-    phone: '+92 345 1010123',
-    role: 'Visitor Control Volunteer',
-    department: 'Operations & Logistics',
-    hours: 32,
-    station: 'Judging Pavilion Gate',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Help enforce the visitor limits during the judging phase and manage physical barriers.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-224',
-    name: 'Asin Nawaz',
-    username: 'asin',
-    email: 'asin.nawaz@collabs.org',
-    phone: '+92 345 1010124',
-    role: 'Logistics Transport Volunteer',
-    department: 'Operations & Logistics',
-    hours: 40,
-    station: 'Operations Storage Hub',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Support the operations manager with on-the-fly logistical needs and material transport.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-225',
-    name: 'Mazhar Ali',
-    username: 'mazhar.ali',
-    email: 'mazhar.ali@collabs.org',
-    phone: '+92 345 1010125',
-    role: 'Canopy & Waste Management Volunteer',
-    department: 'Operations & Logistics',
-    hours: 38,
-    station: 'Exhibition Outdoor Pavilion',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Assist in setting up tents, canopies, and managing waste disposal logistics.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-226',
-    name: 'Ania Faraz',
-    username: 'ania',
-    email: 'ania.faraz@collabs.org',
-    phone: '+92 345 1010126',
-    role: 'Registration & Welcome Volunteer',
-    department: 'Reception & Security',
-    hours: 46,
-    station: 'Main Gate Registration Desk',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Manage the registration desk, welcome guests, and check participant IDs.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-227',
-    name: 'Wania',
-    username: 'wania',
-    email: 'wania@collabs.org',
-    phone: '+92 345 1010127',
-    role: 'Attendance List Volunteer',
-    department: 'Reception & Security',
-    hours: 42,
-    station: 'Main Entrance Lounge',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Maintain attendance lists, direct guests to seating areas, and provide general event information.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  },
-  {
-    id: 'vol-228',
-    name: 'Shawana',
-    username: 'shawana',
-    email: 'shawana@collabs.org',
-    phone: '+92 345 1010128',
-    role: 'Entrance & Lanyard Volunteer',
-    department: 'Reception & Security',
-    hours: 40,
-    station: 'Main Venue Security Gate',
-    shiftTime: '08:00 AM – 05:00 PM PKT',
-    checkedIn: true,
-    duties: 'Assist at the entrance, ensure unauthorized individuals do not enter, and distribute lanyards.',
-    dateJoined: 'Oct 2026',
-    status: 'Verified Active'
-  }
+  { id: 'vol-1', name: 'Salman Ali', username: 'salman', email: 'salman@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-2', name: 'Faizan Ali Akbar', username: 'faizan', email: 'faizan@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-3', name: 'Syed Sameem', username: 'sameem', email: 'sameem@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-4', name: 'Manahil', username: 'manahil', email: 'manahil@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-5', name: 'Sania Ambareen', username: 'sania', email: 'sania@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-6', name: 'Sehba Rahim', username: 'sehba', email: 'sehba@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-7', name: 'Manahil Akram', username: 'manahil_a', email: 'manahil.akram@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-8', name: 'Rubama Hayat', username: 'rubama', email: 'rubama@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-9', name: 'Aliha', username: 'aliha', email: 'aliha@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-10', name: 'Sonam', username: 'sonam', email: 'sonam@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-11', name: 'Fakiha', username: 'fakiha', email: 'fakiha@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-12', name: 'Anita Mehak', username: 'anita', email: 'anita@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-13', name: 'Ifat Naseem', username: 'ifat', email: 'ifat@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-14', name: 'Sidra Ul Muntaha', username: 'sidra', email: 'sidra@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-15', name: 'Sabbah', username: 'sabbah', email: 'sabbah@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-16', name: 'Amina', username: 'amina', email: 'amina@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-17', name: 'Zoha', username: 'zoha', email: 'zoha@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-18', name: 'Muskan', username: 'muskan', email: 'muskan@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-19', name: 'Farina', username: 'farina', email: 'farina@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-20', name: 'Arshe', username: 'arshe', email: 'arshe@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-21', name: 'Ayan Ali', username: 'ayan', email: 'ayan@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-22', name: 'Shahid Nazir', username: 'shahid', email: 'shahid@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-23', name: 'S.Sani', username: 'ssani', email: 'sani@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-24', name: 'Asin Nawaz', username: 'asin', email: 'asin@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-25', name: 'Mazhar Ali', username: 'mazhar', email: 'mazhar@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-26', name: 'Ania Faraz', username: 'ania', email: 'ania@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-27', name: 'Wania', username: 'wania', email: 'wania@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-28', name: 'Shawana', username: 'shawana', email: 'shawana@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-29', name: 'Shayan Ali', username: 'shayan', email: 'shayan@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' },
+  { id: 'vol-30', name: 'Samia Saba', username: 'samia', email: 'samia@collabs.org', role: 'Volunteer', department: 'Event Operations', hours: 12, duties: 'Event support', dateJoined: 'Oct 2026', status: 'Active' }
 ];
 
 const INITIAL_CERTIFICATES: CertificateRecord[] = [
@@ -996,6 +410,20 @@ export default function App() {
   const selectedTeamMemberIdState = useState<string>('tm-1');
   const [activeTeamIndex, setActiveTeamIndex] = useState<number>(0);
   const teamSliderRef = useRef<HTMLDivElement>(null);
+  const volunteerSliderRef = useRef<HTMLDivElement>(null);
+
+  const scrollTeam = (direction: 'left' | 'right') => {
+    if (teamSliderRef.current) {
+      teamSliderRef.current.scrollBy({ left: direction === 'left' ? -320 : 320, behavior: 'smooth' });
+    }
+  };
+
+  const scrollVolunteers = (direction: 'left' | 'right') => {
+    if (volunteerSliderRef.current) {
+      volunteerSliderRef.current.scrollBy({ left: direction === 'left' ? -320 : 320, behavior: 'smooth' });
+    }
+  };
+
   const selectedTeamMemberId = selectedTeamMemberIdState[0];
   const setSelectedTeamMemberId = selectedTeamMemberIdState[1];
 
@@ -3309,222 +2737,145 @@ export default function App() {
 
 
 
-      {/* 5. Team Members & Responsibilities Directory with Expand/Collapse */}
-      <section id="team" className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto scroll-mt-24">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 text-left">
-          <div>
-            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">
-              Community Leads
-            </span>
-            <div className="flex items-center gap-3">
+      {/* 5. Team Members & Volunteers Section */}
+      <section id="team" className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto scroll-mt-24 text-left space-y-12">
+        {/* Core Team Header & Single-Line Scroll Track */}
+        <div>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-5">
+            <div>
+              <span className="text-xs font-extrabold text-blue-600 uppercase tracking-widest block mb-1">
+                Community Organizers
+              </span>
               <h2 className="font-heading text-3xl font-black text-slate-900 tracking-tight">
-                Team Members & Responsibilities
+                Collabs. Team
               </h2>
-              <button
-                onClick={() => toggleSection('teamDirectory')}
-                className="px-2.5 py-1 text-xs font-bold rounded bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center gap-1 cursor-pointer transition-colors"
-                title="Expand or Collapse Team Directory"
-              >
-                {sectionsExpanded.teamDirectory ? <><ChevronUp size={14} /> Collapse</> : <><ChevronDown size={14} /> Expand</>}
-              </button>
+              <p className="text-xs text-slate-500 mt-1 max-w-xl">
+                Official team leading the First Mega Event in Upper Chitral. Scroll to explore members.
+              </p>
             </div>
-            <p className="text-sm text-slate-600 mt-1 max-w-2xl">
-              Meet the coordinators leading the First Mega Event of Collabs in Upper Chitral.
-            </p>
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              <div className="text-xs font-bold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 shrink-0">
+                {INITIAL_TEAM.length} Members
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => scrollTeam('left')}
+                  className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 active:scale-95 text-slate-700 transition shadow-2xs cursor-pointer"
+                  title="Scroll Left"
+                  aria-label="Scroll Team Left"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollTeam('right')}
+                  className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 active:scale-95 text-slate-700 transition shadow-2xs cursor-pointer"
+                  title="Scroll Right"
+                  aria-label="Scroll Team Right"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
           </div>
 
-          {/* Horizontal Next-by-Next Controls */}
-          <div className="flex items-center gap-3 shrink-0">
-            <span className="text-xs font-semibold text-slate-500">
-              <strong className="text-slate-900">{activeTeamIndex + 1}</strong> / {INITIAL_TEAM.length}
-            </span>
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => {
-                  const targetIdx = (activeTeamIndex - 1 + INITIAL_TEAM.length) % INITIAL_TEAM.length;
-                  setActiveTeamIndex(targetIdx);
-                  setSelectedTeamMemberId(INITIAL_TEAM[targetIdx].id);
-                  if (teamSliderRef.current) {
-                    const card = teamSliderRef.current.children[targetIdx] as HTMLElement;
-                    if (card) {
-                      card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                    }
-                  }
-                }}
-                className="p-2.5 bg-white hover:bg-slate-100 text-slate-700 rounded-xl border border-slate-200 transition-all cursor-pointer active:scale-95 shadow-2xs"
-                title="Previous Member"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <button
-                onClick={() => {
-                  const targetIdx = (activeTeamIndex + 1) % INITIAL_TEAM.length;
-                  setActiveTeamIndex(targetIdx);
-                  setSelectedTeamMemberId(INITIAL_TEAM[targetIdx].id);
-                  if (teamSliderRef.current) {
-                    const card = teamSliderRef.current.children[targetIdx] as HTMLElement;
-                    if (card) {
-                      card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                    }
-                  }
-                }}
-                className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all cursor-pointer active:scale-95 shadow-xs flex items-center gap-1 text-xs"
-                title="Next Member"
-              >
-                <span>Next</span>
-                <ChevronRight size={16} />
-              </button>
-            </div>
+          <div
+            ref={teamSliderRef}
+            className="flex flex-nowrap overflow-x-auto gap-3.5 pb-3 pt-1 px-1 scroll-smooth snap-x snap-mandatory no-scrollbar"
+          >
+            {INITIAL_TEAM.map((member) => {
+              const initials = member.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+              return (
+                <div
+                  key={member.id}
+                  className="shrink-0 w-64 sm:w-72 snap-start bg-white border border-slate-200/90 hover:border-blue-400 rounded-2xl p-3.5 shadow-2xs hover:shadow-md transition-all duration-200 flex items-center gap-3 group"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                    {initials}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-heading font-bold text-xs sm:text-sm text-slate-900 group-hover:text-blue-600 transition-colors truncate">
+                      {member.name}
+                    </h3>
+                    <div className="inline-block text-[10px] font-extrabold text-blue-700 bg-blue-50 border border-blue-200/80 px-2 py-0.5 rounded-md mt-0.5 truncate max-w-full">
+                      {member.role}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {sectionsExpanded.teamDirectory && (
-          <div className="space-y-6 text-left">
-            {/* Horizontal Scroll Track with High-Precision Centering */}
-            <div
-              ref={teamSliderRef}
-              onScroll={() => {
-                if (teamSliderRef.current) {
-                  const container = teamSliderRef.current;
-                  const centerPoint = container.scrollLeft + container.clientWidth / 2;
-                  let closestIndex = 0;
-                  let minDistance = Infinity;
-
-                  Array.from(container.children).forEach((child, idx) => {
-                    const el = child as HTMLElement;
-                    const elCenter = el.offsetLeft + el.offsetWidth / 2;
-                    const dist = Math.abs(centerPoint - elCenter);
-                    if (dist < minDistance) {
-                      minDistance = dist;
-                      closestIndex = idx;
-                    }
-                  });
-
-                  if (closestIndex !== activeTeamIndex && closestIndex < INITIAL_TEAM.length) {
-                    setActiveTeamIndex(closestIndex);
-                    setSelectedTeamMemberId(INITIAL_TEAM[closestIndex].id);
-                  }
-                }
-              }}
-              className="flex overflow-x-auto gap-4 pb-4 pt-1 px-1 scroll-smooth snap-x snap-mandatory scrollbar-none"
-            >
-              {INITIAL_TEAM.map((member, idx) => {
-                const isSelected = selectedTeamMemberId === member.id || activeTeamIndex === idx;
-                const roleTag = member.id === 'tm-1'
-                  ? 'ROLE 3'
-                  : (idx % 3 === 0 ? 'ROLE 1' : idx % 3 === 1 ? 'ROLE 2' : 'ROLE 3');
-                const initials = member.name.split(' ').map(n => n[0]).join('').slice(0, 3).toUpperCase();
-
-                return (
-                  <div
-                    key={'dir-' + member.id}
-                    onClick={() => {
-                      setActiveTeamIndex(idx);
-                      setSelectedTeamMemberId(member.id);
-                      setSelectedTeamMemberModal(member);
-                      if (teamSliderRef.current) {
-                        const card = teamSliderRef.current.children[idx] as HTMLElement;
-                        if (card) {
-                          card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                        }
-                      }
-                    }}
-                    className={`snap-center w-[280px] sm:w-[320px] shrink-0 rounded-2xl p-6 border transition-all duration-300 cursor-pointer relative overflow-hidden group flex flex-col justify-between shadow-xs min-h-[220px] ${
-                      isSelected
-                        ? 'bg-gradient-to-br from-[#5338ec] via-[#7033eb] to-[#e6177a] text-white border-transparent shadow-xl shadow-purple-900/30 ring-2 ring-purple-400/40 -translate-y-1 scale-[1.01]'
-                        : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-900 hover:-translate-y-0.5 hover:shadow-md'
-                    }`}
-                  >
-                    <div className="relative z-10">
-                      <div className="flex items-center justify-between mb-4">
-                        <div
-                          className={`font-extrabold text-xs px-2.5 py-1 rounded-xl shadow-xs transition-colors ${
-                            isSelected
-                              ? 'bg-white/20 backdrop-blur-xs text-white'
-                              : 'bg-purple-100 text-purple-800'
-                          }`}
-                        >
-                          {initials}
-                        </div>
-                        <span
-                          className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full tracking-wider ${
-                            isSelected
-                              ? 'bg-white/20 backdrop-blur-xs text-white'
-                              : 'bg-slate-100 text-slate-600 border border-slate-200'
-                          }`}
-                        >
-                          {roleTag}
-                        </span>
-                      </div>
-
-                      <h3
-                        className={`font-heading text-xl font-bold tracking-tight mb-1 transition-colors ${
-                          isSelected ? 'text-white' : 'text-slate-900 group-hover:text-purple-600'
-                        }`}
-                      >
-                        {member.name}
-                      </h3>
-                      <p
-                        className={`text-xs font-semibold transition-colors ${
-                          isSelected ? 'text-white/90' : 'text-purple-600'
-                        }`}
-                      >
-                        {member.role}
-                      </p>
-                    </div>
-
-                    <div
-                      className={`relative z-10 mt-6 pt-3.5 border-t flex items-center justify-between text-xs font-semibold transition-colors ${
-                        isSelected
-                          ? 'border-white/20 text-white font-bold'
-                          : 'border-slate-100 text-slate-600 group-hover:text-slate-900'
-                      }`}
-                    >
-                      <span>{isSelected ? 'Active Profile' : 'View Full Profile'}</span>
-                      <ChevronRight
-                        size={15}
-                        className={`transform transition-transform ${
-                          isSelected
-                            ? 'translate-x-1 text-white'
-                            : 'group-hover:translate-x-1 text-slate-400'
-                        }`}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+        {/* Volunteers Header & Single-Line Scroll Track */}
+        <div className="pt-8 border-t border-slate-200/80">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-5">
+            <div>
+              <span className="text-xs font-extrabold text-emerald-600 uppercase tracking-widest block mb-1">
+                Field Operations Crew
+              </span>
+              <h2 className="font-heading text-3xl font-black text-slate-900 tracking-tight">
+                Event Volunteers
+              </h2>
+              <p className="text-xs text-slate-500 mt-1 max-w-xl">
+                Dedicated volunteers driving logistics, coordination, and attendee guidance. Scroll to view all volunteers.
+              </p>
             </div>
-
-            {/* Smooth Animated Horizontal Pagination Dots */}
-            <div className="flex items-center justify-center gap-1.5 pt-2 pb-1">
-              {INITIAL_TEAM.map((member, idx) => {
-                const isActive = activeTeamIndex === idx;
-                return (
-                  <button
-                    key={member.id}
-                    type="button"
-                    onClick={() => {
-                      setActiveTeamIndex(idx);
-                      setSelectedTeamMemberId(member.id);
-                      if (teamSliderRef.current) {
-                        const card = teamSliderRef.current.children[idx] as HTMLElement;
-                        if (card) {
-                          card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                        }
-                      }
-                    }}
-                    className={`h-2 rounded-full transition-all duration-300 ease-out cursor-pointer ${
-                      isActive
-                        ? 'w-8 bg-blue-600 shadow-xs ring-2 ring-blue-300/60 scale-105'
-                        : 'w-2 bg-slate-300 hover:bg-slate-400 hover:scale-125'
-                    }`}
-                    title={`Go to ${member.name} (${idx + 1}/${INITIAL_TEAM.length})`}
-                  />
-                );
-              })}
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              <div className="text-xs font-bold text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 shrink-0">
+                {volunteers.length} Active Volunteers
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => scrollVolunteers('left')}
+                  className="p-2 rounded-xl border border-emerald-200 bg-white hover:bg-emerald-50 active:scale-95 text-emerald-800 transition shadow-2xs cursor-pointer"
+                  title="Scroll Left"
+                  aria-label="Scroll Volunteers Left"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollVolunteers('right')}
+                  className="p-2 rounded-xl border border-emerald-200 bg-white hover:bg-emerald-50 active:scale-95 text-emerald-800 transition shadow-2xs cursor-pointer"
+                  title="Scroll Right"
+                  aria-label="Scroll Volunteers Right"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
             </div>
           </div>
-        )}
+
+          <div
+            ref={volunteerSliderRef}
+            className="flex flex-nowrap overflow-x-auto gap-3.5 pb-3 pt-1 px-1 scroll-smooth snap-x snap-mandatory no-scrollbar"
+          >
+            {volunteers.map((vol) => {
+              const initials = vol.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+              return (
+                <div
+                  key={vol.id}
+                  className="shrink-0 w-64 sm:w-72 snap-start bg-white border border-slate-200/90 hover:border-emerald-400 rounded-2xl p-3.5 shadow-2xs hover:shadow-md transition-all duration-200 flex items-center gap-3 group"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                    {initials}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-heading font-bold text-xs sm:text-sm text-slate-900 group-hover:text-emerald-700 transition-colors truncate">
+                      {vol.name}
+                    </h3>
+                    <div className="inline-block text-[10px] font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-md mt-0.5 truncate max-w-full">
+                      {vol.role || 'Volunteer'}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </section>
 
       {/* 5. Team Participation Section */}
@@ -4188,7 +3539,7 @@ export default function App() {
                 <a href="https://www.youtube.com/@collabsorg" target="_blank" rel="noreferrer" aria-label="YouTube" className="hover:text-white transition-colors">
                   <Youtube size={16} />
                 </a>
-                <a href="https://www.linkedin.com/company/135248663/" target="_blank" rel="noreferrer" aria-label="LinkedIn" className="hover:text-white transition-colors">
+                <a href="https://www.linkedin.com/company/collabsorg/posts/?feedView=all" target="_blank" rel="noreferrer" aria-label="LinkedIn" className="hover:text-white transition-colors">
                   <Linkedin size={16} />
                 </a>
               </div>
@@ -4622,7 +3973,7 @@ export default function App() {
               <div>
                 <h4 className="font-bold text-slate-900 text-sm mb-2">Operational Responsibilities & Remit:</h4>
                 <ul className="space-y-2">
-                  {selectedTeamMemberModal.responsibilities.map((resp, idx) => (
+                  {(selectedTeamMemberModal.responsibilities || []).map((resp, idx) => (
                     <li key={idx} className="flex items-start gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
                       <CheckCircle2 size={15} className="text-blue-600 shrink-0 mt-0.5" />
                       <span className="text-slate-700 font-medium">{resp}</span>
