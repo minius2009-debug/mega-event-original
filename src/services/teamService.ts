@@ -38,9 +38,8 @@ export function subscribeTeams(
       onUpdate(teams);
     },
     error => {
-      console.error('Real-time teams subscription error:', error);
+      console.warn('Real-time teams subscription notice:', error?.message || error);
       if (onError) onError(error);
-      handleFirestoreError(error, OperationType.LIST, TEAMS_COLLECTION);
     }
   );
 }

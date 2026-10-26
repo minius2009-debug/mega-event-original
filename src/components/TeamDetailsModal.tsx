@@ -22,9 +22,11 @@ import { TeamParticipation } from '../App';
 interface TeamDetailsModalProps {
   team: TeamParticipation | null;
   onClose: () => void;
+  certDatabase?: any[];
+  onViewCertificate?: (certId: string) => void;
 }
 
-export const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ team, onClose }) => {
+export const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ team, onClose, certDatabase, onViewCertificate }) => {
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -183,35 +185,59 @@ export const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ team, onClos
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {team.members?.map((mem, idx) => (
-                <div
-                  key={idx}
-                  className="p-3 bg-white border border-slate-200 rounded-2xl shadow-2xs hover:border-blue-300 transition-colors flex items-center justify-between gap-2"
-                >
-                  <div className="min-w-0">
-                    <div className="font-bold text-slate-900 flex items-center gap-1.5">
-                      <span className="truncate">{mem.name}</span>
-                      {mem.name.toLowerCase() === team.teamLeader.toLowerCase() && (
-                        <span className="text-[9px] font-extrabold bg-blue-100 text-blue-800 px-1.5 py-0.2 rounded shrink-0">
-                          LEAD
-                        </span>
+              {team.members?.map((mem, idx) => {
+                const certRecord = certDatabase?.find(
+                  c => c && c.recipientName && c.recipientName.trim().toLowerCase() === mem.name.trim().toLowerCase()
+                );
+                let hash = 0;
+                const str = `${mem.name.trim().toLowerCase()}-${team.id}`;
+                for (let i = 0; i < str.length; i++) {
+                  hash = (hash << 5) - hash + str.charCodeAt(i);
+                  hash |= 0;
+                }
+                const fallbackCode = `CLB-2026-${100 + (Math.abs(hash) % 899)}`;
+                const certId = certRecord?.id || fallbackCode;
+
+                return (
+                  <div
+                    key={idx}
+                    className="p-3 bg-white border border-slate-200 rounded-2xl shadow-2xs hover:border-purple-300 transition-colors flex flex-col justify-between gap-2 text-left"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="font-bold text-slate-900 flex items-center gap-1.5 flex-wrap">
+                          <span className="truncate">{mem.name}</span>
+                          {mem.name.toLowerCase() === team.teamLeader.toLowerCase() && (
+                            <span className="text-[9px] font-extrabold bg-blue-100 text-blue-800 px-1.5 py-0.2 rounded shrink-0">
+                              LEAD
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[11px] text-blue-600 font-semibold">{mem.role || 'Member'}</div>
+                      </div>
+
+                      <span className="font-mono text-[10px] font-bold text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-md shrink-0">
+                        {certId}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1.5 border-t border-slate-100 text-[10px]">
+                      <span className="text-slate-500 font-medium">Verify Code: <strong className="font-mono text-slate-800">{certId}</strong></span>
+                      {onViewCertificate && (
+                        <button
+                          type="button"
+                          onClick={() => onViewCertificate(certId)}
+                          className="px-2.5 py-1 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1 shrink-0"
+                          title="View Official Certificate & Dynamic Fixed QR Code"
+                        >
+                          <Award size={11} />
+                          <span>Cert & QR →</span>
+                        </button>
                       )}
                     </div>
-                    <div className="text-[11px] text-blue-600 font-semibold">{mem.role || 'Member'}</div>
-                    {mem.school && <div className="text-[10px] text-slate-400 truncate">{mem.school}</div>}
                   </div>
-
-                  {mem.email && (
-                    <a
-                      href={`mailto:${mem.email}`}
-                      className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-slate-50 rounded-lg transition-colors shrink-0"
-                      title={mem.email}
-                    >
-                      <Mail size={14} />
-                    </a>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

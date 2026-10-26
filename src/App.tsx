@@ -93,6 +93,7 @@ import {
   seedInitialTeamsIfEmpty
 } from './services/teamService';
 import { testConnection } from './firebase/firebaseConfig';
+import { SAF_FORM_RESPONSES_TEAMS } from './data/registeredTeamsData';
 
 export interface EventItem {
   id: string;
@@ -143,7 +144,7 @@ export type { CertificateRecord };
 export interface ParticipantMember {
   name: string;
   role: string;
-  email: string;
+  email?: string;
   phone?: string;
   school?: string;
   volunteerId?: string;
@@ -197,72 +198,7 @@ export const getTeamStallNumber = (team: {
   return 'Stall Assigned';
 };
 
-const INITIAL_TEAM_PARTICIPATIONS: TeamParticipation[] = [
-  {
-    id: 'tp-1',
-    teamCode: 'CLB-ROBO-01',
-    projectName: 'AI Robotics Sprint',
-    category: 'AI & Robotics',
-    school: 'Booni Degree College',
-    campus: 'Main Science Campus',
-    location: 'Lab Block A · Room 102',
-    stallNumber: '01',
-    capacity: 6,
-    teamLeader: 'Fatima Zahra',
-    coLeader: 'Elena Rostova',
-    members: [
-      { name: 'Fatima Zahra', role: 'Team Lead', email: 'fatima@collabs.org', school: 'Booni Degree College' },
-      { name: 'Elena Rostova', role: 'Robotics Dev', email: 'elena.rostova@collabs.org', school: 'Booni Degree College' },
-      { name: 'Jordan Hayes', role: 'Hardware Assistant', email: 'jordan.hayes@collabs.org', school: 'Booni Degree College' }
-    ],
-    projectDescription: 'Developing autonomous robots for high-altitude emergency supply navigation and environmental monitoring in Upper Chitral.',
-    award: 'Participation',
-    status: 'Approved',
-    createdAt: 'Oct 2026'
-  },
-  {
-    id: 'tp-2',
-    teamCode: 'CLB-AGRI-02',
-    projectName: 'Smart Agriculture Tool',
-    category: 'Climate & Smart Ag',
-    school: 'Pamir Public School & College',
-    campus: 'Higher Secondary Wing',
-    location: 'Agritech Innovation Pod',
-    stallNumber: '02',
-    capacity: 5,
-    teamLeader: 'Ahmad Khan',
-    coLeader: 'Marcus Vance',
-    members: [
-      { name: 'Ahmad Khan', role: 'Developer', email: 'ahmad@example.com', school: 'Pamir Public School & College' },
-      { name: 'Marcus Vance', role: 'Field Operations', email: 'marcus.vance@collabs.org', school: 'Pamir Public School & College' },
-      { name: 'Chloe Bennett', role: 'Documentation', email: 'chloe.bennett@collabs.org', school: 'Pamir Public School & College' }
-    ],
-    projectDescription: 'IoT-based soil moisture and cold-snap early warning system designed specifically for high-elevation apple and walnut orchards.',
-    award: 'Participation',
-    status: 'Approved',
-    createdAt: 'Oct 2026'
-  },
-  {
-    id: 'tp-3',
-    teamCode: 'CLB-COMM-03',
-    projectName: 'Clean Stream Chitral',
-    category: 'Water & Environment',
-    school: 'Aga Khan Higher Secondary School Kuragh',
-    campus: 'Kuragh Campus',
-    location: 'Eco Station Beta',
-    stallNumber: '03',
-    capacity: 4,
-    teamLeader: 'Amina Nour',
-    members: [
-      { name: 'Amina Nour', role: 'Project Coordinator', email: 'amina.nour@collabs.org', school: 'Aga Khan Higher Secondary School Kuragh' },
-      { name: 'Devon Takahashi', role: 'Data Analysis', email: 'devon.t@collabs.org', school: 'Aga Khan Higher Secondary School Kuragh' }
-    ],
-    projectDescription: 'Community water filtration and microplastic sampling initiative along the Mastuj River tributaries.',
-    award: 'Participation',
-    status: 'Approved',
-    createdAt: 'Oct 2026'
-  }
-];
+const INITIAL_TEAM_PARTICIPATIONS: TeamParticipation[] = SAF_FORM_RESPONSES_TEAMS;
 
 
 const INITIAL_EVENTS: EventItem[] = [
@@ -272,12 +208,12 @@ const INITIAL_EVENTS: EventItem[] = [
     category: 'Upcoming',
     date: '31 October 2026',
     time: '09:30 AM – 05:30 PM PKT',
-    venue: 'Anywhere in Booni, Chitral (Venue TBA)',
+    venue: 'TMA Hall / Office, Booni, Upper Chitral',
     description: 'The landmark first mega gathering of Collabs in Chitral. Bringing together youth innovators, builders, students, and mentors for hands-on collaboration, workshops, and recognition.',
     seatsLeft: 85,
     totalSeats: 300,
     agendaItems: [
-      '09:30 AM: Opening Assembly & Welcome from Community Organizers',
+      '09:30 AM: Opening Assembly & Welcome at TMA Office Booni',
       '11:00 AM: Hands-on Youth Tech & Problem-Solving Ideation Sprint',
       '01:30 PM: Community Networking, Project Demos & Idea Exchange',
       '03:30 PM: Digital Certificates & Volunteer Recognition Ceremony'
@@ -289,7 +225,7 @@ const MANAGEMENT_ROLES = [
   {
     id: 'role-1',
     title: 'Role 1: Overall Leadership & Strategic Direction',
-    members: 'Syed Farhan Danish (Founder) & Umme Kulsoom (Director)',
+    members: 'Aarish Salik (IT Lead) & Umme Kulsoom (Director)',
     responsibilities: [
       'Oversee the entire exhibition timeline, budget, and overall vision.',
       'Coordinate between different departments and make final executive decisions.',
@@ -299,7 +235,7 @@ const MANAGEMENT_ROLES = [
   {
     id: 'role-2',
     title: 'Role 2: Operations, Logistics & External Relations',
-    members: 'Aarish Salik (IT Team Lead), Shahan (Relations Manager), & Zeeshan (Event Manager)',
+    members: 'Aarish Salik (IT Lead), Shahan (Relations Manager), & Zeeshan (Event Manager)',
     responsibilities: [
       'IT & Tech Support: Manage registration software, presentations, screens, and technical troubleshooting during the event (Aarish).',
       'Exhibition & Crowd Flow: Handle venue setup, seating, scheduling, and general attendee management (Zeeshan).',
@@ -321,13 +257,13 @@ const MANAGEMENT_ROLES = [
 const INITIAL_TEAM: TeamMember[] = [
   {
     id: 'tm-1',
-    name: 'Syed Farhan Danish',
-    role: 'Founder',
+    name: 'Aarish Salik',
+    role: 'IT Lead',
     department: 'Core Organizing & Management',
-    focus: 'Overall Event Supervision & Strategic Decision-Making',
+    focus: 'IT Lead & Technical Operations',
     responsibilities: [
-      'Overall event supervision, strategic decision-making, and primary representation of Collabs and SAF 2026.',
-      'Coordinate between different departments and make final executive decisions.'
+      'Manage IT infrastructure, digital registrations, registration software, and technical presentations.',
+      'Manage IT systems, presentations, screens, and technical troubleshooting during the event.'
     ]
   },
   {
@@ -355,7 +291,7 @@ const INITIAL_TEAM: TeamMember[] = [
   {
     id: 'tm-10',
     name: 'Aarish Salik',
-    role: 'IT Team Lead',
+    role: 'IT Lead',
     department: 'Tech, IT & Media',
     focus: 'IT Infrastructure & Digital Registrations',
     responsibilities: [
@@ -1131,12 +1067,11 @@ export default function App() {
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
   const [selectedTeamMemberModal, setSelectedTeamMemberModal] = useState<TeamMember | null>(null);
   const [selectedEventForReg, setSelectedEventForReg] = useState<EventItem | null>(null);
-  const [activeNavTab, setActiveNavTab] = useState<string>('about');
+  const [activeNavTab, setActiveNavTab] = useState<string>('events');
 
   useEffect(() => {
     const handleScroll = () => {
       const sections = [
-        { id: 'about', el: document.getElementById('about') },
         { id: 'events', el: document.getElementById('events') },
         { id: 'team', el: document.getElementById('team') },
         { id: 'participants', el: document.getElementById('team-participation') },
@@ -1457,6 +1392,73 @@ export default function App() {
     };
   }, []);
 
+  // Auto-generate Certificate records & unique verification codes for every enrolled participant
+  useEffect(() => {
+    setCertDatabase(prev => {
+      const existingNames = new Set(prev.map(c => c.recipientName.trim().toLowerCase()));
+      const newRecords: CertificateRecord[] = [];
+
+      teamParticipations.forEach(tp => {
+        // Leader
+        if (tp.teamLeader && tp.teamLeader.trim()) {
+          const leaderName = tp.teamLeader.trim();
+          if (!existingNames.has(leaderName.toLowerCase())) {
+            existingNames.add(leaderName.toLowerCase());
+            let hash = 0;
+            const str = `${leaderName.toLowerCase()}-${tp.id}`;
+            for (let i = 0; i < str.length; i++) {
+              hash = (hash << 5) - hash + str.charCodeAt(i);
+              hash |= 0;
+            }
+            const codeNum = 100 + (Math.abs(hash) % 899);
+            newRecords.push({
+              id: `CLB-2026-${codeNum}`,
+              recipientName: leaderName,
+              achievementType: 'Certificate of Participation',
+              eventName: 'Science, Arts & Food Exhibition 2026',
+              issueDate: 'October 31, 2026',
+              verified: true,
+              issuer: 'Collabs, Naveed-e-Falah, Jenabai Awards & District Youth Office',
+              school: tp.school,
+              project: tp.projectName
+            });
+          }
+        }
+
+        // Members
+        tp.members?.forEach(mem => {
+          if (mem.name && mem.name.trim()) {
+            const cleanName = mem.name.trim();
+            if (!existingNames.has(cleanName.toLowerCase())) {
+              existingNames.add(cleanName.toLowerCase());
+              let hash = 0;
+              const str = `${cleanName.toLowerCase()}-${tp.id}`;
+              for (let i = 0; i < str.length; i++) {
+                hash = (hash << 5) - hash + str.charCodeAt(i);
+                hash |= 0;
+              }
+              const codeNum = 100 + (Math.abs(hash) % 899);
+              newRecords.push({
+                id: `CLB-2026-${codeNum}`,
+                recipientName: cleanName,
+                achievementType: 'Certificate of Participation',
+                eventName: 'Science, Arts & Food Exhibition 2026',
+                issueDate: 'October 31, 2026',
+                verified: true,
+                issuer: 'Collabs, Naveed-e-Falah, Jenabai Awards & District Youth Office',
+                school: mem.school || tp.school,
+                project: tp.projectName
+              });
+            }
+          }
+        });
+      });
+
+      if (newRecords.length === 0) return prev;
+      return [...prev, ...newRecords];
+    });
+  }, [teamParticipations]);
+
   // Auto-generate QR codes for team participations
   useEffect(() => {
     teamParticipations.forEach(tp => {
@@ -1508,7 +1510,15 @@ export default function App() {
         set.add(t.category.trim());
       }
     });
-    return Array.from(set).sort();
+    const customOrder = ['Physics', 'Biology', 'Chemistry', 'Computer Science', 'Art', 'Food'];
+    return Array.from(set).sort((a, b) => {
+      const indexA = customOrder.indexOf(a);
+      const indexB = customOrder.indexOf(b);
+      if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+      if (indexA !== -1) return -1;
+      if (indexB !== -1) return 1;
+      return a.localeCompare(b);
+    });
   }, [teamParticipations]);
 
   // Filtered and Sorted teams list based on user selections
@@ -1665,52 +1675,60 @@ export default function App() {
   };
 
   const getTeamCategoryBadge = (category?: string) => {
-    const cat = (category || '').toLowerCase();
-    if (cat.includes('robo') || cat.includes('ai') || cat.includes('tech')) {
+    const cat = (category || '').toLowerCase().trim();
+    if (cat.includes('phys')) {
       return {
-        label: category || 'AI & Robotics',
-        icon: <Cpu size={11} className="text-indigo-600 shrink-0" />,
-        style: 'bg-indigo-50 text-indigo-700 border-indigo-200/80',
-        borderAccent: 'border-l-indigo-500'
+        label: category || 'Physics',
+        icon: <Zap size={11} className="text-blue-600 shrink-0" />,
+        style: 'bg-blue-50 text-blue-700 border-blue-200/80',
+        borderAccent: 'border-l-blue-500'
       };
     }
-    if (cat.includes('agri') || cat.includes('climate') || cat.includes('farm')) {
+    if (cat.includes('bio')) {
       return {
-        label: category || 'Climate & Ag',
+        label: category || 'Biology',
         icon: <Leaf size={11} className="text-emerald-600 shrink-0" />,
         style: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
         borderAccent: 'border-l-emerald-500'
       };
     }
-    if (cat.includes('water') || cat.includes('enviro') || cat.includes('eco')) {
+    if (cat.includes('chem')) {
       return {
-        label: category || 'Water & Eco',
+        label: category || 'Chemistry',
         icon: <Droplets size={11} className="text-cyan-600 shrink-0" />,
         style: 'bg-cyan-50 text-cyan-700 border-cyan-200/80',
         borderAccent: 'border-l-cyan-500'
       };
     }
-    if (cat.includes('art') || cat.includes('culture') || cat.includes('craft')) {
+    if (cat.includes('comp') || cat.includes('cs') || cat.includes('tech') || cat.includes('ai') || cat.includes('robo')) {
       return {
-        label: category || 'Art & Culture',
+        label: category || 'Computer Science',
+        icon: <Cpu size={11} className="text-indigo-600 shrink-0" />,
+        style: 'bg-indigo-50 text-indigo-700 border-indigo-200/80',
+        borderAccent: 'border-l-indigo-500'
+      };
+    }
+    if (cat.includes('art') || cat.includes('craft') || cat.includes('culture')) {
+      return {
+        label: category || 'Art',
         icon: <Palette size={11} className="text-pink-600 shrink-0" />,
         style: 'bg-pink-50 text-pink-700 border-pink-200/80',
         borderAccent: 'border-l-pink-500'
       };
     }
-    if (cat.includes('food') || cat.includes('nutri')) {
+    if (cat.includes('food') || cat.includes('nutri') || cat.includes('dish')) {
       return {
-        label: category || 'Food & Nutrition',
+        label: category || 'Food',
         icon: <Utensils size={11} className="text-amber-600 shrink-0" />,
         style: 'bg-amber-50 text-amber-700 border-amber-200/80',
         borderAccent: 'border-l-amber-500'
       };
     }
     return {
-      label: category || 'Innovation',
-      icon: <Sparkles size={11} className="text-blue-600 shrink-0" />,
-      style: 'bg-blue-50 text-blue-700 border-blue-200/80',
-      borderAccent: 'border-l-blue-500'
+      label: category || 'General',
+      icon: <Sparkles size={11} className="text-purple-600 shrink-0" />,
+      style: 'bg-purple-50 text-purple-700 border-purple-200/80',
+      borderAccent: 'border-l-purple-500'
     };
   };
 
@@ -2030,6 +2048,269 @@ export default function App() {
           navigate('/');
         }}
       />
+    );
+  }
+
+  const isEventsHubRoute =
+    normalizedPath === '/eventshub' ||
+    normalizedPath === '/events' ||
+    normalizedPath.startsWith('/eventshub') ||
+    normalizedPath.startsWith('/events') ||
+    normalizedHash.includes('eventshub');
+
+  if (isEventsHubRoute) {
+    return (
+      <div className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased selection:bg-blue-600 selection:text-white">
+        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate('/')}
+                className="flex items-center gap-2.5 cursor-pointer group text-left"
+              >
+                <img src={officialLogo} alt="Logo" className="w-10 h-10 object-contain rounded-lg shadow-xs group-hover:scale-105 transition-transform" />
+                <div>
+                  <span className="font-heading text-2xl font-black tracking-tight text-slate-900 leading-none block">
+                    Collabs.
+                  </span>
+                  <span className="text-[10px] font-extrabold text-blue-600 uppercase tracking-wider block mt-0.5">
+                    Events Hub
+                  </span>
+                </div>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                onClick={() => navigate('/volunteer')}
+                className="px-3 py-1.5 text-xs font-bold rounded-xl text-slate-700 hover:text-blue-600 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
+              >
+                Volunteer Portal
+              </button>
+              <button
+                onClick={() => navigate('/certificate')}
+                className="px-3 py-1.5 text-xs font-bold rounded-xl text-slate-700 hover:text-blue-600 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
+              >
+                Certificate Portal
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="px-4 py-2 text-xs font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-colors cursor-pointer shadow-xs flex items-center gap-1.5"
+              >
+                <span>Back to Home</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <main className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-left space-y-10">
+          {/* Hero Banner */}
+          <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 text-white rounded-3xl p-8 sm:p-12 shadow-2xl border border-slate-800">
+            <div className="relative z-10 max-w-3xl space-y-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30 text-xs font-extrabold uppercase tracking-widest">
+                <Sparkles size={14} className="text-blue-400" />
+                <span>Collabs. Official Gatherings & Schedule</span>
+              </div>
+              <h1 className="font-heading text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+                Events Hub
+              </h1>
+              <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
+                Discover all upcoming youth hackathons, workshops, community innovation sprints, and exhibition milestones organized by Collabs in Booni, Upper Chitral.
+              </p>
+
+              {/* Countdown Banner inside Events Hub Hero */}
+              <div className="pt-4 border-t border-slate-800/80 flex flex-wrap items-center gap-6">
+                <div>
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Live Countdown to Event Day:</div>
+                  <div className="flex items-center gap-2 font-mono font-black text-xl text-blue-400">
+                    <span className="px-2 py-1 bg-slate-900 rounded border border-slate-800">{timeLeft.days}d</span>
+                    <span>:</span>
+                    <span className="px-2 py-1 bg-slate-900 rounded border border-slate-800">{timeLeft.hours}h</span>
+                    <span>:</span>
+                    <span className="px-2 py-1 bg-slate-900 rounded border border-slate-800">{timeLeft.minutes}m</span>
+                    <span>:</span>
+                    <span className="px-2 py-1 bg-slate-900 rounded border border-slate-800 text-blue-300">{timeLeft.seconds}s</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <a
+                    href="https://docs.google.com/forms/d/e/1FAIpQLSdUwKtlCvMl4JJBpsa6e7xMJ7KirLBU5_B6ram88WUwza-p-g/viewform"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-2 active:scale-95"
+                  >
+                    <CheckCircle2 size={16} />
+                    <span>Register Now</span>
+                  </a>
+                  <button
+                    onClick={() => setIsRulesModalOpen(true)}
+                    className="px-4 py-2.5 bg-slate-900/80 hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold text-xs rounded-xl transition-all cursor-pointer"
+                  >
+                    Event Rules
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Background Decorative Gradient Circles */}
+            <div className="absolute -right-10 -bottom-10 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+          </div>
+
+          {/* Filter Bar & Event Roster */}
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
+              <div>
+                <h2 className="font-heading text-2xl font-black text-slate-900">Featured Gatherings ({filteredEvents.length})</h2>
+                <p className="text-xs text-slate-500 mt-0.5">Filter by upcoming, hands-on workshops, or past events</p>
+              </div>
+
+              <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200">
+                {(['All', 'Upcoming', 'Workshops', 'Completed'] as const).map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setEventFilter(cat)}
+                    className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                      eventFilter === cat
+                        ? 'bg-blue-600 text-white shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              {filteredEvents.map(event => {
+                const isFull = event.seatsLeft === 0;
+                const isCardExpanded = expandedCards[event.id] ?? true;
+
+                return (
+                  <div
+                    key={event.id}
+                    className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs hover:border-blue-300 hover:shadow-md transition-all flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-3">
+                        <span className={`text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded ${
+                          event.category === 'Upcoming'
+                            ? 'bg-blue-100 text-blue-800'
+                            : event.category === 'Workshops'
+                            ? 'bg-indigo-100 text-indigo-800'
+                            : 'bg-slate-200 text-slate-700'
+                        }`}>
+                          {event.category}
+                        </span>
+
+                        <button
+                          onClick={() => toggleCard(event.id)}
+                          className="p-1 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-900 cursor-pointer transition-colors"
+                          title={isCardExpanded ? 'Collapse Details' : 'Expand Details'}
+                        >
+                          {isCardExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        </button>
+                      </div>
+
+                      <h3 className="font-heading text-xl font-bold text-slate-900 mb-2">
+                        {event.title}
+                      </h3>
+
+                      <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                        {event.description}
+                      </p>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-slate-600 font-medium mb-4 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar size={14} className="text-blue-600 shrink-0" />
+                          <span>{event.date}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Clock size={14} className="text-blue-600 shrink-0" />
+                          <span>{event.time}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 sm:col-span-1">
+                          <MapPin size={14} className="text-blue-600 shrink-0" />
+                          <span className="truncate">{event.venue}</span>
+                        </div>
+                      </div>
+
+                      {/* Seat count indicator */}
+                      <div className="mb-4 space-y-1.5">
+                        <div className="flex justify-between text-xs font-semibold">
+                          <span className="text-slate-500">Attendee Capacity:</span>
+                          <span className={isFull ? 'text-rose-600 font-bold' : 'text-slate-700'}>
+                            {isFull ? 'Registration Full' : `${event.seatsLeft} of ${event.totalSeats} spots remaining`}
+                          </span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full transition-all duration-500 ${
+                              isFull ? 'bg-rose-500' : 'bg-blue-600'
+                            }`}
+                            style={{
+                              width: `${Math.min(100, Math.max(0, ((event.totalSeats - event.seatsLeft) / event.totalSeats) * 100))}%`
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      {/* Expandable Agenda Breakdown */}
+                      {isCardExpanded && event.agendaItems && event.agendaItems.length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-slate-200/80 space-y-2 animate-fadeIn">
+                          <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                            <Clock size={13} className="text-blue-600" />
+                            <span>Program Agenda Timeline:</span>
+                          </div>
+                          <ul className="space-y-1.5">
+                            {event.agendaItems.map((agenda, aIdx) => (
+                              <li key={aIdx} className="text-xs text-slate-600 flex items-start gap-2 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 shrink-0 mt-1.5"></span>
+                                <span>{agenda}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="pt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 mt-4">
+                      <button
+                        onClick={() => {
+                          const shareUrl = `${window.location.origin}/eventshub`;
+                          navigator.clipboard.writeText(shareUrl);
+                          alert('Events Hub link copied to clipboard!');
+                        }}
+                        className="text-xs font-bold text-slate-600 hover:text-blue-600 flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Copy size={13} /> Share Event Link
+                      </button>
+
+                      <a
+                        href="https://docs.google.com/forms/d/e/1FAIpQLSdUwKtlCvMl4JJBpsa6e7xMJ7KirLBU5_B6ram88WUwza-p-g/viewform"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
+                      >
+                        <span>Register for Event</span>
+                        <ExternalLink size={13} />
+                      </a>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </main>
+
+        <footer className="bg-slate-900 text-slate-400 text-xs py-8 border-t border-slate-800 text-center">
+          <div className="max-w-7xl mx-auto px-4">
+            <p className="font-medium text-slate-300">First Mega Event of Collabs · Events & Schedule Hub</p>
+            <p className="text-slate-500 mt-1">31 October 2026 · Booni, Upper Chitral</p>
+          </div>
+        </footer>
+      </div>
     );
   }
 
@@ -2825,7 +3106,7 @@ export default function App() {
           
           {/* Logo - Official Collabs. */}
           <div className="flex items-center gap-3">
-            <a href="#about" onClick={(e) => handleSmoothNavClick(e, 'about')} className="flex items-center gap-2.5 group">
+            <a href="#events" onClick={(e) => handleSmoothNavClick(e, 'events')} className="flex items-center gap-2.5 group">
               <img src={officialLogo} alt="Collabs. Official Logo" className="w-10 h-10 object-contain rounded-lg shadow-sm group-hover:scale-105 transition-transform" />
               <span className="font-heading text-2xl font-black tracking-tight text-slate-900 leading-none">
                 Collabs.
@@ -2836,8 +3117,7 @@ export default function App() {
           {/* Navigation Links with Smooth Scrolling & Animated Underline */}
           <nav className="hidden lg:flex items-center gap-6 text-sm font-semibold text-slate-600">
             {[
-              { id: 'about', label: 'About', href: '#about', sectionKey: undefined },
-              { id: 'events', label: 'Events', href: '#events', sectionKey: 'eventsHub' as const },
+              { id: 'events', label: 'Events', href: '#events', sectionKey: undefined },
               { id: 'team', label: 'Team', href: '#team', sectionKey: 'teamDirectory' as const },
               { id: 'participants', label: 'Participants', href: '#team-participation', sectionKey: undefined },
               { id: 'judging', label: 'Judging', href: '#judging-criteria', sectionKey: undefined },
@@ -2849,16 +3129,6 @@ export default function App() {
                   key={tab.id}
                   href={tab.href}
                   onClick={(e) => {
-                    if (tab.id === 'volunteers') {
-                      e.preventDefault();
-                      navigate('/volunteer');
-                      return;
-                    }
-                    if (tab.id === 'certificates') {
-                      e.preventDefault();
-                      navigate('/certificate');
-                      return;
-                    }
                     setActiveNavTab(tab.id);
                     handleSmoothNavClick(e, tab.href.replace('#', ''), tab.sectionKey);
                   }}
@@ -2894,15 +3164,8 @@ export default function App() {
         {/* Mobile Navigation Sub-bar with Smooth Scrolling */}
         <div className="lg:hidden border-t border-slate-100 bg-white/95 px-4 py-2 overflow-x-auto flex items-center gap-2 no-scrollbar text-xs font-semibold text-slate-600">
           <a
-            href="#about"
-            onClick={(e) => handleSmoothNavClick(e, 'about')}
-            className="px-2.5 py-1 rounded-md hover:bg-slate-100 hover:text-blue-600 shrink-0 transition-colors cursor-pointer"
-          >
-            About
-          </a>
-          <a
             href="#events"
-            onClick={(e) => handleSmoothNavClick(e, 'events', 'eventsHub')}
+            onClick={(e) => handleSmoothNavClick(e, 'events')}
             className="px-2.5 py-1 rounded-md hover:bg-slate-100 hover:text-blue-600 shrink-0 transition-colors cursor-pointer"
           >
             Events
@@ -2939,7 +3202,7 @@ export default function App() {
       </header>
 
       {/* Mega Event of Collabs Official Banner - Styled like reference image, compact to fit fully on main screen */}
-      <section className="bg-gradient-to-b from-blue-50/80 via-indigo-50/40 to-slate-50 pt-4 pb-6 sm:pt-6 sm:pb-8 px-4 sm:px-6 lg:px-8 border-b border-slate-200">
+      <section id="events" className="bg-gradient-to-b from-blue-50/80 via-indigo-50/40 to-slate-50 pt-4 pb-6 sm:pt-6 sm:pb-8 px-4 sm:px-6 lg:px-8 border-b border-slate-200 scroll-mt-24">
         <div className="max-w-3xl mx-auto bg-white border-2 border-blue-600/20 rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-lg shadow-blue-900/5 text-center relative overflow-hidden">
           <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-br from-blue-400/10 to-emerald-400/10 rounded-bl-full pointer-events-none"></div>
           
@@ -3054,152 +3317,7 @@ export default function App() {
 
 
 
-      {/* 3. Events Hub with Expand/Collapse Features */}
-      <section id="events" className="py-16 bg-white border-y border-slate-200 scroll-mt-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 text-left">
-            <div>
-              <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">
-                Event Schedule & Milestones
-              </span>
-              <div className="flex items-center gap-3">
-                <h2 className="font-heading text-3xl font-black text-slate-900 tracking-tight">
-                  Events Hub
-                </h2>
-                <button
-                  onClick={() => toggleSection('eventsHub')}
-                  className="px-2.5 py-1 text-xs font-bold rounded bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center gap-1 cursor-pointer transition-colors"
-                  title="Expand or Collapse Events Section"
-                >
-                  {sectionsExpanded.eventsHub ? <><ChevronUp size={14} /> Collapse</> : <><ChevronDown size={14} /> Expand</>}
-                </button>
-              </div>
-              <p className="text-sm text-slate-600 mt-1 max-w-xl">
-                Upcoming gatherings and events for Collabs. community members.
-              </p>
-            </div>
 
-            {sectionsExpanded.eventsHub && (
-              <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200 self-start md:self-auto">
-                {(['All', 'Upcoming', 'Workshops', 'Completed'] as const).map(cat => (
-                  <button
-                    key={cat}
-                    onClick={() => setEventFilter(cat)}
-                    className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                      eventFilter === cat
-                        ? 'bg-blue-600 text-white shadow-xs'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {sectionsExpanded.eventsHub && (
-            <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-6 text-left">
-              {filteredEvents.map(event => {
-                const isFull = event.seatsLeft === 0;
-                const isCardExpanded = expandedCards[event.id] ?? (event.id === 'ev-1');
-
-                return (
-                  <div
-                    key={event.id}
-                    className="bg-slate-50 border border-slate-200 rounded-xl p-6 hover:border-blue-300 transition-all flex flex-col justify-between"
-                  >
-                    <div>
-                      {/* Card Header */}
-                      <div className="flex items-center justify-between gap-2 mb-3">
-                        <span className={`text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded ${
-                          event.category === 'Upcoming'
-                            ? 'bg-blue-100 text-blue-800'
-                            : event.category === 'Workshops'
-                            ? 'bg-indigo-100 text-indigo-800'
-                            : 'bg-slate-200 text-slate-700'
-                        }`}>
-                          {event.category}
-                        </span>
-
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => toggleCard(event.id)}
-                            className="p-1 hover:bg-slate-200 rounded text-slate-500 hover:text-slate-900 cursor-pointer transition-colors"
-                            title={isCardExpanded ? 'Collapse Details' : 'Expand Details'}
-                          >
-                            {isCardExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                          </button>
-                        </div>
-                      </div>
-
-                      <h3 className="font-heading text-xl font-black text-slate-900 mb-2">
-                        {event.title}
-                      </h3>
-
-                      <p className="text-xs text-slate-600 leading-relaxed mb-4">
-                        {event.description}
-                      </p>
-
-                      {/* Expandable Agenda Breakdown */}
-                      {isCardExpanded && event.agendaItems && (
-                        <div className="mb-4 bg-white p-3 rounded-lg border border-slate-200 text-xs">
-                          <div className="font-bold text-slate-800 mb-1.5 flex items-center gap-1">
-                            <Clock size={13} className="text-blue-600" />
-                            <span>Schedule & Agenda Outline:</span>
-                          </div>
-                          <ul className="space-y-1 text-slate-600 text-[11px]">
-                            {event.agendaItems.map((item, idx) => (
-                              <li key={idx} className="flex items-start gap-1.5">
-                                <span className="text-blue-600 font-bold">•</span>
-                                <span>{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="space-y-3 pt-3 border-t border-slate-200">
-                      <div className="space-y-1 text-xs text-slate-600">
-                        <div className="flex items-center gap-2">
-                          <Calendar size={14} className="text-blue-600 shrink-0" />
-                          <span className="font-semibold text-slate-900">{event.date}</span>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <MapPin size={14} className="text-blue-600 shrink-0 mt-0.5" />
-                          <span className="font-medium text-slate-800">{event.venue}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => toggleCard(event.id)}
-                          className="flex-1 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-lg transition-colors cursor-pointer text-center"
-                        >
-                          {isCardExpanded ? 'Collapse Agenda' : 'Expand Agenda'}
-                        </button>
-                        {!isFull && (
-                          <a
-                            href="https://docs.google.com/forms/d/e/1FAIpQLSdUwKtlCvMl4JJBpsa6e7xMJ7KirLBU5_B6ram88WUwza-p-g/viewform"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer text-center"
-                          >
-                            Register
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-        </div>
-      </section>
 
 
       {/* 5. Team Members & Responsibilities Directory with Expand/Collapse */}
@@ -4551,6 +4669,13 @@ export default function App() {
       <TeamDetailsModal
         team={selectedTeamForDetails}
         onClose={() => setSelectedTeamForDetails(null)}
+        certDatabase={certDatabase}
+        onViewCertificate={(certId) => {
+          setCurrentCertId(certId);
+          setSelectedTeamForDetails(null);
+          const el = document.getElementById('certificates');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }}
       />
 
     </div>

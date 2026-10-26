@@ -60,8 +60,13 @@ export async function testConnection(): Promise<boolean> {
     await getDocFromServer(doc(db, 'test', 'connection'));
     return true;
   } catch (error) {
-    if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.error('Please check your Firebase configuration.');
+    if (error instanceof Error && (
+      error.message.includes('the client is offline') ||
+      error.message.includes('Could not reach Cloud Firestore backend') ||
+      error.message.includes('unavailable') ||
+      (error as any).code === 'unavailable'
+    )) {
+      console.warn('Firebase connection test: backend currently unavailable or offline.');
       return false;
     }
     // Expected if test doc does not exist yet; connection succeeded

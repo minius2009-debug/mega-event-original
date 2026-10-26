@@ -26,10 +26,7 @@ export const AdminLoginGate: React.FC<AdminLoginGateProps> = ({
     const cleanPass = password.trim();
 
     setTimeout(() => {
-      if (
-        (cleanUser === 'admin' || cleanUser === 'collabs_admin' || cleanUser === 'collabs') &&
-        (cleanPass === 'collabs2026' || cleanPass === 'admin123')
-      ) {
+      if (cleanUser === 'collabs' && cleanPass === 'collabs2026') {
         sessionStorage.setItem('collabs_admin_auth', 'true');
         onLoginSuccess();
       } else {
@@ -37,12 +34,6 @@ export const AdminLoginGate: React.FC<AdminLoginGateProps> = ({
         setError('Authentication failed. Invalid administrator username or password.');
       }
     }, 350);
-  };
-
-  const handlePrefillTestCredentials = () => {
-    setUsername('admin');
-    setPassword('collabs2026');
-    setError(null);
   };
 
   return (
@@ -132,7 +123,7 @@ export const AdminLoginGate: React.FC<AdminLoginGateProps> = ({
                     setUsername(e.target.value);
                     if (error) setError(null);
                   }}
-                  placeholder="admin"
+                  placeholder="Enter admin username"
                   className="w-full bg-slate-950/70 border border-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-600 transition-all outline-none font-medium"
                 />
               </div>
@@ -188,25 +179,6 @@ export const AdminLoginGate: React.FC<AdminLoginGateProps> = ({
               )}
             </button>
           </form>
-
-          {/* Test Credentials Helper Card */}
-          <div className="mt-6 pt-5 border-t border-slate-800/80">
-            <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between gap-3 text-[11px]">
-              <div>
-                <span className="text-slate-400">Default Staff Access: </span>
-                <span className="font-mono text-blue-400 font-bold">admin</span>
-                <span className="text-slate-600 mx-1.5">/</span>
-                <span className="font-mono text-emerald-400 font-bold">collabs2026</span>
-              </div>
-              <button
-                type="button"
-                onClick={handlePrefillTestCredentials}
-                className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-lg font-bold text-[10px] transition-colors cursor-pointer shrink-0"
-              >
-                Auto-fill
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* Security watermark footer */}
