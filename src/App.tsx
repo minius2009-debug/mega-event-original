@@ -414,13 +414,13 @@ export default function App() {
 
   const scrollTeam = (direction: 'left' | 'right') => {
     if (teamSliderRef.current) {
-      teamSliderRef.current.scrollBy({ left: direction === 'left' ? -320 : 320, behavior: 'smooth' });
+      teamSliderRef.current.scrollBy({ left: direction === 'left' ? -340 : 340, behavior: 'smooth' });
     }
   };
 
   const scrollVolunteers = (direction: 'left' | 'right') => {
     if (volunteerSliderRef.current) {
-      volunteerSliderRef.current.scrollBy({ left: direction === 'left' ? -320 : 320, behavior: 'smooth' });
+      volunteerSliderRef.current.scrollBy({ left: direction === 'left' ? -340 : 340, behavior: 'smooth' });
     }
   };
 
@@ -2738,10 +2738,10 @@ export default function App() {
 
 
       {/* 5. Team Members & Volunteers Section */}
-      <section id="team" className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto scroll-mt-24 text-left space-y-12">
+      <section id="team" className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto scroll-mt-24 text-left space-y-5">
         {/* Core Team Header & Single-Line Scroll Track */}
         <div>
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-5">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4">
             <div>
               <span className="text-xs font-extrabold text-blue-600 uppercase tracking-widest block mb-1">
                 Community Organizers
@@ -2782,23 +2782,23 @@ export default function App() {
 
           <div
             ref={teamSliderRef}
-            className="flex flex-nowrap overflow-x-auto gap-3.5 pb-3 pt-1 px-1 scroll-smooth snap-x snap-mandatory no-scrollbar"
+            className="flex flex-nowrap overflow-x-auto gap-4 pb-3 pt-1 px-1 scroll-smooth snap-x snap-mandatory no-scrollbar"
           >
             {INITIAL_TEAM.map((member) => {
               const initials = member.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
               return (
                 <div
                   key={member.id}
-                  className="shrink-0 w-64 sm:w-72 snap-start bg-white border border-slate-200/90 hover:border-blue-400 rounded-2xl p-3.5 shadow-2xs hover:shadow-md transition-all duration-200 flex items-center gap-3 group"
+                  className="shrink-0 w-72 sm:w-80 snap-start bg-white border border-slate-200/90 hover:border-blue-500 rounded-2xl p-4 sm:p-4.5 shadow-2xs hover:shadow-md transition-all duration-200 flex items-center gap-3.5 group"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
                     {initials}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-heading font-bold text-xs sm:text-sm text-slate-900 group-hover:text-blue-600 transition-colors truncate">
+                    <h3 className="font-heading font-bold text-sm sm:text-base text-slate-900 group-hover:text-blue-600 transition-colors truncate">
                       {member.name}
                     </h3>
-                    <div className="inline-block text-[10px] font-extrabold text-blue-700 bg-blue-50 border border-blue-200/80 px-2 py-0.5 rounded-md mt-0.5 truncate max-w-full">
+                    <div className="inline-block text-[11px] sm:text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200/80 px-2.5 py-0.5 rounded-lg mt-1 truncate max-w-full">
                       {member.role}
                     </div>
                   </div>
@@ -2809,10 +2809,10 @@ export default function App() {
         </div>
 
         {/* Volunteers Header & Single-Line Scroll Track */}
-        <div className="pt-8 border-t border-slate-200/80">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-5">
+        <div className="pt-5 border-t border-slate-200/70">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4">
             <div>
-              <span className="text-xs font-extrabold text-emerald-600 uppercase tracking-widest block mb-1">
+              <span className="text-xs font-extrabold text-[#800020] uppercase tracking-widest block mb-1">
                 Field Operations Crew
               </span>
               <h2 className="font-heading text-3xl font-black text-slate-900 tracking-tight">
@@ -2823,14 +2823,14 @@ export default function App() {
               </p>
             </div>
             <div className="flex items-center gap-2 self-start sm:self-auto">
-              <div className="text-xs font-bold text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 shrink-0">
+              <div className="text-xs font-bold text-[#800020] bg-[#fbf0f2] px-3.5 py-1.5 rounded-xl border border-[#800020]/25 shrink-0">
                 {volunteers.length} Active Volunteers
               </div>
               <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => scrollVolunteers('left')}
-                  className="p-2 rounded-xl border border-emerald-200 bg-white hover:bg-emerald-50 active:scale-95 text-emerald-800 transition shadow-2xs cursor-pointer"
+                  className="p-2 rounded-xl border border-[#800020]/25 bg-white hover:bg-[#fbf0f2] active:scale-95 text-[#800020] transition shadow-2xs cursor-pointer"
                   title="Scroll Left"
                   aria-label="Scroll Volunteers Left"
                 >
@@ -2839,7 +2839,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => scrollVolunteers('right')}
-                  className="p-2 rounded-xl border border-emerald-200 bg-white hover:bg-emerald-50 active:scale-95 text-emerald-800 transition shadow-2xs cursor-pointer"
+                  className="p-2 rounded-xl border border-[#800020]/25 bg-white hover:bg-[#fbf0f2] active:scale-95 text-[#800020] transition shadow-2xs cursor-pointer"
                   title="Scroll Right"
                   aria-label="Scroll Volunteers Right"
                 >
@@ -2851,23 +2851,23 @@ export default function App() {
 
           <div
             ref={volunteerSliderRef}
-            className="flex flex-nowrap overflow-x-auto gap-3.5 pb-3 pt-1 px-1 scroll-smooth snap-x snap-mandatory no-scrollbar"
+            className="flex flex-nowrap overflow-x-auto gap-4 pb-3 pt-1 px-1 scroll-smooth snap-x snap-mandatory no-scrollbar"
           >
             {volunteers.map((vol) => {
               const initials = vol.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
               return (
                 <div
                   key={vol.id}
-                  className="shrink-0 w-64 sm:w-72 snap-start bg-white border border-slate-200/90 hover:border-emerald-400 rounded-2xl p-3.5 shadow-2xs hover:shadow-md transition-all duration-200 flex items-center gap-3 group"
+                  className="shrink-0 w-72 sm:w-80 snap-start bg-white border border-slate-200/90 hover:border-[#800020] rounded-2xl p-4 sm:p-4.5 shadow-2xs hover:shadow-md transition-all duration-200 flex items-center gap-3.5 group"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#800020] via-[#6d001a] to-[#4d0012] text-rose-50 font-bold text-sm flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
                     {initials}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-heading font-bold text-xs sm:text-sm text-slate-900 group-hover:text-emerald-700 transition-colors truncate">
+                    <h3 className="font-heading font-bold text-sm sm:text-base text-slate-900 group-hover:text-[#800020] transition-colors truncate">
                       {vol.name}
                     </h3>
-                    <div className="inline-block text-[10px] font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-md mt-0.5 truncate max-w-full">
+                    <div className="inline-block text-[11px] sm:text-xs font-bold text-[#800020] bg-[#fbf0f2] border border-[#800020]/25 px-2.5 py-0.5 rounded-lg mt-1 truncate max-w-full">
                       {vol.role || 'Volunteer'}
                     </div>
                   </div>
