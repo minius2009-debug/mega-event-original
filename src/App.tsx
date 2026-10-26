@@ -256,17 +256,6 @@ const MANAGEMENT_ROLES = [
 
 const INITIAL_TEAM: TeamMember[] = [
   {
-    id: 'tm-1',
-    name: 'Aarish Salik',
-    role: 'IT Lead',
-    department: 'Core Organizing & Management',
-    focus: 'IT Lead & Technical Operations',
-    responsibilities: [
-      'Manage IT infrastructure, digital registrations, registration software, and technical presentations.',
-      'Manage IT systems, presentations, screens, and technical troubleshooting during the event.'
-    ]
-  },
-  {
     id: 'tm-2',
     name: 'Syed Shahan Ali',
     role: 'Relations Manager',
@@ -4210,8 +4199,8 @@ export default function App() {
               <h3 className="font-heading text-sm font-bold text-white mb-3 tracking-wide">Event Details</h3>
               <ul className="space-y-2 text-xs text-slate-300">
                 <li><strong className="text-slate-400 font-medium">Date:</strong> 31 October 2026</li>
-                <li><strong className="text-slate-400 font-medium">Location:</strong> Booni, Chitral</li>
-                <li><strong className="text-slate-400 font-medium">Venue:</strong> To Be Announced (TBA)</li>
+                <li><strong className="text-slate-400 font-medium">Location:</strong> Booni, Upper Chitral</li>
+                <li><strong className="text-slate-400 font-medium">Venue:</strong> TMA Office Booni, Upper Chitral</li>
                 <li className="pt-2">
                   <a
                     href="https://www.collabs.eu.org/"
@@ -4338,7 +4327,7 @@ export default function App() {
                     type="submit"
                     className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer shadow-md shadow-blue-600/20 mt-2"
                   >
-                    Confirm Registration for 18 Oct
+                    Confirm Registration for 31 October 2026
                   </button>
                 </form>
               </div>
@@ -4353,7 +4342,7 @@ export default function App() {
                     Seat Reserved!
                   </h4>
                   <p className="text-xs text-slate-500 mt-1">
-                    You're registered for the First Mega Event of Collabs on 18 Oct.
+                    You're registered for the First Mega Event of Collabs on 31 October 2026.
                   </p>
                 </div>
 
@@ -4364,7 +4353,7 @@ export default function App() {
                   </div>
                   <div className="text-sm font-bold text-slate-900">{regForm.fullName}</div>
                   <div className="text-xs text-slate-600">First Mega Event of Collabs</div>
-                  <div className="text-[11px] text-slate-500">18 Oct 2026 · Booni, Chitral (Venue TBA)</div>
+                  <div className="text-[11px] text-slate-500">31 October 2026 · TMA Office Booni, Upper Chitral</div>
                 </div>
 
                 <div className="space-y-2 pt-1">
