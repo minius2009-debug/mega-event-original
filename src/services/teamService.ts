@@ -71,6 +71,32 @@ export async function deleteTeamFromFirestore(teamId: string): Promise<void> {
 }
 
 /**
+ * Delete all teams from Firestore in batches
+ */
+export async function deleteAllTeamsFromFirestore(): Promise<void> {
+  try {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('collabs_teams_cleared', 'true');
+    }
+    const existingSnap = await getDocs(collection(db, TEAMS_COLLECTION));
+    if (existingSnap.empty) return;
+
+    const docs = existingSnap.docs;
+    const chunkSize = 400;
+    for (let i = 0; i < docs.length; i += chunkSize) {
+      const chunk = docs.slice(i, i + chunkSize);
+      const batch = writeBatch(db);
+      chunk.forEach(d => {
+        batch.delete(d.ref);
+      });
+      await batch.commit();
+    }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, TEAMS_COLLECTION);
+  }
+}
+
+/**
  * Bulk import teams to Firestore (append or replace)
  */
 export async function bulkImportTeamsToFirestore(
@@ -78,6 +104,9 @@ export async function bulkImportTeamsToFirestore(
   mode: 'append' | 'replace'
 ): Promise<void> {
   try {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('collabs_teams_cleared');
+    }
     if (mode === 'replace') {
       // First fetch existing docs to delete them
       const existingSnap = await getDocs(collection(db, TEAMS_COLLECTION));
@@ -110,6 +139,9 @@ export async function bulkImportTeamsToFirestore(
  */
 export async function seedInitialTeamsIfEmpty(defaultTeams: TeamParticipation[]): Promise<boolean> {
   try {
+    if (typeof window !== 'undefined' && localStorage.getItem('collabs_teams_cleared') === 'true') {
+      return false;
+    }
     const snapshot = await getDocs(collection(db, TEAMS_COLLECTION));
     if (snapshot.empty && defaultTeams.length > 0) {
       const batch = writeBatch(db);
@@ -127,3 +159,4 @@ export async function seedInitialTeamsIfEmpty(defaultTeams: TeamParticipation[])
     return false;
   }
 }
+

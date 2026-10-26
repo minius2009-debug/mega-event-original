@@ -776,7 +776,12 @@ export default function App() {
     eventName: 'First Mega Event of Collabs',
     issueDate: '31 October 2026'
   });
-  const [teamParticipations, setTeamParticipations] = useState<TeamParticipation[]>(INITIAL_TEAM_PARTICIPATIONS);
+  const [teamParticipations, setTeamParticipations] = useState<TeamParticipation[]>(() => {
+    if (typeof window !== 'undefined' && localStorage.getItem('collabs_teams_cleared') === 'true') {
+      return [];
+    }
+    return INITIAL_TEAM_PARTICIPATIONS;
+  });
   const [isBulkTeamImportOpen, setIsBulkTeamImportOpen] = useState(false);
   const [selectedTeamForDetails, setSelectedTeamForDetails] = useState<TeamParticipation | null>(null);
   const [teamImportToast, setTeamImportToast] = useState<string | null>(null);
@@ -792,7 +797,7 @@ export default function App() {
         seedInitialTeamsIfEmpty(INITIAL_TEAM_PARTICIPATIONS).then(() => {
           unsubscribe = subscribeTeams(
             firestoreTeams => {
-              if (firestoreTeams && firestoreTeams.length > 0) {
+              if (firestoreTeams) {
                 setTeamParticipations(firestoreTeams);
               }
             },
@@ -2924,56 +2929,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Small Category Name Filter Bar */}
-        <div className="flex flex-wrap items-center gap-1.5 mb-6 pb-3 border-b border-slate-200">
-          <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider mr-1 flex items-center gap-1">
-            <Filter size={11} className="text-blue-600" />
-            <span>Category:</span>
-          </span>
-          <button
-            type="button"
-            onClick={() => {
-              setParticipationCategoryFilter('All');
-              setIsTeamsExpanded(true);
-            }}
-            className={`px-2.5 py-1 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer border flex items-center gap-1 ${
-              participationCategoryFilter === 'All'
-                ? 'bg-blue-600 text-white border-blue-600 shadow-2xs scale-105'
-                : 'bg-white text-slate-600 hover:text-slate-900 border-slate-200 hover:bg-slate-100'
-            }`}
-          >
-            <span>All Categories</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[9px] ${participationCategoryFilter === 'All' ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-500'}`}>
-              {teamParticipations.length}
-            </span>
-          </button>
-
-          {availableCategories.map(cat => {
-            const count = teamParticipations.filter(t => t.category === cat).length;
-            const isSelected = participationCategoryFilter === cat;
-            return (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => {
-                  setParticipationCategoryFilter(cat);
-                  setIsTeamsExpanded(true);
-                }}
-                className={`px-2.5 py-1 text-[10px] font-extrabold rounded-lg transition-all cursor-pointer border flex items-center gap-1 ${
-                  isSelected
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-2xs scale-105'
-                    : 'bg-white text-slate-600 hover:text-slate-900 border-slate-200 hover:bg-slate-100'
-                }`}
-              >
-                <span>{cat}</span>
-                <span className={`px-1.5 py-0.2 rounded-full text-[9px] ${isSelected ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-500'}`}>
-                  {count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
         {/* Empty State */}
         {sortedAndFilteredTeams.length === 0 && (
           <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center max-w-md mx-auto my-6 shadow-xs">
@@ -2999,136 +2954,72 @@ export default function App() {
           </div>
         )}
 
-        {/* Small, Creative & Engaging Grid of Participating Teams */}
+        {/* Simple, Clean Cards of Participating Teams with Category Color Borders */}
         {participationViewMode === 'grid' && sortedAndFilteredTeams.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 sm:gap-4">
             {displayedTeams.map(p => {
-              const categoryBadge = getTeamCategoryBadge(p.category);
-              const { icon: awardIcon, style: awardBadgeStyle, label: awardLabel } = getTeamAwardDetails(p.award);
-              const qr = teamCardQrs[p.id];
+              const cat = (p.category || '').toLowerCase();
+              let borderClass = 'border-l-4 border-l-blue-600 hover:border-blue-500';
+              let badgeClass = 'bg-blue-50 text-blue-700 border-blue-200/80';
+              let hoverTextClass = 'group-hover:text-blue-600';
+              let linkTextClass = 'text-blue-600 group-hover:text-blue-700';
+
+              if (cat.includes('physics')) {
+                borderClass = 'border-l-4 border-l-purple-600 hover:border-purple-500';
+                badgeClass = 'bg-purple-50 text-purple-700 border-purple-200/80';
+                hoverTextClass = 'group-hover:text-purple-600';
+                linkTextClass = 'text-purple-600 group-hover:text-purple-700';
+              } else if (cat.includes('biology') || cat.includes('bio')) {
+                borderClass = 'border-l-4 border-l-emerald-600 hover:border-emerald-500';
+                badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200/80';
+                hoverTextClass = 'group-hover:text-emerald-600';
+                linkTextClass = 'text-emerald-600 group-hover:text-emerald-700';
+              } else if (cat.includes('chemistry') || cat.includes('chem')) {
+                borderClass = 'border-l-4 border-l-amber-500 hover:border-amber-500';
+                badgeClass = 'bg-amber-50 text-amber-700 border-amber-200/80';
+                hoverTextClass = 'group-hover:text-amber-600';
+                linkTextClass = 'text-amber-600 group-hover:text-amber-700';
+              } else if (cat.includes('art') || cat.includes('craft') || cat.includes('design')) {
+                borderClass = 'border-l-4 border-l-rose-500 hover:border-rose-500';
+                badgeClass = 'bg-rose-50 text-rose-700 border-rose-200/80';
+                hoverTextClass = 'group-hover:text-rose-600';
+                linkTextClass = 'text-rose-600 group-hover:text-rose-700';
+              } else if (cat.includes('food') || cat.includes('dish') || cat.includes('culinary')) {
+                borderClass = 'border-l-4 border-l-orange-500 hover:border-orange-500';
+                badgeClass = 'bg-orange-50 text-orange-700 border-orange-200/80';
+                hoverTextClass = 'group-hover:text-orange-600';
+                linkTextClass = 'text-orange-600 group-hover:text-orange-700';
+              }
 
               return (
                 <div
                   key={p.id}
                   onClick={() => setSelectedTeamForDetails(p)}
-                  className={`group relative bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-150 p-3 flex flex-col justify-between cursor-pointer overflow-hidden border-l-[3px] ${categoryBadge.borderAccent}`}
+                  className={`group bg-white rounded-2xl border border-slate-200/90 ${borderClass} shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 p-4 sm:p-5 flex flex-col justify-between cursor-pointer text-left`}
                 >
-                  <div>
-                    {/* Top Header: Category Tag & Status Badge */}
-                    <div className="flex items-center justify-between gap-1 mb-1.5">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (p.category) {
-                            setParticipationCategoryFilter(p.category);
-                            setIsTeamsExpanded(true);
-                          }
-                        }}
-                        className={`inline-flex items-center gap-1 text-[9px] font-extrabold px-1.5 py-0.5 rounded cursor-pointer transition-transform hover:scale-105 ${categoryBadge.style}`}
-                        title={`Show all ${p.category} teams`}
-                      >
-                        {categoryBadge.icon}
-                        <span className="truncate max-w-[80px]">{categoryBadge.label}</span>
-                      </button>
-
-                      <div className="flex items-center gap-1 shrink-0">
-                        <span className="font-mono text-[9px] font-bold text-slate-600 bg-slate-100 border border-slate-200/80 px-1 py-0.5 rounded">
-                          {p.teamCode || p.id}
+                  <div className="space-y-2">
+                    {p.category && (
+                      <div>
+                        <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-md border ${badgeClass}`}>
+                          {p.category}
                         </span>
-                        <span className="font-mono text-[9px] font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-200/90 px-1.5 py-0.5 rounded flex items-center gap-0.5 shadow-2xs">
-                          <MapPin size={9} className="text-indigo-600" />
-                          {getTeamStallNumber(p)}
-                        </span>
-                        {getTeamStatusBadge(p.status)}
-                        {isAdminMode && (
-                          <button
-                            onClick={async e => {
-                              e.stopPropagation();
-                              try {
-                                await deleteTeamFromFirestore(p.id);
-                              } catch (err) {
-                                console.error('Error deleting team from Firebase:', err);
-                              }
-                              setTeamParticipations(prev => prev.filter(item => item.id !== p.id));
-                            }}
-                            className="text-red-500 hover:text-red-700 p-0.5 rounded hover:bg-red-50"
-                            title="Delete Team"
-                          >
-                            <Trash2 size={11} />
-                          </button>
-                        )}
                       </div>
-                    </div>
-
-                    {/* Project Title */}
+                    )}
                     <h3
-                      className="font-heading font-black text-xs text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1 leading-snug"
+                      className={`font-heading font-black text-sm sm:text-base text-slate-900 ${hoverTextClass} transition-colors line-clamp-2 leading-snug`}
                       title={p.projectName}
                     >
                       {p.projectName}
                     </h3>
-
-                    {/* School / Institution */}
-                    <div className="flex items-center gap-1 text-[10px] text-slate-500 font-medium mt-0.5 truncate">
-                      <GraduationCap size={11} className="text-slate-400 shrink-0" />
-                      <span className="truncate">{p.school || 'Collabs Event'}</span>
-                    </div>
-
-                    {/* Creative Project Description Snippet */}
-                    <p className="text-[10px] text-slate-500 line-clamp-1 leading-snug bg-slate-50 p-1.5 rounded-lg border border-slate-100/90 mt-1.5 italic">
-                      "{p.projectDescription}"
-                    </p>
-
-                    {/* Micro Data Badges: Leader, Roster & Stall */}
-                    <div className="mt-2 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-600 gap-1">
-                      <span className="truncate max-w-[130px] font-semibold text-slate-800">
-                        <span className="text-slate-400 font-normal">Lead:</span> {p.teamLeader}
-                      </span>
-                      <span className="font-mono font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded text-[9px] shrink-0">
-                        {p.members?.length || 0} members
-                      </span>
-                    </div>
-
-                    <div className="text-[9px] text-slate-500 truncate flex items-center justify-between gap-1 mt-1 bg-slate-50 px-1.5 py-1 rounded-md border border-slate-100">
-                      <span className="font-extrabold text-indigo-700 flex items-center gap-1">
-                        <MapPin size={9} className="text-indigo-600 shrink-0" />
-                        {getTeamStallNumber(p)}
-                      </span>
-                      <span className="text-slate-400 truncate max-w-[120px]">{p.location || 'Exhibition Zone'}</span>
+                    <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                      <span className="text-slate-400 font-medium">Team Leader:</span>
+                      <span className="font-bold text-slate-800 truncate">{p.teamLeader}</span>
                     </div>
                   </div>
 
-                  {/* Card Footer: Award Badge & Quick Pass Trigger */}
-                  <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between gap-1">
-                    {/* Award Tag */}
-                    <div className={`inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full ${awardBadgeStyle}`}>
-                      {awardIcon}
-                      <span className="font-bold">{awardLabel}</span>
-                    </div>
-
-                    {/* Action & Mini QR Peek */}
-                    <div className="flex items-center gap-1 shrink-0">
-                      {qr && (
-                        <img
-                          src={qr}
-                          alt="QR Peek"
-                          className="w-5 h-5 rounded border border-slate-200 bg-white p-0.5 hover:scale-125 transition-transform"
-                          title="View attendee check-in pass"
-                        />
-                      )}
-                      <button
-                        type="button"
-                        onClick={e => {
-                          e.stopPropagation();
-                          setSelectedTeamForDetails(p);
-                        }}
-                        className="px-2 py-0.5 bg-slate-50 hover:bg-blue-600 hover:text-white text-slate-700 text-[10px] font-bold rounded-lg border border-slate-200 group-hover:border-blue-600 transition-colors flex items-center gap-0.5 cursor-pointer"
-                      >
-                        <span>Pass</span>
-                        <ChevronRight size={10} />
-                      </button>
-                    </div>
+                  <div className={`mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold ${linkTextClass}`}>
+                    <span>View Details</span>
+                    <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
                   </div>
                 </div>
               );
@@ -3136,107 +3027,42 @@ export default function App() {
           </div>
         )}
 
-        {/* Dense Table View Mode */}
+        {/* Simple Table View Mode */}
         {participationViewMode === 'table' && sortedAndFilteredTeams.length > 0 && (
           <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
                   <tr>
-                    <th className="p-3 pl-4">Team Code</th>
-                    <th className="p-3 text-center">Stall #</th>
-                    <th className="p-3">Project & Category</th>
-                    <th className="p-3">School / Institution</th>
-                    <th className="p-3">Team Leader</th>
-                    <th className="p-3 text-center">Roster</th>
-                    <th className="p-3 text-center">Recognition</th>
-                    <th className="p-3 text-center">Status</th>
-                    <th className="p-3 pr-4 text-right">Actions</th>
+                    <th className="p-3.5 pl-4">Project Name</th>
+                    <th className="p-3.5">Team Leader</th>
+                    <th className="p-3.5 pr-4 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {displayedTeams.map(p => {
-                    const categoryBadge = getTeamCategoryBadge(p.category);
-                    const { icon: awardIcon, style: awardBadgeStyle, label: awardLabel } = getTeamAwardDetails(p.award);
-
-                    return (
-                      <tr
-                        key={p.id}
-                        onClick={() => setSelectedTeamForDetails(p)}
-                        className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
-                      >
-                        <td className="p-3 pl-4 font-mono font-bold text-slate-800 text-[11px]">
-                          {p.teamCode || p.id}
-                        </td>
-                        <td className="p-3 text-center">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-200/80 text-indigo-700 font-mono font-extrabold text-[10px]">
-                            <MapPin size={10} className="text-indigo-600" />
-                            {getTeamStallNumber(p)}
-                          </span>
-                        </td>
-                        <td className="p-3">
-                          <div className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
-                            {p.projectName}
-                          </div>
-                          <div className="flex items-center gap-1 text-[10px] text-slate-500 mt-0.5">
-                            {categoryBadge.icon}
-                            <span>{p.category || 'Innovation Sprint'}</span>
-                          </div>
-                        </td>
-                        <td className="p-3 text-slate-700">
-                          <div className="font-medium truncate max-w-[200px]">{p.school || 'Collabs Event'}</div>
-                          {p.location && (
-                            <div className="text-[10px] text-slate-400 flex items-center gap-1">
-                              <MapPin size={9} /> {p.location}
-                            </div>
-                          )}
-                        </td>
-                        <td className="p-3 text-slate-800 font-semibold">
-                          {p.teamLeader}
-                        </td>
-                        <td className="p-3 text-center font-mono font-bold text-blue-600">
-                          {p.members?.length || 0}
-                        </td>
-                        <td className="p-3 text-center">
-                          <span className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full ${awardBadgeStyle}`}>
-                            {awardIcon} {awardLabel}
-                          </span>
-                        </td>
-                        <td className="p-3 text-center">
-                          {getTeamStatusBadge(p.status)}
-                        </td>
-                        <td className="p-3 pr-4 text-right" onClick={e => e.stopPropagation()}>
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() => setSelectedTeamForDetails(p)}
-                              className="px-2.5 py-1 bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-blue-700 text-xs font-bold rounded-lg border border-slate-200 transition-colors flex items-center gap-1"
-                              title="View Team Pass & Roster Details"
-                            >
-                              <Eye size={12} /> View
-                            </button>
-                            {isAdminMode && (
-                              <button
-                                type="button"
-                                onClick={async () => {
-                                  try {
-                                    await deleteTeamFromFirestore(p.id);
-                                  } catch (err) {
-                                    console.error('Error deleting team:', err);
-                                  }
-                                  setTeamParticipations(prev => prev.filter(item => item.id !== p.id));
-                                }}
-                                className="p-1 text-red-500 hover:bg-red-50 rounded"
-                                title="Delete Team"
-                              >
-                                <Trash2 size={13} />
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {displayedTeams.map(p => (
+                    <tr
+                      key={p.id}
+                      onClick={() => setSelectedTeamForDetails(p)}
+                      className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                    >
+                      <td className="p-3.5 pl-4 font-bold text-slate-900 text-sm group-hover:text-blue-600">
+                        {p.projectName}
+                      </td>
+                      <td className="p-3.5 text-slate-800 font-semibold">
+                        {p.teamLeader}
+                      </td>
+                      <td className="p-3.5 pr-4 text-right" onClick={e => e.stopPropagation()}>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedTeamForDetails(p)}
+                          className="px-3 py-1.5 bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-700 text-xs font-bold rounded-lg border border-blue-200 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                        >
+                          <Eye size={13} /> View Details
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

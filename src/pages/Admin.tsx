@@ -67,6 +67,7 @@ import { TeamManagement } from '../components/TeamManagement';
 import { VolunteerManagement } from '../components/VolunteerManagement';
 import { TeamParticipation, VolunteerLog, EventItem } from '../App';
 import officialLogo from '../assets/images/logo2.png';
+import { deleteAllTeamsFromFirestore } from '../services/teamService';
 
 interface CertificateRecord {
   id: string;
@@ -326,6 +327,27 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 4000);
+  };
+
+  // Delete All Teams State & Handler
+  const [isDeleteAllTeamsModalOpen, setIsDeleteAllTeamsModalOpen] = useState(false);
+  const [isDeletingAllTeams, setIsDeletingAllTeams] = useState(false);
+
+  const handleDeleteAllTeamsAdmin = async () => {
+    setIsDeletingAllTeams(true);
+    try {
+      setTeamParticipations([]);
+      await deleteAllTeamsFromFirestore();
+      addAuditLog('Deleted All Teams', `Cleared all ${teamParticipations.length} teams from roster`, 'team');
+      showToast('All participating teams have been completely deleted.');
+      setIsDeleteAllTeamsModalOpen(false);
+    } catch (err: any) {
+      console.error('Error deleting all teams:', err);
+      showToast(`Removed teams locally (Sync notice: ${err?.message || 'offline'})`);
+      setIsDeleteAllTeamsModalOpen(false);
+    } finally {
+      setIsDeletingAllTeams(false);
+    }
   };
 
   // Add an audit log helper
@@ -1451,6 +1473,25 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                       <Download size={16} /> Export Complete Organization Snapshot
                     </span>
                     <ChevronRight size={14} />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsDeleteAllTeamsModalOpen(true)}
+                    disabled={teamParticipations.length === 0}
+                    className={`w-full py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-between border cursor-pointer ${
+                      teamParticipations.length === 0
+                        ? 'opacity-40 cursor-not-allowed bg-slate-900/40 text-slate-500 border-slate-800'
+                        : isDark
+                        ? 'bg-red-950/40 hover:bg-red-900/60 hover:border-red-500/60 text-red-300 border-red-900/60'
+                        : 'bg-red-50 hover:bg-red-100 text-red-700 border-red-200'
+                    }`}
+                    title={teamParticipations.length === 0 ? 'No teams to delete' : `Delete all ${teamParticipations.length} teams`}
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <Trash2 size={16} className={teamParticipations.length === 0 ? 'text-slate-500' : 'text-red-500'} /> Delete All Teams ({teamParticipations.length})
+                    </span>
+                    <ChevronRight size={14} className={teamParticipations.length === 0 ? 'text-slate-600' : 'text-red-400'} />
                   </button>
                 </div>
 
@@ -2939,6 +2980,53 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: DELETE ALL TEAMS CONFIRMATION */}
+      {isDeleteAllTeamsModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-red-200 animate-fadeIn text-center space-y-4">
+            <div className="w-14 h-14 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
+              <Trash2 size={28} />
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-slate-900 font-heading">Delete All {teamParticipations.length} Teams?</h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                This will permanently delete <strong>all {teamParticipations.length} registered innovation teams</strong> from the event roster and cloud database.
+              </p>
+              <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-[11px] text-red-700 font-medium text-left flex items-start gap-2">
+                <AlertCircle size={16} className="text-red-600 shrink-0 mt-0.5" />
+                <span>This action cannot be undone. You can re-upload teams anytime using <strong>Bulk Excel Import</strong> in the Teams tab.</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setIsDeleteAllTeamsModalOpen(false)}
+                disabled={isDeletingAllTeams}
+                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl cursor-pointer transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteAllTeamsAdmin}
+                disabled={isDeletingAllTeams}
+                className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold text-xs rounded-xl cursor-pointer transition-all shadow-md shadow-red-600/20 flex items-center justify-center gap-2"
+              >
+                {isDeletingAllTeams ? (
+                  <>
+                    <RefreshCw size={14} className="animate-spin" /> Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={14} /> Yes, Delete All Teams
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

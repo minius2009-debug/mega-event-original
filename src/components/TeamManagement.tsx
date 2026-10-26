@@ -35,7 +35,8 @@ import { BulkTeamImportModal } from './BulkTeamImportModal';
 import {
   saveTeamToFirestore,
   deleteTeamFromFirestore,
-  bulkImportTeamsToFirestore
+  bulkImportTeamsToFirestore,
+  deleteAllTeamsFromFirestore
 } from '../services/teamService';
 
 interface TeamManagementProps {
@@ -86,6 +87,8 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
   const [selectedTeam, setSelectedTeam] = useState<TeamParticipation | null>(null);
   const [qrModalTeam, setQrModalTeam] = useState<TeamParticipation | null>(null);
   const [deleteConfirmTeam, setDeleteConfirmTeam] = useState<TeamParticipation | null>(null);
+  const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState(false);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -399,6 +402,28 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
     });
   };
 
+  // Delete All Teams in a single action
+  const handleDeleteAllTeams = async () => {
+    setIsDeletingAll(true);
+    try {
+      setTeamParticipations([]);
+      setSelectedTeam(null);
+      setDeleteConfirmTeam(null);
+      setQrCodes({});
+
+      await deleteAllTeamsFromFirestore();
+
+      showToast('All participating teams have been completely deleted.');
+      setIsDeleteAllModalOpen(false);
+    } catch (err: any) {
+      console.error('Error deleting all teams:', err);
+      showToast(`Removed teams locally (Sync notice: ${err?.message || 'offline'})`);
+      setIsDeleteAllModalOpen(false);
+    } finally {
+      setIsDeletingAll(false);
+    }
+  };
+
   // Download QR Code
   const downloadQRCode = (team: TeamParticipation) => {
     const dataUrl = qrCodes[team.id];
@@ -466,6 +491,20 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
             </div>
 
             <div className="flex items-center gap-3 shrink-0 flex-wrap">
+              <button
+                type="button"
+                onClick={() => setIsDeleteAllModalOpen(true)}
+                disabled={teamParticipations.length === 0}
+                className={`px-4 py-2.5 font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-2 cursor-pointer active:scale-95 ${
+                  teamParticipations.length === 0
+                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
+                    : 'bg-red-50 hover:bg-red-100 text-red-700 border border-red-300 hover:border-red-400'
+                }`}
+                title={teamParticipations.length === 0 ? 'No teams to delete' : `Delete all ${teamParticipations.length} teams in a single click`}
+              >
+                <Trash2 size={15} className={teamParticipations.length === 0 ? 'text-slate-400' : 'text-red-600'} /> Delete All Teams ({teamParticipations.length})
+              </button>
+
               <button
                 onClick={() => setIsBulkImportOpen(true)}
                 className="px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-xs rounded-xl transition-all shadow-xs flex items-center gap-2 cursor-pointer active:scale-95"
@@ -1549,6 +1588,55 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
                 className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl cursor-pointer"
               >
                 Yes, Remove Team
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: DELETE ALL TEAMS CONFIRMATION */}
+      {/* ========================================================================= */}
+      {isDeleteAllModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-red-200 animate-fadeIn text-center space-y-4">
+            <div className="w-14 h-14 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
+              <Trash2 size={28} />
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-slate-900 font-heading">Delete All {teamParticipations.length} Teams?</h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                This will permanently delete <strong>all {teamParticipations.length} registered innovation teams</strong> from the event roster and cloud storage.
+              </p>
+              <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-[11px] text-red-700 font-medium text-left flex items-start gap-2">
+                <AlertCircle size={16} className="text-red-600 shrink-0 mt-0.5" />
+                <span>You can restore or upload new teams at any time using the <strong>Bulk Excel Import</strong> button.</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setIsDeleteAllModalOpen(false)}
+                disabled={isDeletingAll}
+                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl cursor-pointer transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteAllTeams}
+                disabled={isDeletingAll}
+                className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold text-xs rounded-xl cursor-pointer transition-all shadow-md shadow-red-600/20 flex items-center justify-center gap-2"
+              >
+                {isDeletingAll ? (
+                  <>
+                    <RotateCcw size={14} className="animate-spin" /> Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={14} /> Yes, Delete All Teams
+                  </>
+                )}
               </button>
             </div>
           </div>

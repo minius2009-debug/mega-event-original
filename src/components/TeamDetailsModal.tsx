@@ -3,19 +3,12 @@ import QRCode from 'qrcode';
 import {
   X,
   Building2,
-  MapPin,
   Users,
-  Award,
-  QrCode as QrIcon,
   Download,
-  Mail,
-  UserCheck,
-  Shield,
-  Layers,
-  Sparkles,
-  ExternalLink,
-  CheckCircle2,
-  Copy
+  QrCode as QrIcon,
+  BookOpen,
+  User,
+  CheckCircle2
 } from 'lucide-react';
 import { TeamParticipation } from '../App';
 
@@ -26,24 +19,33 @@ interface TeamDetailsModalProps {
   onViewCertificate?: (certId: string) => void;
 }
 
-export const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ team, onClose, certDatabase, onViewCertificate }) => {
+export const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ team, onClose }) => {
   const [qrUrl, setQrUrl] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [downloadSuccess, setDownloadSuccess] = useState(false);
 
   useEffect(() => {
     if (!team) return;
-    const payload = JSON.stringify({
-      id: team.id,
-      code: team.teamCode || team.id,
-      name: team.projectName,
-      leader: team.teamLeader,
-      school: team.school || 'Collabs Event',
-      event: 'First Mega Event of Collabs 2026'
-    });
 
-    QRCode.toDataURL(payload, { width: 360, margin: 2 })
+    const memberNames = (team.members || []).map(m => m.name).filter(Boolean);
+    const membersListStr = memberNames.length > 0 ? memberNames.join(', ') : 'N/A';
+
+    const fullDetailsText = [
+      `PROJECT: ${team.projectName}`,
+      `SUBJECT: ${team.category || 'General'}`,
+      `SCHOOL: ${team.school || 'Collabs Event'}`,
+      `TEAM LEADER: ${team.teamLeader}`,
+      `TEAM MEMBERS: ${membersListStr}`,
+      `SUMMARY: ${team.projectDescription || ''}`,
+      `EVENT: First Mega Event of Collabs 2026 (31 Oct 2026 · TMA Office Booni, Upper Chitral)`
+    ].join('\n\n');
+
+    QRCode.toDataURL(fullDetailsText, {
+      width: 320,
+      margin: 2,
+      errorCorrectionLevel: 'M'
+    })
       .then(url => setQrUrl(url))
-      .catch(err => console.error('Failed to generate QR:', err));
+      .catch(err => console.error('Failed to generate project QR:', err));
   }, [team]);
 
   if (!team) return null;
@@ -52,225 +54,151 @@ export const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ team, onClos
     if (!qrUrl) return;
     const link = document.createElement('a');
     link.href = qrUrl;
-    link.download = `QR_${team.teamCode || team.id}_${team.projectName.replace(/\s+/g, '_')}.png`;
+    const safeName = team.projectName.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 30);
+    link.download = `QR_${safeName}.png`;
     link.click();
+    setDownloadSuccess(true);
+    setTimeout(() => setDownloadSuccess(false), 2500);
   };
-
-  const handleCopyCode = () => {
-    navigator.clipboard.writeText(team.teamCode || team.id);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const stallNumber = (() => {
-    if (team.stallNumber && team.stallNumber.trim()) {
-      const s = team.stallNumber.trim();
-      return s.toLowerCase().startsWith('stall') ? s : `Stall #${s.replace(/^#/, '')}`;
-    }
-    const loc = (team.location || '').trim();
-    const stallMatch = loc.match(/stall\s*#?\s*([a-zA-Z0-9-]+)/i);
-    if (stallMatch) {
-      return `Stall #${stallMatch[1]}`;
-    }
-    const code = (team.teamCode || team.id || '').trim();
-    const numMatch = code.match(/(?:[a-zA-Z]+-)+(?:2026-)?(\d+)/i) || code.match(/-(\d+)$/);
-    if (numMatch) {
-      const num = numMatch[1].replace(/^0+/, '') || numMatch[1];
-      return `Stall #${num}`;
-    }
-    if (loc && !loc.toLowerCase().includes('grounds') && !loc.toLowerCase().includes('venue')) {
-      return loc;
-    }
-    return 'Stall Assigned';
-  })();
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 my-6 animate-fadeIn text-left flex flex-col max-h-[92vh]">
+      <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 my-6 animate-fadeIn text-left flex flex-col max-h-[92vh]">
         {/* Modal Header */}
         <div className="flex items-start justify-between pb-4 border-b border-slate-100 shrink-0">
-          <div>
-            <div className="flex flex-wrap items-center gap-2 mb-1">
-              <span className="font-mono text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-lg flex items-center gap-1.5">
-                {team.teamCode || team.id}
-                <button
-                  onClick={handleCopyCode}
-                  title="Copy Team Code"
-                  className="hover:text-blue-900 cursor-pointer"
-                >
-                  <Copy size={11} />
-                </button>
+          <div className="pr-4">
+            {/* Subject / Category Tag */}
+            {team.category && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-extrabold bg-blue-50 text-blue-700 border border-blue-200/80 mb-2">
+                <BookOpen size={13} className="text-blue-600" />
+                <span>Subject: {team.category}</span>
               </span>
-              {copied && <span className="text-[10px] text-emerald-600 font-bold">Copied!</span>}
-              <span className="font-mono text-xs font-extrabold text-indigo-800 bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 rounded-lg flex items-center gap-1 shadow-2xs">
-                <MapPin size={11} className="text-indigo-600" />
-                <span>{stallNumber}</span>
-              </span>
-              <span className="text-xs font-medium text-slate-400">·</span>
-              <span className="text-xs font-bold text-slate-600">{team.category || 'Innovation Sprint'}</span>
-            </div>
-            <h3 className="text-2xl font-black text-slate-900 font-heading">
+            )}
+            <h3 className="text-xl sm:text-2xl font-black text-slate-900 font-heading leading-tight">
               {team.projectName}
             </h3>
           </div>
 
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-slate-100 text-slate-500 hover:text-slate-900 flex items-center justify-center cursor-pointer transition-colors"
+            className="w-9 h-9 rounded-full bg-slate-100 text-slate-500 hover:text-slate-900 flex items-center justify-center cursor-pointer transition-colors shrink-0"
+            aria-label="Close"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto py-5 space-y-6 pr-1 text-xs">
-          {/* Top Quick Attributes Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80">
-              <div className="text-[10px] text-slate-600 uppercase font-bold tracking-wider">Institution</div>
-              <div className="font-bold text-slate-900 mt-1 line-clamp-1">{team.school || 'Collabs Event'}</div>
-              <div className="text-[10px] text-slate-600 truncate">{team.campus || 'Main Campus'}</div>
+        <div className="flex-1 overflow-y-auto py-5 space-y-5 pr-1 text-xs">
+          {/* School Name */}
+          <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-100/70 text-blue-700 flex items-center justify-center shrink-0">
+              <Building2 size={20} />
             </div>
-
-            {/* Professional Stall Number Card */}
-            <div className="p-3.5 bg-gradient-to-br from-indigo-50/70 via-blue-50/50 to-white rounded-2xl border border-indigo-200/90 shadow-2xs">
-              <div className="text-[10px] text-indigo-700 uppercase font-extrabold tracking-wider flex items-center justify-between">
-                <span>Stall Number</span>
-                <span className="text-[9px] font-mono text-emerald-700 font-extrabold bg-emerald-50 border border-emerald-200/70 px-1.5 py-0.2 rounded-full">
-                  Confirmed
-                </span>
+            <div className="min-w-0">
+              <div className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">
+                School / Institution
               </div>
-              <div className="font-heading font-black text-slate-900 text-sm sm:text-base mt-1 flex items-center gap-1.5 text-indigo-900">
-                <MapPin size={13} className="text-indigo-600 shrink-0" />
-                <span className="truncate">{stallNumber}</span>
-              </div>
-              <div className="text-[10px] text-slate-500 truncate mt-0.5">
-                {team.location && !team.location.toLowerCase().includes('booni grounds') ? team.location : 'Exhibition Zone · Booni Grounds'}
-              </div>
-            </div>
-
-            <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80">
-              <div className="text-[10px] text-slate-600 uppercase font-bold tracking-wider">Team Leader</div>
-              <div className="font-bold text-slate-900 mt-1 truncate">{team.teamLeader}</div>
-              <div className="text-[10px] text-slate-600 truncate">{team.coLeader ? `Co: ${team.coLeader}` : 'Primary Representative'}</div>
-            </div>
-
-            <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80">
-              <div className="text-[10px] text-slate-600 uppercase font-bold tracking-wider">Recognition</div>
-              <div className="font-bold text-emerald-700 mt-1">{team.status}</div>
-              <div className="text-[10px] text-blue-700 font-semibold flex items-center gap-1 mt-0.5">
-                <Award size={10} className="text-blue-600 shrink-0" />
-                <span>Official Participation</span>
+              <div className="text-sm font-bold text-slate-900 truncate">
+                {team.school || 'Collabs Event Partner School'}
               </div>
             </div>
           </div>
 
-          {/* Project Abstract / Description */}
-          <div className="space-y-1.5">
-            <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
-              Project Description & Community Mission:
-            </span>
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-slate-700 leading-relaxed text-xs">
-              {team.projectDescription}
-            </div>
-          </div>
-
-          {/* Team Members Roster */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                Enrolled Team Members ({team.members?.length || 0} / {team.capacity || 5})
+          {/* Team Leader & Members */}
+          <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-3">
+            <div className="flex items-center gap-2">
+              <User size={15} className="text-blue-600" />
+              <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">
+                Team Leadership
               </span>
-              <span className="text-[11px] text-slate-500 font-medium">Booni Exhibition Cohort</span>
+            </div>
+            <div className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <span>{team.teamLeader}</span>
+              <span className="text-[10px] font-extrabold text-blue-700 bg-blue-100/70 border border-blue-200 px-2 py-0.5 rounded-md">
+                Team Leader
+              </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {team.members?.map((mem, idx) => {
-                const certRecord = certDatabase?.find(
-                  c => c && c.recipientName && c.recipientName.trim().toLowerCase() === mem.name.trim().toLowerCase()
-                );
-                let hash = 0;
-                const str = `${mem.name.trim().toLowerCase()}-${team.id}`;
-                for (let i = 0; i < str.length; i++) {
-                  hash = (hash << 5) - hash + str.charCodeAt(i);
-                  hash |= 0;
-                }
-                const fallbackCode = `CLB-2026-${100 + (Math.abs(hash) % 899)}`;
-                const certId = certRecord?.id || fallbackCode;
-
-                return (
-                  <div
-                    key={idx}
-                    className="p-3 bg-white border border-slate-200 rounded-2xl shadow-2xs hover:border-purple-300 transition-colors flex flex-col justify-between gap-2 text-left"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <div className="font-bold text-slate-900 flex items-center gap-1.5 flex-wrap">
-                          <span className="truncate">{mem.name}</span>
-                          {mem.name.toLowerCase() === team.teamLeader.toLowerCase() && (
-                            <span className="text-[9px] font-extrabold bg-blue-100 text-blue-800 px-1.5 py-0.2 rounded shrink-0">
-                              LEAD
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-[11px] text-blue-600 font-semibold">{mem.role || 'Member'}</div>
-                      </div>
-
-                      <span className="font-mono text-[10px] font-bold text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-md shrink-0">
-                        {certId}
+            {/* Team Members List */}
+            {team.members && team.members.length > 0 && (
+              <div className="pt-3 border-t border-slate-200/70">
+                <div className="flex items-center gap-2 mb-2">
+                  <Users size={15} className="text-slate-600" />
+                  <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">
+                    Team Members ({team.members.length})
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {team.members.map((mem, idx) => (
+                    <div
+                      key={idx}
+                      className="p-2.5 bg-white border border-slate-200 rounded-xl flex items-center justify-between gap-2 shadow-2xs"
+                    >
+                      <span className="font-bold text-slate-800 text-xs truncate">
+                        {mem.name}
                       </span>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-1.5 border-t border-slate-100 text-[10px]">
-                      <span className="text-slate-500 font-medium">Verify Code: <strong className="font-mono text-slate-800">{certId}</strong></span>
-                      {onViewCertificate && (
-                        <button
-                          type="button"
-                          onClick={() => onViewCertificate(certId)}
-                          className="px-2.5 py-1 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1 shrink-0"
-                          title="View Official Certificate & Dynamic Fixed QR Code"
-                        >
-                          <Award size={11} />
-                          <span>Cert & QR →</span>
-                        </button>
+                      {mem.role && (
+                        <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md shrink-0">
+                          {mem.role}
+                        </span>
                       )}
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* QR Badge & Check-in Details */}
-          <div className="p-4 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-3xl flex flex-col sm:flex-row items-center gap-5">
+          {/* Everything About the Project / Summary */}
+          {team.projectDescription && (
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+                Project Summary & Details:
+              </span>
+              <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200 text-slate-700 leading-relaxed text-xs sm:text-sm">
+                {team.projectDescription}
+              </div>
+            </div>
+          )}
+
+          {/* Small Downloadable QR Code Section */}
+          <div className="p-4 bg-slate-900 text-white rounded-2xl flex flex-col sm:flex-row items-center gap-4 border border-slate-800 shadow-md">
             {qrUrl ? (
               <img
                 src={qrUrl}
-                alt="Event Check-in QR"
-                className="w-28 h-28 bg-white p-1.5 rounded-2xl shrink-0 shadow-lg"
+                alt="Project Details QR Code"
+                className="w-24 h-24 bg-white p-1.5 rounded-xl shrink-0 shadow-sm"
               />
             ) : (
-              <div className="w-28 h-28 bg-slate-800 rounded-2xl flex items-center justify-center shrink-0">
-                <QrIcon size={32} className="text-slate-500" />
+              <div className="w-24 h-24 bg-slate-800 rounded-xl flex items-center justify-center shrink-0">
+                <QrIcon size={28} className="text-slate-400" />
               </div>
             )}
 
-            <div className="space-y-2 text-center sm:text-left flex-1">
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full inline-block">
-                Exhibition Check-in QR Badge
-              </span>
-              <h4 className="font-heading font-black text-lg text-white">
-                Collabs Booni 2026 Digital Pass
+            <div className="space-y-1.5 text-center sm:text-left flex-1">
+              <h4 className="font-heading font-black text-sm text-white">
+                Project QR Pass
               </h4>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Scan this credential at the exhibition reception desk in Booni for immediate team credential verification, certificate eligibility, and booth check-in.
+              <p className="text-[11px] text-slate-300 leading-relaxed">
+                Scan or download this QR code to view all details about <strong>{team.projectName}</strong>.
               </p>
               <button
                 type="button"
                 onClick={handleDownloadQr}
-                className="mt-1 px-4 py-2 bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs rounded-xl shadow transition-all cursor-pointer inline-flex items-center gap-1.5"
+                className="mt-1 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-95"
               >
-                <Download size={14} /> Download High-Res QR Badge
+                {downloadSuccess ? (
+                  <>
+                    <CheckCircle2 size={13} className="text-emerald-300" />
+                    <span>Downloaded!</span>
+                  </>
+                ) : (
+                  <>
+                    <Download size={13} />
+                    <span>Download QR Code</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -283,7 +211,7 @@ export const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ team, onClos
             onClick={onClose}
             className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl cursor-pointer transition-colors"
           >
-            Close Profile
+            Close
           </button>
         </div>
       </div>
