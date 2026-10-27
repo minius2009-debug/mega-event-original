@@ -89,6 +89,7 @@ import { VolunteerDutyTracker } from './components/VolunteerDutyTracker';
 import {
   subscribeTeams,
   deleteTeamFromFirestore,
+  deleteAllTeamsFromFirestore,
   bulkImportTeamsToFirestore,
   seedInitialTeamsIfEmpty
 } from './services/teamService';
@@ -271,6 +272,7 @@ const INITIAL_TEAM: TeamMember[] = [
   { id: 'tm-14', name: 'Zuhaib Pirzada', role: 'Media Director', department: 'Media' },
   { id: 'tm-15', name: 'Imad Uddin', role: 'Developer', department: 'Tech' },
   { id: 'tm-16', name: 'Syed Mazhar', role: 'Media Manager', department: 'Media' },
+  { id: 'tm-16b', name: 'Ayan Afzal', role: 'Media Manager', department: 'Media' },
   { id: 'tm-17', name: 'Uroosa', role: 'Field Manager', department: 'Operations' },
   { id: 'tm-18', name: 'Akhtar Musaveer', role: 'Logistics Team', department: 'Logistics' },
   { id: 'tm-19', name: 'Hisham Uddin', role: 'Campus Ambassador', department: 'Outreach' },
@@ -776,12 +778,7 @@ export default function App() {
     eventName: 'First Mega Event of Collabs',
     issueDate: '31 October 2026'
   });
-  const [teamParticipations, setTeamParticipations] = useState<TeamParticipation[]>(() => {
-    if (typeof window !== 'undefined' && localStorage.getItem('collabs_teams_cleared') === 'true') {
-      return [];
-    }
-    return INITIAL_TEAM_PARTICIPATIONS;
-  });
+  const [teamParticipations, setTeamParticipations] = useState<TeamParticipation[]>([]);
   const [isBulkTeamImportOpen, setIsBulkTeamImportOpen] = useState(false);
   const [selectedTeamForDetails, setSelectedTeamForDetails] = useState<TeamParticipation | null>(null);
   const [teamImportToast, setTeamImportToast] = useState<string | null>(null);
@@ -791,10 +788,13 @@ export default function App() {
   // Initialize and synchronize with Firebase Firestore
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('collabs_teams_cleared', 'true');
+    }
     testConnection().then(connected => {
       if (connected) {
         setIsFirebaseConnected(true);
-        seedInitialTeamsIfEmpty(INITIAL_TEAM_PARTICIPATIONS).then(() => {
+        deleteAllTeamsFromFirestore().then(() => {
           unsubscribe = subscribeTeams(
             firestoreTeams => {
               if (firestoreTeams) {
