@@ -87,6 +87,12 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
   const [selectedTeam, setSelectedTeam] = useState<TeamParticipation | null>(null);
   const [qrModalTeam, setQrModalTeam] = useState<TeamParticipation | null>(null);
   const [deleteConfirmTeam, setDeleteConfirmTeam] = useState<TeamParticipation | null>(null);
+  const [editingTeam, setEditingTeam] = useState<TeamParticipation | null>(null);
+  const [newMemberForm, setNewMemberForm] = useState<ParticipantMember>({
+    name: '',
+    role: 'Team Member',
+    school: ''
+  });
   const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState(false);
   const [isDeletingAll, setIsDeletingAll] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -731,6 +737,13 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
                             <Eye size={16} />
                           </button>
                           <button
+                            onClick={() => setEditingTeam(team)}
+                            className="p-2 text-slate-500 hover:text-blue-600 hover:bg-white rounded-xl transition-colors cursor-pointer"
+                            title="Edit Team Details & Members"
+                          >
+                            <Edit3 size={16} />
+                          </button>
+                          <button
                             onClick={() => setDeleteConfirmTeam(team)}
                             className="p-2 text-slate-500 hover:text-red-600 hover:bg-white rounded-xl transition-colors cursor-pointer"
                             title="Delete Team"
@@ -849,13 +862,22 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
                       <div className="flex items-center justify-center gap-1">
                         <button
                           onClick={() => setSelectedTeam(team)}
-                          className="p-1.5 text-slate-500 hover:text-blue-600 rounded-lg"
+                          className="p-1.5 text-slate-500 hover:text-blue-600 rounded-lg cursor-pointer"
+                          title="View Details"
                         >
                           <Eye size={15} />
                         </button>
                         <button
+                          onClick={() => setEditingTeam(team)}
+                          className="p-1.5 text-slate-500 hover:text-blue-600 rounded-lg cursor-pointer"
+                          title="Edit Details & Members"
+                        >
+                          <Edit3 size={15} />
+                        </button>
+                        <button
                           onClick={() => setDeleteConfirmTeam(team)}
-                          className="p-1.5 text-slate-500 hover:text-red-600 rounded-lg"
+                          className="p-1.5 text-slate-500 hover:text-red-600 rounded-lg cursor-pointer"
+                          title="Delete Team"
                         >
                           <Trash2 size={15} />
                         </button>
@@ -1482,23 +1504,35 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
             </div>
 
             {/* QR Download & Footer */}
-            <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+            <div className="flex items-center justify-between pt-4 border-t border-slate-100 flex-wrap gap-2">
               <button
                 onClick={() => {
                   setSelectedTeam(null);
                   setQrModalTeam(selectedTeam);
                 }}
-                className="px-4 py-2 bg-blue-50 text-blue-700 font-bold text-xs rounded-xl hover:bg-blue-100 transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-2 bg-blue-50 text-blue-700 font-bold text-xs rounded-xl hover:bg-blue-100 transition-colors flex items-center gap-1.5 cursor-pointer"
               >
                 <QrIcon size={14} /> Open Check-in Badge
               </button>
 
-              <button
-                onClick={() => setSelectedTeam(null)}
-                className="px-5 py-2 bg-slate-900 text-white font-bold text-xs rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
-              >
-                Close
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setEditingTeam(selectedTeam);
+                    setSelectedTeam(null);
+                  }}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                >
+                  <Edit3 size={14} /> Edit Details & Members
+                </button>
+
+                <button
+                  onClick={() => setSelectedTeam(null)}
+                  className="px-4 py-2 bg-slate-900 text-white font-bold text-xs rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1555,6 +1589,274 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
                 className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-blue-600/20"
               >
                 <Download size={15} /> Download PNG Badge
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: EDIT TEAM DETAILS & MEMBER ROSTER */}
+      {/* ========================================================================= */}
+      {editingTeam && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 my-8 animate-fadeIn text-left space-y-6 max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 shrink-0">
+              <div>
+                <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block">
+                  Admin Edit Mode
+                </span>
+                <h3 className="text-xl font-black text-slate-900 font-heading">
+                  Edit Team Details & Members
+                </h3>
+                <p className="text-xs text-slate-500">Update project name, category, leader, school, stall number, and member roster.</p>
+              </div>
+              <button
+                onClick={() => setEditingTeam(null)}
+                className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-slate-900 flex items-center justify-center cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Form Scrollable Body */}
+            <div className="space-y-5 overflow-y-auto pr-1 flex-1">
+              {/* Project Name & Code */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Project / Team Name *</label>
+                  <input
+                    type="text"
+                    value={editingTeam.projectName}
+                    onChange={e => setEditingTeam({ ...editingTeam, projectName: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-bold focus:outline-none focus:border-blue-600 focus:bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Team Code</label>
+                  <input
+                    type="text"
+                    value={editingTeam.teamCode || ''}
+                    onChange={e => setEditingTeam({ ...editingTeam, teamCode: e.target.value.toUpperCase() })}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white"
+                  />
+                </div>
+              </div>
+
+              {/* Category & School */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Category</label>
+                  <select
+                    value={editingTeam.category || 'Computer Science'}
+                    onChange={e => setEditingTeam({ ...editingTeam, category: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-semibold focus:outline-none focus:border-blue-600 focus:bg-white cursor-pointer"
+                  >
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Physics">Physics</option>
+                    <option value="Biology">Biology</option>
+                    <option value="Chemistry">Chemistry</option>
+                    <option value="Art">Art</option>
+                    <option value="Food">Food</option>
+                    <option value="AI & Robotics">AI & Robotics</option>
+                    <option value="Climate & Smart Ag">Climate & Smart Ag</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">School / Institution</label>
+                  <input
+                    type="text"
+                    value={editingTeam.school || ''}
+                    onChange={e => setEditingTeam({ ...editingTeam, school: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-semibold focus:outline-none focus:border-blue-600 focus:bg-white"
+                  />
+                </div>
+              </div>
+
+              {/* Leader & Co-Leader */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Team Leader *</label>
+                  <input
+                    type="text"
+                    value={editingTeam.teamLeader}
+                    onChange={e => setEditingTeam({ ...editingTeam, teamLeader: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-bold focus:outline-none focus:border-blue-600 focus:bg-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Co-Leader / Supervisor</label>
+                  <input
+                    type="text"
+                    value={editingTeam.coLeader || ''}
+                    onChange={e => setEditingTeam({ ...editingTeam, coLeader: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white"
+                    placeholder="Optional co-leader"
+                  />
+                </div>
+              </div>
+
+              {/* Stall & Status */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Stall Number</label>
+                  <input
+                    type="text"
+                    value={editingTeam.stallNumber || ''}
+                    onChange={e => setEditingTeam({ ...editingTeam, stallNumber: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-semibold focus:outline-none focus:border-blue-600 focus:bg-white"
+                    placeholder="e.g. 01, 15, Stall #25"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Status</label>
+                  <select
+                    value={editingTeam.status}
+                    onChange={e => setEditingTeam({ ...editingTeam, status: e.target.value as 'Approved' | 'Pending' | 'Rejected' })}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-semibold focus:outline-none focus:border-blue-600 focus:bg-white cursor-pointer"
+                  >
+                    <option value="Approved">Approved</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Rejected">Rejected</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Project Description */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Project Description / Summary</label>
+                <textarea
+                  rows={3}
+                  value={editingTeam.projectDescription}
+                  onChange={e => setEditingTeam({ ...editingTeam, projectDescription: e.target.value })}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white leading-relaxed"
+                ></textarea>
+              </div>
+
+              {/* Member Roster Editing Section */}
+              <div className="pt-3 border-t border-slate-200 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <Users size={14} className="text-blue-600" />
+                    <span>Team Members Roster ({editingTeam.members?.length || 0})</span>
+                  </span>
+                </div>
+
+                {/* Member List */}
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                  {editingTeam.members && editingTeam.members.length > 0 ? (
+                    editingTeam.members.map((mem, idx) => (
+                      <div
+                        key={idx}
+                        className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-2"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="font-bold text-xs text-slate-900 truncate">{mem.name}</div>
+                          <div className="text-[11px] text-slate-500">{mem.role} {mem.school ? `· ${mem.school}` : ''}</div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updatedMembers = editingTeam.members.filter((_, i) => i !== idx);
+                            setEditingTeam({ ...editingTeam, members: updatedMembers });
+                          }}
+                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer shrink-0"
+                          title="Remove Member"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-slate-400 italic p-2 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-center">
+                      No extra team members added yet. Use the form below to add members.
+                    </p>
+                  )}
+                </div>
+
+                {/* Add New Member Input Subform */}
+                <div className="p-3 bg-blue-50/50 border border-blue-200/80 rounded-2xl space-y-2.5">
+                  <span className="text-[11px] font-bold text-blue-900 uppercase tracking-wider block">
+                    + Add Member To Roster
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <input
+                      type="text"
+                      placeholder="Member Name *"
+                      value={newMemberForm.name}
+                      onChange={e => setNewMemberForm({ ...newMemberForm, name: e.target.value })}
+                      className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Role (e.g. Developer, Artist)"
+                      value={newMemberForm.role}
+                      onChange={e => setNewMemberForm({ ...newMemberForm, role: e.target.value })}
+                      className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
+                    />
+                    <input
+                      type="text"
+                      placeholder="School / Institution"
+                      value={newMemberForm.school || editingTeam.school || ''}
+                      onChange={e => setNewMemberForm({ ...newMemberForm, school: e.target.value })}
+                      className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-600"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!newMemberForm.name.trim()) return;
+                      const newMem: ParticipantMember = {
+                        name: newMemberForm.name.trim(),
+                        role: newMemberForm.role.trim() || 'Team Member',
+                        school: newMemberForm.school?.trim() || editingTeam.school || ''
+                      };
+                      setEditingTeam({
+                        ...editingTeam,
+                        members: [...(editingTeam.members || []), newMem]
+                      });
+                      setNewMemberForm({ name: '', role: 'Team Member', school: '' });
+                    }}
+                    className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <UserPlus size={14} /> Add Member to Team
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Buttons */}
+            <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => setEditingTeam(null)}
+                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!editingTeam.projectName.trim() || !editingTeam.teamLeader.trim()) {
+                    showToast('Project Name and Team Leader are required.');
+                    return;
+                  }
+                  const updated = {
+                    ...editingTeam,
+                    projectName: editingTeam.projectName.trim(),
+                    teamLeader: editingTeam.teamLeader.trim()
+                  };
+                  setTeamParticipations(prev => prev.map(t => (t.id === updated.id ? updated : t)));
+                  saveTeamToFirestore(updated).catch(err => {
+                    console.error('Error saving updated team to Firestore:', err);
+                  });
+                  showToast(`Updated details & members for "${updated.projectName}"!`);
+                  setEditingTeam(null);
+                }}
+                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all shadow-md shadow-emerald-600/20 flex items-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                <Check size={16} /> Save Changes
               </button>
             </div>
           </div>
