@@ -778,7 +778,12 @@ export default function App() {
     eventName: 'First Mega Event of Collabs',
     issueDate: '31 October 2026'
   });
-  const [teamParticipations, setTeamParticipations] = useState<TeamParticipation[]>([]);
+  const [teamParticipations, setTeamParticipations] = useState<TeamParticipation[]>(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('collabs_teams_cleared');
+    }
+    return SAF_FORM_RESPONSES_TEAMS;
+  });
   const [isBulkTeamImportOpen, setIsBulkTeamImportOpen] = useState(false);
   const [selectedTeamForDetails, setSelectedTeamForDetails] = useState<TeamParticipation | null>(null);
   const [teamImportToast, setTeamImportToast] = useState<string | null>(null);
@@ -789,16 +794,18 @@ export default function App() {
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
     if (typeof window !== 'undefined') {
-      localStorage.setItem('collabs_teams_cleared', 'true');
+      localStorage.removeItem('collabs_teams_cleared');
     }
     testConnection().then(connected => {
       if (connected) {
         setIsFirebaseConnected(true);
-        deleteAllTeamsFromFirestore().then(() => {
+        seedInitialTeamsIfEmpty(SAF_FORM_RESPONSES_TEAMS).then(() => {
           unsubscribe = subscribeTeams(
             firestoreTeams => {
-              if (firestoreTeams) {
+              if (firestoreTeams && firestoreTeams.length > 0) {
                 setTeamParticipations(firestoreTeams);
+              } else {
+                setTeamParticipations(SAF_FORM_RESPONSES_TEAMS);
               }
             },
             err => {
