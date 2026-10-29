@@ -49,7 +49,8 @@ import {
   ArrowUpRight,
   Sun,
   Moon,
-  LogOut
+  LogOut,
+  FileSpreadsheet
 } from 'lucide-react';
 import {
   BarChart,
@@ -65,6 +66,8 @@ import {
 } from 'recharts';
 import { TeamManagement } from '../components/TeamManagement';
 import { VolunteerManagement } from '../components/VolunteerManagement';
+import { BulkCertificateImportModal } from '../components/BulkCertificateImportModal';
+import { getCertificateTemplateImage } from '../components/CertificatePortal';
 import { TeamParticipation, VolunteerLog, EventItem } from '../App';
 import officialLogo from '../assets/images/logo2.png';
 import { deleteAllTeamsFromFirestore } from '../services/teamService';
@@ -399,17 +402,63 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   const [certSearch, setCertSearch] = useState('');
   const [certFilterType, setCertFilterType] = useState('All');
   const [isIssueCertModalOpen, setIsIssueCertModalOpen] = useState(false);
+  const [isBulkCertImportOpen, setIsBulkCertImportOpen] = useState(false);
+  const [isDeleteAllCertsModalOpen, setIsDeleteAllCertsModalOpen] = useState(false);
   const [previewCert, setPreviewCert] = useState<CertificateRecord | null>(null);
   const [previewCertQr, setPreviewCertQr] = useState<string>('');
 
   const [newCertForm, setNewCertForm] = useState({
     recipientName: '',
-    achievementType: 'Excellence' as CertificateRecord['achievementType'],
-    eventName: 'First Mega Event of Collabs',
+    achievementType: 'Certificate of Participation' as CertificateRecord['achievementType'],
+    eventName: 'Science, Arts & Food Exhibition 2026',
     school: COMMON_SCHOOLS[0],
     issueDate: '31 October 2026',
     issuer: 'Collabs Executive Board'
   });
+
+  // Auto-generate certificates for all volunteers
+  const handleGenerateVolunteerCerts = () => {
+    const existingNames = new Set(certDatabase.map(c => (c.recipientName || '').trim().toLowerCase()));
+    const newVolCerts: CertificateRecord[] = [];
+    let counter = certDatabase.length + 100;
+
+    volunteers.forEach(v => {
+      const name = (v.name || '').trim();
+      if (name && !existingNames.has(name.toLowerCase())) {
+        existingNames.add(name.toLowerCase());
+        counter++;
+        newVolCerts.push({
+          id: `CLB-2026-${counter}`,
+          recipientName: name,
+          achievementType: 'Certificate of Volunteerism',
+          eventName: 'Science, Arts & Food Exhibition 2026',
+          issueDate: 'October 31, 2026',
+          verified: true,
+          issuer: 'Collabs, Naveed-e-Falah, Jenabai Awards & District Youth Office',
+          school: v.school || 'Collabs Volunteer Network',
+          project: `${v.department || 'Event Operations'} Track Volunteer`
+        });
+      }
+    });
+
+    if (newVolCerts.length === 0) {
+      showToast('All registered volunteers already have Volunteerism certificates issued!');
+      return;
+    }
+
+    setCertDatabase(prev => [...newVolCerts, ...prev]);
+    showToast(`Issued Certificate of Volunteerism for ${newVolCerts.length} volunteers!`);
+    addAuditLog('Bulk Volunteer Certificates', `Generated ${newVolCerts.length} Volunteerism certificates`, 'certificate');
+  };
+
+  // Delete all certificates handler
+  const handleDeleteAllCertificates = () => {
+    const totalCount = certDatabase.length;
+    setCertDatabase([]);
+    setIsDeleteAllCertsModalOpen(false);
+    showToast(`Deleted all ${totalCount} certificates from database.`);
+    addAuditLog('Deleted All Certificates', `Cleared ${totalCount} certificates`, 'certificate');
+  };
 
   // Certificate generation handler
   const handleIssueCertificateSubmit = (e: React.FormEvent) => {
@@ -1930,23 +1979,49 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     Issue cryptographically referenced certificates with dynamic QR code verification for attendees and winners.
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <button
+                    onClick={() => setIsBulkCertImportOpen(true)}
+                    className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-600/20 cursor-pointer flex items-center gap-2"
+                  >
+                    <FileSpreadsheet size={15} /> Upload Excel / CSV
+                  </button>
+
+                  <button
+                    onClick={handleGenerateVolunteerCerts}
+                    className="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-blue-600/20 cursor-pointer flex items-center gap-2"
+                    title="Auto-generate Certificate of Volunteerism for all registered volunteers"
+                  >
+                    <UserCheck size={15} /> Auto-Issue Volunteer Certificates
+                  </button>
+
                   <button
                     onClick={() => exportCSV(certDatabase, 'certificates_database.csv')}
-                    className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-colors border cursor-pointer flex items-center gap-2 ${
+                    className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors border cursor-pointer flex items-center gap-2 ${
                       isDark
                         ? 'bg-slate-900 hover:bg-slate-800 text-slate-200 border-slate-700'
                         : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
                     }`}
                   >
-                    <Download size={15} /> Export Registry ({certDatabase.length})
+                    <Download size={14} /> Export ({certDatabase.length})
                   </button>
+
                   <button
                     onClick={() => setIsIssueCertModalOpen(true)}
-                    className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-xl transition-colors shadow-lg shadow-purple-600/30 cursor-pointer flex items-center gap-2"
+                    className="px-4 py-2.5 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-xl transition-colors shadow-lg shadow-purple-600/30 cursor-pointer flex items-center gap-2"
                   >
-                    <Plus size={16} /> Issue Certificate
+                    <Plus size={15} /> Issue Single
                   </button>
+
+                  {certDatabase.length > 0 && (
+                    <button
+                      onClick={() => setIsDeleteAllCertsModalOpen(true)}
+                      className="px-3.5 py-2.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/60 text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1.5"
+                      title="Delete all certificates from database"
+                    >
+                      <Trash2 size={14} /> Delete All
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -1976,10 +2051,10 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                       : 'bg-white border-slate-200 text-slate-800 focus:outline-none focus:border-purple-600'
                   }`}
                 >
-                  <option value="All">All Honors & Categories</option>
-                  <option value="Excellence">Excellence</option>
-                  <option value="Volunteer Leadership">Volunteer Leadership</option>
-                  <option value="Active Participation">Active Participation</option>
+                  <option value="All">All Honors & Categories ({certDatabase.length})</option>
+                  <option value="Certificate of Participation">Certificate of Participation</option>
+                  <option value="Certificate of Leadership">Certificate of Leadership</option>
+                  <option value="Certificate of Volunteerism">Certificate of Volunteerism</option>
                 </select>
               </div>
 
@@ -2666,8 +2741,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               style={{ aspectRatio: '2560 / 1810' }}
             >
               <img
-                src="/assets/certificate_of_participation_template.jpeg"
-                alt="Official Certificate of Participation"
+                src={getCertificateTemplateImage(previewCert.achievementType)}
+                alt={previewCert.achievementType || 'Official Certificate'}
                 className="w-full h-full object-cover block select-none pointer-events-none"
               />
               <div
@@ -3030,6 +3105,55 @@ export const AdminPage: React.FC<AdminPageProps> = ({
           </div>
         </div>
       )}
+
+      {/* MODAL: DELETE ALL CERTIFICATES CONFIRMATION */}
+      {isDeleteAllCertsModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-red-200 animate-fadeIn text-center space-y-4">
+            <div className="w-14 h-14 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
+              <Trash2 size={28} />
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-slate-900 font-heading">Delete All {certDatabase.length} Certificates?</h3>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                This will permanently delete <strong>all {certDatabase.length} issued certificates</strong> from the database.
+              </p>
+              <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-[11px] text-red-700 font-medium text-left flex items-start gap-2">
+                <AlertCircle size={16} className="text-red-600 shrink-0 mt-0.5" />
+                <span>This action cannot be undone. You can re-import certificates anytime using <strong>Upload Excel / CSV</strong>.</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setIsDeleteAllCertsModalOpen(false)}
+                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl cursor-pointer transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteAllCertificates}
+                className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold text-xs rounded-xl cursor-pointer transition-all shadow-md shadow-red-600/20 flex items-center justify-center gap-2"
+              >
+                <Trash2 size={14} /> Yes, Delete All Certificates
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* BULK CERTIFICATE EXCEL/CSV IMPORT MODAL */}
+      <BulkCertificateImportModal
+        isOpen={isBulkCertImportOpen}
+        onClose={() => setIsBulkCertImportOpen(false)}
+        onImport={(newCerts) => {
+          setCertDatabase(prev => [...newCerts, ...prev]);
+          showToast(`Bulk Imported ${newCerts.length} certificates!`);
+          addAuditLog('Bulk Import Certificates', `Imported ${newCerts.length} records via Excel`, 'certificate');
+        }}
+        existingCount={certDatabase.length}
+      />
     </div>
   );
 };

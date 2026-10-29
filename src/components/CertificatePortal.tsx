@@ -19,8 +19,11 @@ import {
   Layers,
   Eye,
   CheckCircle,
-  User
+  User,
+  FileSpreadsheet,
+  Upload
 } from 'lucide-react';
+import { BulkCertificateImportModal } from './BulkCertificateImportModal';
 
 export interface CertificateRecord {
   id: string;
@@ -34,6 +37,17 @@ export interface CertificateRecord {
   theme?: string;
   project?: string;
 }
+
+export const getCertificateTemplateImage = (achievementType?: string): string => {
+  const typeLower = (achievementType || '').toLowerCase();
+  if (typeLower.includes('leadership') || typeLower.includes('leader')) {
+    return '/assets/aistudio/Certificate_of_Leadership_e0b3d616.png';
+  }
+  if (typeLower.includes('volunteer') || typeLower.includes('volunteerism')) {
+    return '/assets/aistudio/Certificate_of_Volunteerism_e195dba3.png';
+  }
+  return '/assets/aistudio/Certificate_Of_Participation_999fe9ff.png';
+};
 
 interface CertificatePortalProps {
   certDatabase: CertificateRecord[];
@@ -86,8 +100,12 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
 
   // Custom Issuer Form State
   const [customName, setCustomName] = useState('');
+  const [customType, setCustomType] = useState<string>('Certificate of Participation');
   const [customProject, setCustomProject] = useState('Science, Arts & Food Exhibition 2026');
   const [customSchool, setCustomSchool] = useState('');
+
+  // Bulk Excel Import modal state
+  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
 
   // Dedicated QR Data URL state for live template rendering
   const [generatedQr, setGeneratedQr] = useState<string>('');
@@ -173,7 +191,7 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
     const newRecord: CertificateRecord = {
       id: newId,
       recipientName: customName.trim(),
-      achievementType: 'Certificate of Participation',
+      achievementType: customType || 'Certificate of Participation',
       eventName: 'Science, Arts & Food Exhibition 2026',
       issueDate: 'October 31, 2026',
       verified: true,
@@ -187,7 +205,7 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
     setInputCertId(newId);
     setActiveTab('certificate');
     setLookupMessage({
-      text: `Official Certificate of Participation generated for ${newRecord.recipientName} [ID: ${newId}]!`,
+      text: `Official ${newRecord.achievementType} generated for ${newRecord.recipientName} [ID: ${newId}]!`,
       type: 'success'
     });
   };
@@ -337,6 +355,15 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
           >
             <Sparkles size={15} className="text-amber-400" />
             <span>Issue Student Certificate</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsBulkImportOpen(true)}
+            className="px-4 py-2 rounded-xl font-bold text-xs bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-md shadow-emerald-600/25 transition-all flex items-center gap-2 cursor-pointer shrink-0 ml-auto"
+          >
+            <FileSpreadsheet size={15} />
+            <span>Upload Excel / CSV</span>
           </button>
         </div>
       </div>
@@ -526,8 +553,8 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
                 >
                   {/* Master Background Official Certificate Template Image */}
                   <img
-                    src="/assets/certificate_of_participation_template.jpeg"
-                    alt="Official Certificate of Participation"
+                    src={getCertificateTemplateImage(activeCertificate?.achievementType)}
+                    alt={activeCertificate?.achievementType || 'Official Certificate'}
                     className="w-full h-full object-cover block select-none pointer-events-none"
                     draggable={false}
                   />
@@ -703,14 +730,17 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
 
                 <div>
                   <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
-                    Credential Type
+                    Credential Type *
                   </label>
-                  <input
-                    type="text"
-                    readOnly
-                    value="Official Certificate of Participation"
-                    className="w-full bg-slate-100 border border-slate-300 rounded-xl p-3 text-xs text-slate-700 font-bold cursor-not-allowed"
-                  />
+                  <select
+                    value={customType}
+                    onChange={(e) => setCustomType(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs text-slate-900 font-bold focus:outline-none focus:border-purple-600"
+                  >
+                    <option value="Certificate of Participation">Certificate of Participation</option>
+                    <option value="Certificate of Leadership">Certificate of Leadership</option>
+                    <option value="Certificate of Volunteerism">Certificate of Volunteerism</option>
+                  </select>
                 </div>
 
                 <div className="sm:col-span-2">
@@ -739,6 +769,25 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
           )}
         </div>
       )}
+
+      {/* Excel / CSV Bulk Certificate Import Modal */}
+      <BulkCertificateImportModal
+        isOpen={isBulkImportOpen}
+        onClose={() => setIsBulkImportOpen(false)}
+        onImport={(newCerts) => {
+          setCertDatabase(prev => [...newCerts, ...prev]);
+          if (newCerts.length > 0) {
+            setCurrentCertId(newCerts[0].id);
+            setInputCertId(newCerts[0].id);
+            setActiveTab('certificate');
+            setLookupMessage({
+              text: `Bulk Imported ${newCerts.length} certificates! Loaded ${newCerts[0].recipientName} [ID: ${newCerts[0].id}]`,
+              type: 'success'
+            });
+          }
+        }}
+        existingCount={certDatabase.length}
+      />
     </section>
   );
 };
