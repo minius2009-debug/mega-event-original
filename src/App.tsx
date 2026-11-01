@@ -768,8 +768,30 @@ export default function App() {
     });
   };
 
-  // Certificate Generator State
-  const [certDatabase, setCertDatabase] = useState<CertificateRecord[]>(INITIAL_CERTIFICATES);
+  // Certificate Generator State with localStorage persistence
+  const [certDatabase, setCertDatabase] = useState<CertificateRecord[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('collabs_certificates');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed;
+          }
+        } catch (e) {
+          console.error('Failed to parse saved certificates from localStorage:', e);
+        }
+      }
+    }
+    return INITIAL_CERTIFICATES;
+  });
+
+  // Save certDatabase to localStorage on changes
+  useEffect(() => {
+    if (typeof window !== 'undefined' && certDatabase) {
+      localStorage.setItem('collabs_certificates', JSON.stringify(certDatabase));
+    }
+  }, [certDatabase]);
   const [certTheme, setCertTheme] = useState<'gold' | 'emerald' | 'royal'>('gold');
   const [certRecipientSchool, setCertRecipientSchool] = useState('Booni Degree College');
   const [certForm, setCertForm] = useState({
@@ -825,7 +847,25 @@ export default function App() {
   useEffect(() => {
     setCertDatabase(prev => {
       const existingNames = new Set(prev.map(c => c.recipientName.trim().toLowerCase()));
+      const seenIds = new Set<string>();
+
+      // Ensure existing records have unique IDs
+      const sanitizedPrev = prev.map((item, idx) => {
+        let currentId = item.id;
+        if (!currentId || seenIds.has(currentId)) {
+          currentId = `CLB-2026-${100 + idx}`;
+          let suffix = 1;
+          while (seenIds.has(currentId)) {
+            currentId = `CLB-2026-${100 + idx + suffix}`;
+            suffix++;
+          }
+        }
+        seenIds.add(currentId);
+        return { ...item, id: currentId };
+      });
+
       const newRecords: CertificateRecord[] = [];
+      let seqCounter = sanitizedPrev.length + 100;
 
       teamParticipations.forEach(tp => {
         // Leader
@@ -833,15 +873,13 @@ export default function App() {
           const leaderName = tp.teamLeader.trim();
           if (!existingNames.has(leaderName.toLowerCase())) {
             existingNames.add(leaderName.toLowerCase());
-            let hash = 0;
-            const str = `${leaderName.toLowerCase()}-${tp.id}`;
-            for (let i = 0; i < str.length; i++) {
-              hash = (hash << 5) - hash + str.charCodeAt(i);
-              hash |= 0;
+            let uniqueId = `CLB-2026-${seqCounter++}`;
+            while (seenIds.has(uniqueId)) {
+              uniqueId = `CLB-2026-${seqCounter++}`;
             }
-            const codeNum = 100 + (Math.abs(hash) % 899);
+            seenIds.add(uniqueId);
             newRecords.push({
-              id: `CLB-2026-${codeNum}`,
+              id: uniqueId,
               recipientName: leaderName,
               achievementType: 'Certificate of Participation',
               eventName: 'Science, Arts & Food Exhibition 2026',
@@ -860,15 +898,13 @@ export default function App() {
             const cleanName = mem.name.trim();
             if (!existingNames.has(cleanName.toLowerCase())) {
               existingNames.add(cleanName.toLowerCase());
-              let hash = 0;
-              const str = `${cleanName.toLowerCase()}-${tp.id}`;
-              for (let i = 0; i < str.length; i++) {
-                hash = (hash << 5) - hash + str.charCodeAt(i);
-                hash |= 0;
+              let uniqueId = `CLB-2026-${seqCounter++}`;
+              while (seenIds.has(uniqueId)) {
+                uniqueId = `CLB-2026-${seqCounter++}`;
               }
-              const codeNum = 100 + (Math.abs(hash) % 899);
+              seenIds.add(uniqueId);
               newRecords.push({
-                id: `CLB-2026-${codeNum}`,
+                id: uniqueId,
                 recipientName: cleanName,
                 achievementType: 'Certificate of Participation',
                 eventName: 'Science, Arts & Food Exhibition 2026',
@@ -883,8 +919,8 @@ export default function App() {
         });
       });
 
-      if (newRecords.length === 0) return prev;
-      return [...prev, ...newRecords];
+      if (newRecords.length === 0) return sanitizedPrev;
+      return [...sanitizedPrev, ...newRecords];
     });
   }, [teamParticipations]);
 
@@ -2503,23 +2539,14 @@ export default function App() {
             setCertDatabase={setCertDatabase}
             currentCertId={currentCertId}
             setCurrentCertId={setCurrentCertId}
-            activeCertificate={activeCertificate}
-            qrCodeDataUrls={qrCodeDataUrls}
-            handlePrintCertificate={handlePrintCertificate}
-            handleCopyVerificationLink={handleCopyVerificationLink}
-            copiedLink={copiedLink}
-            handleOpenLookupForId={handleOpenLookupForId}
-            setIsVerifyModalOpen={setIsVerifyModalOpen}
-            officialLogo={officialLogo}
-            isExpanded={true}
-            onToggleExpand={() => {}}
+            isAdminMode={false}
           />
         </main>
 
         <footer className="bg-slate-900 text-slate-400 text-xs py-8 border-t border-slate-800 text-center">
           <div className="max-w-7xl mx-auto px-4">
-            <p className="font-medium text-slate-300">Collabs Official Digital Certificate Verification Registry</p>
-            <p className="text-slate-500 mt-1">First Mega Event of Collabs 2026 · Booni, Upper Chitral</p>
+            <p className="font-medium text-slate-300">Collabs Official Certificate Portal</p>
+            <p className="text-slate-500 mt-1">Science, Arts & Food Exhibition 2026 · Booni, Upper Chitral</p>
           </div>
         </footer>
       </div>
@@ -2549,6 +2576,7 @@ export default function App() {
               { id: 'events', label: 'Events', href: '#events', sectionKey: undefined },
               { id: 'team', label: 'Team', href: '#team', sectionKey: 'teamDirectory' as const },
               { id: 'participants', label: 'Participants', href: '#team-participation', sectionKey: undefined },
+              { id: 'certificates', label: 'Certificates', href: '/certificate', sectionKey: undefined },
               { id: 'judging', label: 'Judging', href: '#judging-criteria', sectionKey: undefined },
               { id: 'awards', label: 'Awards', href: '#awards', sectionKey: 'awardsShowcase' as const },
             ].map(tab => {
@@ -2558,8 +2586,13 @@ export default function App() {
                   key={tab.id}
                   href={tab.href}
                   onClick={(e) => {
-                    setActiveNavTab(tab.id);
-                    handleSmoothNavClick(e, tab.href.replace('#', ''), tab.sectionKey);
+                    if (tab.href.startsWith('/')) {
+                      e.preventDefault();
+                      navigate(tab.href);
+                    } else {
+                      setActiveNavTab(tab.id);
+                      handleSmoothNavClick(e, tab.href.replace('#', ''), tab.sectionKey);
+                    }
                   }}
                   className={`relative py-2 transition-colors cursor-pointer group ${
                     isActive ? 'text-blue-600 font-bold' : 'text-slate-600 hover:text-blue-600'
@@ -2578,10 +2611,13 @@ export default function App() {
 
           {/* Header Action Buttons */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="px-3 sm:px-4 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 border border-slate-300 rounded-xl flex items-center gap-1.5 cursor-default select-none shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-red-500"></span>
-              <span>Registration Closed</span>
-            </div>
+            <button
+              onClick={() => navigate('/certificate')}
+              className="px-4 py-2 text-xs font-black text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-xl transition-all cursor-pointer shadow-md flex items-center gap-2 active:scale-95"
+            >
+              <Award size={16} />
+              <span>Get Your Certificate</span>
+            </button>
           </div>
 
         </div>
@@ -2608,6 +2644,13 @@ export default function App() {
             className="px-2.5 py-1 rounded-md hover:bg-slate-100 hover:text-blue-600 shrink-0 transition-colors cursor-pointer"
           >
             Participants
+          </a>
+          <a
+            href="/certificate"
+            onClick={(e) => { e.preventDefault(); navigate('/certificate'); }}
+            className="px-2.5 py-1 rounded-md hover:bg-slate-100 hover:text-blue-600 shrink-0 transition-colors cursor-pointer text-purple-700 font-bold"
+          >
+            Certificates
           </a>
           <a
             href="#judging"
@@ -2650,10 +2693,13 @@ export default function App() {
             Empowering Youth. Building Tomorrow. Part of the Global Summit on Digital Literacy & Leadership.
           </p>
 
-          <div className="inline-flex items-center gap-1.5 bg-red-50 border border-red-200 rounded-full px-3.5 py-1 text-[11px] font-bold text-red-700 mb-3.5 shadow-2xs">
-            <span className="w-2 h-2 rounded-full bg-red-500"></span>
-            <span>Registration Closed</span>
-          </div>
+          <button
+            onClick={() => navigate('/certificate')}
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black px-6 py-2.5 rounded-full text-xs sm:text-sm mb-3.5 shadow-lg shadow-purple-600/30 transition-all cursor-pointer active:scale-95"
+          >
+            <Award size={18} />
+            <span>Get Your Certificate</span>
+          </button>
 
           {/* Functional Countdown Timer for 31 October 2026 - Compact & Clear */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 max-w-md mx-auto mb-2.5">
