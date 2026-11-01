@@ -1,11 +1,18 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
+import { getFirestore, doc, getDocFromServer, setLogLevel } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId); /* CRITICAL: The app will break without this line */
 export const auth = getAuth(app);
+
+// Suppress verbose Firebase internal log warnings when operating in offline/fallback mode
+try {
+  setLogLevel('error');
+} catch {
+  // Ignored if already set
+}
 
 export enum OperationType {
   CREATE = 'create',
@@ -54,23 +61,29 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
   throw new Error(JSON.stringify(errInfo));
 }
 
-// Connection check on boot
+// Connection check on boot with 3s timeout
 export async function testConnection(): Promise<boolean> {
   try {
-    await getDocFromServer(doc(db, 'test', 'connection'));
-    return true;
-  } catch (error) {
-    if (error instanceof Error && (
-      error.message.includes('the client is offline') ||
-      error.message.includes('Could not reach Cloud Firestore backend') ||
-      error.message.includes('unavailable') ||
-      (error as any).code === 'unavailable'
-    )) {
-      console.warn('Firebase connection test: backend currently unavailable or offline.');
-      return false;
-    }
-    // Expected if test doc does not exist yet; connection succeeded
-    return true;
+    const timeoutPromise = new Promise<boolean>(resolve => setTimeout(() => resolve(false), 3000));
+    const testPromise = (async () => {
+      try {
+        await getDocFromServer(doc(db, 'test', 'connection'));
+        return true;
+      } catch (error) {
+        if (error instanceof Error && (
+          error.message.includes('the client is offline') ||
+          error.message.includes('Could not reach Cloud Firestore backend') ||
+          error.message.includes('unavailable') ||
+          (error as any).code === 'unavailable'
+        )) {
+          return false;
+        }
+        return true;
+      }
+    })();
+    return await Promise.race([testPromise, timeoutPromise]);
+  } catch {
+    return false;
   }
 }
 

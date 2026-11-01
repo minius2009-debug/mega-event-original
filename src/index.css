@@ -59,25 +59,34 @@ html {
     size: landscape;
     margin: 0;
   }
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    overflow: hidden !important;
+  }
   body * {
-    visibility: hidden;
+    visibility: hidden !important;
   }
   #printable-certificate, #printable-certificate * {
-    visibility: visible;
+    visibility: visible !important;
   }
   #printable-certificate {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100vw;
-    height: 100vh;
-    margin: 0;
-    padding: 0;
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
     border: none !important;
     box-shadow: none !important;
-    z-index: 999999;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    z-index: 9999999 !important;
+    background-color: #ffffff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
   }
 
   .no-print {

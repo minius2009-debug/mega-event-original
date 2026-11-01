@@ -529,50 +529,11 @@ export default function App() {
   const [participationViewMode, setParticipationViewMode] = useState<'grid' | 'table'>('grid');
   const [isTeamsExpanded, setIsTeamsExpanded] = useState(false);
 
-  // Real-time Countdown strictly for 31 October 2026
-  const [timeLeft, setTimeLeft] = useState({ days: 8, hours: 19, minutes: 48, seconds: 20 });
+  // Real-time Countdown set fully to 0
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
-    const calculateCountdown = () => {
-      // Event Date: 31 October 2026 at 09:30 AM PKT
-      const targetTime = new Date('2026-10-31T09:30:00').getTime();
-      const actualNow = Date.now();
-      const diff = targetTime - actualNow;
-
-      if (diff > 0) {
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        setTimeLeft({ days, hours, minutes, seconds });
-      } else {
-        setTimeLeft({ days: 8, hours: 19, minutes: 45, seconds: 0 });
-      }
-    };
-
-    calculateCountdown();
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        let { days, hours, minutes, seconds } = prev;
-        if (seconds > 0) {
-          seconds--;
-        } else {
-          seconds = 59;
-          if (minutes > 0) minutes--;
-          else {
-            minutes = 59;
-            if (hours > 0) hours--;
-            else {
-              hours = 23;
-              if (days > 0) days--;
-            }
-          }
-        }
-        return { days, hours, minutes, seconds };
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
+    setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   }, []);
 
   // Volunteer Roster, Login & Signup state
