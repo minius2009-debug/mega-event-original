@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import QRCode from 'qrcode';
 import {
   Printer,
+  Download,
   Search,
   Award,
   User,
@@ -72,6 +73,9 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
   // View mode: 'cards' (participant cards as requested) or 'all' (all full certificates unrolled)
   const [viewMode, setViewMode] = useState<'cards' | 'all'>('cards');
 
+  // Downloading state indicator for feedback
+  const [downloadingCertId, setDownloadingCertId] = useState<string | null>(null);
+
   // Custom Issuer Form State (Admin)
   const [customName, setCustomName] = useState('');
   const [customType, setCustomType] = useState<string>('Certificate of Participation');
@@ -118,9 +122,82 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
     );
   }, [certDatabase, searchTerm]);
 
+  // Handle high-resolution direct PNG certificate image download
+  const handleDownloadPNG = async (cert: CertificateRecord) => {
+    try {
+      setDownloadingCertId(cert.id);
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      canvas.width = 2560;
+      canvas.height = 1810;
+
+      // Load background template image
+      const bgImg = new Image();
+      bgImg.crossOrigin = 'anonymous';
+      bgImg.src = getCertificateTemplateImage(cert.achievementType);
+
+      await new Promise((resolve) => {
+        bgImg.onload = resolve;
+        bgImg.onerror = () => {
+          const fallback = new Image();
+          fallback.src = getCertificateTemplateImage(cert.achievementType);
+          fallback.onload = resolve;
+          fallback.onerror = resolve;
+        };
+      });
+
+      // Draw background template
+      ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+
+      // Draw Recipient Name Overlay
+      const name = cert.recipientName || 'Student Name';
+      ctx.fillStyle = '#0f172a';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = '900 108px "Playfair Display", "Georgia", "Times New Roman", serif';
+      ctx.fillText(name, canvas.width * 0.5, canvas.height * 0.412);
+
+      // Draw Unique QR Code Overlay
+      const qrDataUrl = qrCodeMap[cert.id];
+      if (qrDataUrl) {
+        const qrImg = new Image();
+        qrImg.src = qrDataUrl;
+        await new Promise((resolve) => {
+          qrImg.onload = resolve;
+          qrImg.onerror = resolve;
+        });
+
+        const qrX = canvas.width * 0.429;
+        const qrY = canvas.height * 0.8265;
+        const qrW = canvas.width * 0.1113;
+        const qrH = canvas.height * 0.1458;
+
+        ctx.drawImage(qrImg, qrX, qrY, qrW, qrH);
+      }
+
+      // Convert canvas to Data URL and trigger direct download
+      const dataUrl = canvas.toDataURL('image/png');
+      const cleanName = name.replace(/[^a-zA-Z0-9_\-]/g, '_');
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `Certificate_${cleanName}_SAF2026.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('Failed to download certificate image:', err);
+      alert('Downloading certificate image... Please try printing if download is blocked by browser rules.');
+    } finally {
+      setDownloadingCertId(null);
+    }
+  };
+
   // Handle printing specific certificate
   const handlePrintCert = (cert: CertificateRecord) => {
     setCurrentCertId(cert.id);
+    setSelectedCertModal(cert);
     setTimeout(() => {
       window.print();
     }, 150);
@@ -169,7 +246,7 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
             </h1>
 
             <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
-              Click on any participant card below to view and print their official Certificate of Participation for <strong>Science, Arts & Food Exhibition 2026</strong>.
+              Click on any participant card below to view and download their official Certificate of Participation for <strong>Science, Arts & Food Exhibition 2026</strong>.
             </p>
           </div>
 
@@ -184,7 +261,7 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
               onClick={() => window.print()}
               className="px-5 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs rounded-xl shadow-lg shadow-purple-600/25 flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95"
             >
-              <Printer size={16} /> Print All Certificates
+              <Printer size={16} /> Print / Save PDF
             </button>
           </div>
         </div>
@@ -203,7 +280,7 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-2.5 text-xs text-slate-400 hover:text-white"
+                className="absolute right-3 top-2.5 text-xs text-slate-400 hover:text-white cursor-pointer"
               >
                 Clear
               </button>
@@ -326,7 +403,7 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
         </div>
       )}
 
-      {/* DEFAULT VIEW: PARTICIPANT CARDS ROSTER (EXACT DESIGN MATCHING ATTACHMENT) */}
+      {/* DEFAULT VIEW: PARTICIPANT CARDS ROSTER */}
       {viewMode === 'cards' && (
         <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4">
@@ -335,7 +412,7 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
                 Participant Certificates Roster ({filteredCertificates.length})
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Click on any participant name below to view and print their main official certificate
+                Click on any participant card to download or print their official main certificate
               </p>
             </div>
           </div>
@@ -360,25 +437,22 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
                   className="bg-white border border-slate-200 hover:border-purple-500 hover:bg-purple-50/20 p-5 rounded-2xl cursor-pointer shadow-2xs hover:shadow-lg transition-all space-y-2 group text-left relative overflow-hidden"
                 >
                   <div className="flex items-start justify-between gap-2">
-                    {/* Purple Bold Participant Name */}
                     <h3 className="font-heading font-black text-purple-700 text-xl sm:text-2xl tracking-tight group-hover:text-purple-900 transition-colors">
                       {cert.recipientName}
                     </h3>
                   </div>
 
-                  {/* Purple Certificate Type Title */}
                   <p className="text-sm font-bold text-purple-600">
                     {cert.achievementType || 'Certificate of Participation'}
                   </p>
 
-                  {/* Institution / School with Building Icon */}
                   <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium pt-1">
                     <Building2 size={15} className="text-slate-400 shrink-0" />
                     <span className="truncate">{cert.school || 'Partner School'}</span>
                   </div>
 
                   <div className="pt-2 border-t border-slate-100/80 flex items-center justify-between text-[11px] font-bold text-purple-700 opacity-80 group-hover:opacity-100 transition-opacity">
-                    <span>View Official Certificate</span>
+                    <span>View & Download Certificate</span>
                     <ExternalLink size={13} />
                   </div>
                 </div>
@@ -406,7 +480,7 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
                 key={`cert-unrolled-${cert.id}-${index}`}
                 className="bg-white rounded-3xl p-4 sm:p-6 border border-slate-200 shadow-xl space-y-4 transition-all hover:border-purple-300"
               >
-                {/* Header */}
+                {/* Header Actions */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 font-black flex items-center justify-center text-sm shadow-xs shrink-0">
@@ -428,18 +502,31 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handlePrintCert(cert)}
-                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-xs shrink-0"
-                  >
-                    <Printer size={15} /> Print / Save PDF
-                  </button>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadPNG(cert)}
+                      disabled={downloadingCertId === cert.id}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+                    >
+                      <Download size={15} />
+                      <span>{downloadingCertId === cert.id ? 'Generating PNG...' : 'Download PNG'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handlePrintCert(cert)}
+                      className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+                    >
+                      <Printer size={15} /> Print / Save PDF
+                    </button>
+                  </div>
                 </div>
 
                 {/* Main Official Certificate Canvas */}
                 <div className="w-full max-w-4xl mx-auto my-2">
                   <div
+                    id={selectedCertModal?.id === cert.id ? 'printable-certificate' : undefined}
                     className="relative w-full rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden select-none bg-white border border-slate-200"
                     style={{ aspectRatio: '2560 / 1810' }}
                   >
@@ -505,9 +592,9 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header Bar */}
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-300 font-bold flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-300 font-bold flex items-center justify-center shrink-0">
                   <Award size={20} />
                 </div>
                 <div>
@@ -520,11 +607,21 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => handleDownloadPNG(selectedCertModal)}
+                  disabled={downloadingCertId === selectedCertModal.id}
+                  className="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-1.5 active:scale-95"
+                >
+                  <Download size={15} />
+                  <span>{downloadingCertId === selectedCertModal.id ? 'Generating Image...' : 'Download PNG'}</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => handlePrintCert(selectedCertModal)}
-                  className="px-4 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-1.5"
+                  className="px-4 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-1.5 active:scale-95"
                 >
                   <Printer size={15} /> Print / Save PDF
                 </button>
@@ -542,6 +639,7 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
             {/* MAIN CERTIFICATE CANVAS INSIDE MODAL */}
             <div className="w-full my-2 bg-white rounded-2xl p-2 sm:p-4 shadow-inner border border-slate-800">
               <div
+                id="printable-certificate"
                 className="relative w-full rounded-xl overflow-hidden select-none bg-white border border-slate-200"
                 style={{ aspectRatio: '2560 / 1810' }}
               >
