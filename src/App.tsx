@@ -484,9 +484,15 @@ export default function App() {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
+  const [isCertNotReadyModalOpen, setIsCertNotReadyModalOpen] = useState(false);
   const [selectedTeamMemberModal, setSelectedTeamMemberModal] = useState<TeamMember | null>(null);
   const [selectedEventForReg, setSelectedEventForReg] = useState<EventItem | null>(null);
   const [activeNavTab, setActiveNavTab] = useState<string>('events');
+
+  const handleGetCertificateClick = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    setIsCertNotReadyModalOpen(true);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -529,11 +535,33 @@ export default function App() {
   const [participationViewMode, setParticipationViewMode] = useState<'grid' | 'table'>('grid');
   const [isTeamsExpanded, setIsTeamsExpanded] = useState(false);
 
-  // Real-time Countdown set fully to 0
+  // Real-time Countdown strictly for 31 October 2026 (Reached event date -> 0)
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
-    setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+    const calculateCountdown = () => {
+      // Event Date: 31 October 2026 at 09:30 AM PKT
+      const targetTime = new Date('2026-10-31T09:30:00').getTime();
+      const actualNow = Date.now();
+      const diff = targetTime - actualNow;
+
+      if (diff > 0) {
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        setTimeLeft({ days, hours, minutes, seconds });
+      } else {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      }
+    };
+
+    calculateCountdown();
+    const timer = setInterval(() => {
+      calculateCountdown();
+    }, 1000);
+
+    return () => clearInterval(timer);
   }, []);
 
   // Volunteer Roster, Login & Signup state
@@ -808,25 +836,7 @@ export default function App() {
   useEffect(() => {
     setCertDatabase(prev => {
       const existingNames = new Set(prev.map(c => c.recipientName.trim().toLowerCase()));
-      const seenIds = new Set<string>();
-
-      // Ensure existing records have unique IDs
-      const sanitizedPrev = prev.map((item, idx) => {
-        let currentId = item.id;
-        if (!currentId || seenIds.has(currentId)) {
-          currentId = `CLB-2026-${100 + idx}`;
-          let suffix = 1;
-          while (seenIds.has(currentId)) {
-            currentId = `CLB-2026-${100 + idx + suffix}`;
-            suffix++;
-          }
-        }
-        seenIds.add(currentId);
-        return { ...item, id: currentId };
-      });
-
       const newRecords: CertificateRecord[] = [];
-      let seqCounter = sanitizedPrev.length + 100;
 
       teamParticipations.forEach(tp => {
         // Leader
@@ -834,13 +844,15 @@ export default function App() {
           const leaderName = tp.teamLeader.trim();
           if (!existingNames.has(leaderName.toLowerCase())) {
             existingNames.add(leaderName.toLowerCase());
-            let uniqueId = `CLB-2026-${seqCounter++}`;
-            while (seenIds.has(uniqueId)) {
-              uniqueId = `CLB-2026-${seqCounter++}`;
+            let hash = 0;
+            const str = `${leaderName.toLowerCase()}-${tp.id}`;
+            for (let i = 0; i < str.length; i++) {
+              hash = (hash << 5) - hash + str.charCodeAt(i);
+              hash |= 0;
             }
-            seenIds.add(uniqueId);
+            const codeNum = 100 + (Math.abs(hash) % 899);
             newRecords.push({
-              id: uniqueId,
+              id: `CLB-2026-${codeNum}`,
               recipientName: leaderName,
               achievementType: 'Certificate of Participation',
               eventName: 'Science, Arts & Food Exhibition 2026',
@@ -859,13 +871,15 @@ export default function App() {
             const cleanName = mem.name.trim();
             if (!existingNames.has(cleanName.toLowerCase())) {
               existingNames.add(cleanName.toLowerCase());
-              let uniqueId = `CLB-2026-${seqCounter++}`;
-              while (seenIds.has(uniqueId)) {
-                uniqueId = `CLB-2026-${seqCounter++}`;
+              let hash = 0;
+              const str = `${cleanName.toLowerCase()}-${tp.id}`;
+              for (let i = 0; i < str.length; i++) {
+                hash = (hash << 5) - hash + str.charCodeAt(i);
+                hash |= 0;
               }
-              seenIds.add(uniqueId);
+              const codeNum = 100 + (Math.abs(hash) % 899);
               newRecords.push({
-                id: uniqueId,
+                id: `CLB-2026-${codeNum}`,
                 recipientName: cleanName,
                 achievementType: 'Certificate of Participation',
                 eventName: 'Science, Arts & Food Exhibition 2026',
@@ -880,8 +894,8 @@ export default function App() {
         });
       });
 
-      if (newRecords.length === 0) return sanitizedPrev;
-      return [...sanitizedPrev, ...newRecords];
+      if (newRecords.length === 0) return prev;
+      return [...prev, ...newRecords];
     });
   }, [teamParticipations]);
 
@@ -2500,14 +2514,23 @@ export default function App() {
             setCertDatabase={setCertDatabase}
             currentCertId={currentCertId}
             setCurrentCertId={setCurrentCertId}
-            isAdminMode={false}
+            activeCertificate={activeCertificate}
+            qrCodeDataUrls={qrCodeDataUrls}
+            handlePrintCertificate={handlePrintCertificate}
+            handleCopyVerificationLink={handleCopyVerificationLink}
+            copiedLink={copiedLink}
+            handleOpenLookupForId={handleOpenLookupForId}
+            setIsVerifyModalOpen={setIsVerifyModalOpen}
+            officialLogo={officialLogo}
+            isExpanded={true}
+            onToggleExpand={() => {}}
           />
         </main>
 
         <footer className="bg-slate-900 text-slate-400 text-xs py-8 border-t border-slate-800 text-center">
           <div className="max-w-7xl mx-auto px-4">
-            <p className="font-medium text-slate-300">Collabs Official Certificate Portal</p>
-            <p className="text-slate-500 mt-1">Science, Arts & Food Exhibition 2026 · Booni, Upper Chitral</p>
+            <p className="font-medium text-slate-300">Collabs Official Digital Certificate Verification Registry</p>
+            <p className="text-slate-500 mt-1">First Mega Event of Collabs 2026 · Booni, Upper Chitral</p>
           </div>
         </footer>
       </div>
@@ -2547,7 +2570,10 @@ export default function App() {
                   key={tab.id}
                   href={tab.href}
                   onClick={(e) => {
-                    if (tab.href.startsWith('/')) {
+                    if (tab.id === 'certificates') {
+                      e.preventDefault();
+                      handleGetCertificateClick(e);
+                    } else if (tab.href.startsWith('/')) {
                       e.preventDefault();
                       navigate(tab.href);
                     } else {
@@ -2573,7 +2599,7 @@ export default function App() {
           {/* Header Action Buttons */}
           <div className="flex items-center gap-2 sm:gap-3">
             <button
-              onClick={() => navigate('/certificate')}
+              onClick={handleGetCertificateClick}
               className="px-4 py-2 text-xs font-black text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-xl transition-all cursor-pointer shadow-md flex items-center gap-2 active:scale-95"
             >
               <Award size={16} />
@@ -2606,13 +2632,13 @@ export default function App() {
           >
             Participants
           </a>
-          <a
-            href="/certificate"
-            onClick={(e) => { e.preventDefault(); navigate('/certificate'); }}
+          <button
+            type="button"
+            onClick={handleGetCertificateClick}
             className="px-2.5 py-1 rounded-md hover:bg-slate-100 hover:text-blue-600 shrink-0 transition-colors cursor-pointer text-purple-700 font-bold"
           >
             Certificates
-          </a>
+          </button>
           <a
             href="#judging"
             onClick={(e) => handleSmoothNavClick(e, 'judging-criteria')}
@@ -2655,7 +2681,7 @@ export default function App() {
           </p>
 
           <button
-            onClick={() => navigate('/certificate')}
+            onClick={handleGetCertificateClick}
             className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black px-6 py-2.5 rounded-full text-xs sm:text-sm mb-3.5 shadow-lg shadow-purple-600/30 transition-all cursor-pointer active:scale-95"
           >
             <Award size={18} />
@@ -3844,6 +3870,52 @@ export default function App() {
           if (el) el.scrollIntoView({ behavior: 'smooth' });
         }}
       />
+
+      {/* MODAL: Certificates Not Ready */}
+      {isCertNotReadyModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200 text-center relative overflow-hidden">
+            <button
+              onClick={() => setIsCertNotReadyModalOpen(false)}
+              className="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 text-slate-500 hover:text-slate-900 flex items-center justify-center cursor-pointer transition-colors"
+              aria-label="Close"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="w-16 h-16 rounded-3xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-4 border border-amber-200 shadow-inner">
+              <Clock size={32} />
+            </div>
+
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 text-amber-800 text-[11px] font-extrabold uppercase tracking-widest rounded-full mb-2 border border-amber-200">
+              <AlertTriangle size={13} className="text-amber-600" />
+              Notice
+            </span>
+
+            <h3 className="font-heading text-2xl font-black text-slate-900 mb-2 leading-tight">
+              Certificates Not Ready
+            </h3>
+
+            <p className="text-base font-extrabold text-slate-800 mb-2">
+              They all are not ready, wait till tomorrow.
+            </p>
+
+            <p className="text-xs text-slate-500 leading-relaxed mb-6">
+              The official certificates for the Science, Arts & Food Exhibition 2026 are currently undergoing final processing and district verification. Please check back tomorrow!
+            </p>
+
+            <div className="flex items-center justify-center pt-2">
+              <button
+                type="button"
+                onClick={() => setIsCertNotReadyModalOpen(false)}
+                className="w-full sm:w-auto px-8 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl transition-all cursor-pointer shadow-md shadow-purple-600/20 active:scale-95"
+              >
+                Understood
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

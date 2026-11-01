@@ -1,18 +1,35 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, doc, getDocFromServer, setLogLevel } from 'firebase/firestore';
+import {
+  initializeFirestore,
+  getFirestore,
+  doc,
+  getDocFromServer,
+  persistentLocalCache,
+  persistentMultipleTabManager
+} from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId); /* CRITICAL: The app will break without this line */
-export const auth = getAuth(app);
 
-// Suppress verbose Firebase internal log warnings when operating in offline/fallback mode
-try {
-  setLogLevel('error');
-} catch {
-  // Ignored if already set
-}
+// Initialize Firestore with robust local caching so transient connection issues operate seamlessly in offline mode
+export const db = (() => {
+  try {
+    return initializeFirestore(
+      app,
+      {
+        localCache: persistentLocalCache({
+          tabManager: persistentMultipleTabManager()
+        })
+      },
+      firebaseConfig.firestoreDatabaseId
+    );
+  } catch {
+    return getFirestore(app, firebaseConfig.firestoreDatabaseId); /* CRITICAL: Required for AI Studio Firestore initialization */
+  }
+})();
+
+export const auth = getAuth(app);
 
 export enum OperationType {
   CREATE = 'create',
@@ -57,33 +74,30 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
     operationType,
     path
   };
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  console.warn('Firestore Operation Notice: ', JSON.stringify(errInfo));
   throw new Error(JSON.stringify(errInfo));
 }
 
-// Connection check on boot with 3s timeout
+// Connection check on boot with graceful offline recovery handling
 export async function testConnection(): Promise<boolean> {
   try {
-    const timeoutPromise = new Promise<boolean>(resolve => setTimeout(() => resolve(false), 3000));
-    const testPromise = (async () => {
-      try {
-        await getDocFromServer(doc(db, 'test', 'connection'));
-        return true;
-      } catch (error) {
-        if (error instanceof Error && (
-          error.message.includes('the client is offline') ||
-          error.message.includes('Could not reach Cloud Firestore backend') ||
-          error.message.includes('unavailable') ||
-          (error as any).code === 'unavailable'
-        )) {
-          return false;
-        }
-        return true;
-      }
-    })();
-    return await Promise.race([testPromise, timeoutPromise]);
-  } catch {
-    return false;
+    await getDocFromServer(doc(db, 'test', 'connection'));
+    return true;
+  } catch (error: any) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    const errCode = error?.code;
+    if (
+      errCode === 'unavailable' ||
+      errMsg.includes('the client is offline') ||
+      errMsg.includes('Could not reach Cloud Firestore backend') ||
+      errMsg.includes('unavailable') ||
+      errMsg.includes('Failed to get document')
+    ) {
+      console.warn('Firebase notice: Operating in offline mode or waiting for Cloud Firestore connection.');
+      return false;
+    }
+    // Document missing or permission error means connection to Firestore backend was established
+    return true;
   }
 }
 
