@@ -97,6 +97,7 @@ import {
 } from './services/teamService';
 import { testConnection } from './firebase/firebaseConfig';
 import { SAF_FORM_RESPONSES_TEAMS } from './data/registeredTeamsData';
+import { IMPORTED_SAF_2026_CERTIFICATES } from './data/importedCertificatesData';
 
 export interface EventItem {
   id: string;
@@ -766,12 +767,22 @@ export default function App() {
     });
   };
 
-  // Certificate Generator State with localStorage persistence (Default to empty array)
+  // Certificate Generator State initialized with all 293 imported SAF 2026 visitor certificates
   const [certDatabase, setCertDatabase] = useState<CertificateRecord[]>(() => {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('collabs_certificates');
+      const saved = localStorage.getItem('collabs_certificates');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed;
+          }
+        } catch (e) {
+          console.error('Failed to parse saved certificates from localStorage:', e);
+        }
+      }
     }
-    return [];
+    return IMPORTED_SAF_2026_CERTIFICATES;
   });
 
   // Save certDatabase to localStorage on changes
@@ -3997,16 +4008,42 @@ export default function App() {
 }
 
 const QRScannerComponent = ({ onScan }: { onScan: (text: string) => void }) => {
-    React.useEffect(() => {
-        let scanner: any;
-        import('html5-qrcode').then(({ Html5QrcodeScanner }) => {
+  React.useEffect(() => {
+    let scanner: any = null;
+    let isMounted = true;
+
+    import('html5-qrcode')
+      .then(({ Html5QrcodeScanner }) => {
+        if (!isMounted) return;
+        const elem = document.getElementById("qr-reader");
+        if (elem) {
+          try {
             scanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 250 }, false);
-            scanner.render((decodedText: string) => {
+            scanner.render(
+              (decodedText: string) => {
                 onScan(decodedText);
-                scanner.clear();
-            }, (error: any) => console.warn(error));
-        });
-        return () => { if (scanner) scanner.clear(); };
-    }, [onScan]);
-    return <div id="qr-reader" className="w-full mb-4"></div>;
+                try {
+                  scanner.clear();
+                } catch (e) {}
+              },
+              (_error: any) => {}
+            );
+          } catch (err) {
+            console.warn("QR Scanner initialization notice:", err);
+          }
+        }
+      })
+      .catch(err => console.warn("Failed to load html5-qrcode scanner:", err));
+
+    return () => {
+      isMounted = false;
+      if (scanner) {
+        try {
+          scanner.clear();
+        } catch (e) {}
+      }
+    };
+  }, [onScan]);
+
+  return <div id="qr-reader" className="w-full mb-4"></div>;
 };

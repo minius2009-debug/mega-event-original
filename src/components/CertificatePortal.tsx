@@ -292,10 +292,6 @@ export const CertificatePortal: React.FC<CertificatePortalProps> = ({
       {/* Sleek Header & Section Nav Bar */}
       <div className="bg-slate-900 rounded-3xl text-white p-5 sm:p-6 shadow-xl border border-slate-800 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[10px] font-bold uppercase tracking-widest">
-            <ShieldCheck size={13} className="text-emerald-400" />
-            <span>District Youth Office & Collabs · Official Certificates</span>
-          </div>
           <h1 className="font-heading text-2xl sm:text-3xl font-black text-white">
             Official Certificates Portal
           </h1>
