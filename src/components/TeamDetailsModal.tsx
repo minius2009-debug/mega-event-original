@@ -8,9 +8,12 @@ import {
   QrCode as QrIcon,
   BookOpen,
   User,
-  CheckCircle2
+  CheckCircle2,
+  Award,
+  Loader2
 } from 'lucide-react';
 import { TeamParticipation } from '../App';
+import { downloadCertificateAsPdf } from '../services/certificateDownloadService';
 
 interface TeamDetailsModalProps {
   team: TeamParticipation | null;
@@ -19,9 +22,10 @@ interface TeamDetailsModalProps {
   onViewCertificate?: (certId: string) => void;
 }
 
-export const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ team, onClose }) => {
+export const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ team, onClose, certDatabase, onViewCertificate }) => {
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
+  const [downloadingCertFor, setDownloadingCertFor] = useState<string | null>(null);
 
   useEffect(() => {
     if (!team) return;
@@ -59,6 +63,31 @@ export const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ team, onClos
     link.click();
     setDownloadSuccess(true);
     setTimeout(() => setDownloadSuccess(false), 2500);
+  };
+
+  const handleDownloadCertForPerson = async (name: string) => {
+    try {
+      setDownloadingCertFor(name);
+      const match = (certDatabase || []).find(
+        (c: any) => c.recipientName?.toLowerCase() === name.trim().toLowerCase()
+      );
+      const record = match || {
+        id: `CLB-2026-${Math.floor(100 + Math.random() * 899)}`,
+        recipientName: name.trim(),
+        achievementType: 'Certificate of Participation',
+        eventName: 'Science, Arts & Food Exhibition 2026',
+        issueDate: 'October 31, 2026',
+        verified: true,
+        issuer: 'Collabs, Naveed-e-Falah, Jenabai Awards & District Youth Office',
+        school: team?.school || undefined,
+        project: team?.projectName || undefined
+      };
+      await downloadCertificateAsPdf(record);
+    } catch (e) {
+      console.error('Failed to download certificate:', e);
+    } finally {
+      setDownloadingCertFor(null);
+    }
   };
 
   return (
@@ -107,11 +136,26 @@ export const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ team, onClos
 
           {/* Team Leader & Members */}
           <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-3">
-            <div className="flex items-center gap-2">
-              <User size={15} className="text-blue-600" />
-              <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">
-                Team Leadership
-              </span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <User size={15} className="text-blue-600" />
+                <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">
+                  Team Leadership
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleDownloadCertForPerson(team.teamLeader)}
+                disabled={downloadingCertFor === team.teamLeader}
+                className="px-2.5 py-1 bg-purple-600 hover:bg-purple-700 text-white font-bold text-[11px] rounded-lg transition-all cursor-pointer flex items-center gap-1 shadow-xs active:scale-95 disabled:opacity-60"
+              >
+                {downloadingCertFor === team.teamLeader ? (
+                  <Loader2 size={12} className="animate-spin" />
+                ) : (
+                  <Award size={12} />
+                )}
+                <span>Download Leader Certificate</span>
+              </button>
             </div>
             <div className="text-sm font-bold text-slate-900 flex items-center gap-2">
               <span>{team.teamLeader}</span>
@@ -135,14 +179,30 @@ export const TeamDetailsModal: React.FC<TeamDetailsModalProps> = ({ team, onClos
                       key={idx}
                       className="p-2.5 bg-white border border-slate-200 rounded-xl flex items-center justify-between gap-2 shadow-2xs"
                     >
-                      <span className="font-bold text-slate-800 text-xs truncate">
-                        {mem.name}
-                      </span>
-                      {mem.role && (
-                        <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md shrink-0">
-                          {mem.role}
+                      <div className="min-w-0">
+                        <span className="font-bold text-slate-800 text-xs block truncate">
+                          {mem.name}
                         </span>
-                      )}
+                        {mem.role && (
+                          <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded inline-block mt-0.5">
+                            {mem.role}
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleDownloadCertForPerson(mem.name)}
+                        disabled={downloadingCertFor === mem.name}
+                        className="px-2 py-1 bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-[10px] rounded-lg border border-purple-200 shrink-0 flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-60"
+                        title={`Download certificate for ${mem.name}`}
+                      >
+                        {downloadingCertFor === mem.name ? (
+                          <Loader2 size={10} className="animate-spin" />
+                        ) : (
+                          <Download size={10} />
+                        )}
+                        <span>Certificate</span>
+                      </button>
                     </div>
                   ))}
                 </div>

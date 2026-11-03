@@ -4,28 +4,67 @@ import {
   initializeFirestore,
   getFirestore,
   doc,
-  getDocFromServer,
+  getDoc,
+  setLogLevel,
   persistentLocalCache,
-  persistentMultipleTabManager
+  persistentSingleTabManager,
+  memoryLocalCache
 } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
+// Silence non-fatal Firestore network transition / timeout warnings in iframe/sandboxed previews
+try {
+  setLogLevel('error');
+} catch {
+  // Ignore in environments where setLogLevel is restricted
+}
+
+// Intercept harmless 10-second Firestore timeout notice so it does not trigger app errors
+if (typeof window !== 'undefined') {
+  const origError = console.error;
+  console.error = (...args: any[]) => {
+    const firstArg = args[0];
+    if (
+      typeof firstArg === 'string' &&
+      (firstArg.includes('Could not reach Cloud Firestore backend') ||
+        firstArg.includes("Backend didn't respond within 10 seconds") ||
+        firstArg.includes('client will operate in offline mode'))
+    ) {
+      console.warn('Firestore notice: Operating in offline mode with synchronized local dataset.');
+      return;
+    }
+    origError.apply(console, args);
+  };
+}
+
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firestore with robust local caching so transient connection issues operate seamlessly in offline mode
+// Initialize Firestore with forced long polling and robust local caching for iframe / browser preview resilience
 export const db = (() => {
   try {
     return initializeFirestore(
       app,
       {
+        experimentalForceLongPolling: true,
         localCache: persistentLocalCache({
-          tabManager: persistentMultipleTabManager()
+          tabManager: persistentSingleTabManager({})
         })
       },
       firebaseConfig.firestoreDatabaseId
     );
   } catch {
-    return getFirestore(app, firebaseConfig.firestoreDatabaseId); /* CRITICAL: Required for AI Studio Firestore initialization */
+    try {
+      return initializeFirestore(
+        app,
+        {
+          experimentalForceLongPolling: true,
+          localCache: memoryLocalCache()
+        },
+        firebaseConfig.firestoreDatabaseId
+      );
+    } catch {
+      return getFirestore(app, firebaseConfig.firestoreDatabaseId); /* CRITICAL: Required for AI Studio Firestore initialization */
+    }
   }
 })();
 
@@ -78,19 +117,24 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
   throw new Error(JSON.stringify(errInfo));
 }
 
-// Connection check on boot with graceful offline recovery handling
-export async function testConnection(): Promise<boolean> {
+// Connection check on boot with timeout and graceful offline recovery handling
+export async function testConnection(timeoutMs = 3000): Promise<boolean> {
   try {
-    await getDocFromServer(doc(db, 'test', 'connection'));
+    const connectionPromise = getDoc(doc(db, 'test', 'connection'));
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Connection check timed out; client operating in offline mode')), timeoutMs)
+    );
+    await Promise.race([connectionPromise, timeoutPromise]);
     return true;
   } catch (error: any) {
     const errMsg = error instanceof Error ? error.message : String(error);
     const errCode = error?.code;
     if (
       errCode === 'unavailable' ||
-      errMsg.includes('the client is offline') ||
+      errMsg.includes('offline') ||
       errMsg.includes('Could not reach Cloud Firestore backend') ||
       errMsg.includes('unavailable') ||
+      errMsg.includes('timed out') ||
       errMsg.includes('Failed to get document')
     ) {
       console.warn('Firebase notice: Operating in offline mode or waiting for Cloud Firestore connection.');

@@ -85,6 +85,8 @@ import {
 import { BulkTeamImportModal } from './components/BulkTeamImportModal';
 import { TeamDetailsModal } from './components/TeamDetailsModal';
 import { CertificatePortal, CertificateRecord } from './components/CertificatePortal';
+import { CertificateQuickDownloadModal } from './components/CertificateQuickDownloadModal';
+import { downloadCertificateAsPdf, downloadCertificateAsImage } from './services/certificateDownloadService';
 import { VolunteerDutyTracker } from './components/VolunteerDutyTracker';
 import {
   subscribeTeams,
@@ -484,14 +486,21 @@ export default function App() {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
-  const [isCertNotReadyModalOpen, setIsCertNotReadyModalOpen] = useState(false);
+  const [isQuickDownloadModalOpen, setIsQuickDownloadModalOpen] = useState(false);
+  const [quickDownloadCertId, setQuickDownloadCertId] = useState<string | undefined>(undefined);
   const [selectedTeamMemberModal, setSelectedTeamMemberModal] = useState<TeamMember | null>(null);
   const [selectedEventForReg, setSelectedEventForReg] = useState<EventItem | null>(null);
   const [activeNavTab, setActiveNavTab] = useState<string>('events');
 
   const handleGetCertificateClick = (e?: React.MouseEvent) => {
     if (e) e.preventDefault();
-    setIsCertNotReadyModalOpen(true);
+    setSectionsExpanded(prev => ({ ...prev, certificatePortal: true }));
+    setTimeout(() => {
+      const element = document.getElementById('certificates');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 50);
   };
 
   useEffect(() => {
@@ -757,22 +766,12 @@ export default function App() {
     });
   };
 
-  // Certificate Generator State with localStorage persistence
+  // Certificate Generator State with localStorage persistence (Default to empty array)
   const [certDatabase, setCertDatabase] = useState<CertificateRecord[]>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('collabs_certificates');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            return parsed;
-          }
-        } catch (e) {
-          console.error('Failed to parse saved certificates from localStorage:', e);
-        }
-      }
+      localStorage.removeItem('collabs_certificates');
     }
-    return INITIAL_CERTIFICATES;
+    return [];
   });
 
   // Save certDatabase to localStorage on changes
@@ -807,97 +806,43 @@ export default function App() {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('collabs_teams_cleared');
     }
-    testConnection().then(connected => {
-      if (connected) {
-        setIsFirebaseConnected(true);
-        seedInitialTeamsIfEmpty(SAF_FORM_RESPONSES_TEAMS).then(() => {
-          unsubscribe = subscribeTeams(
-            firestoreTeams => {
-              if (firestoreTeams && firestoreTeams.length > 0) {
-                setTeamParticipations(firestoreTeams);
-              } else {
-                setTeamParticipations(SAF_FORM_RESPONSES_TEAMS);
-              }
-            },
-            err => {
-              console.warn('Live team sync notice:', err);
-            }
-          );
-        });
-      }
-    });
+
+    // Subscribe immediately so real-time and cached data load instantly without a 10s blocking stall
+    try {
+      unsubscribe = subscribeTeams(
+        firestoreTeams => {
+          if (firestoreTeams && firestoreTeams.length > 0) {
+            setTeamParticipations(firestoreTeams);
+          } else {
+            setTeamParticipations(SAF_FORM_RESPONSES_TEAMS);
+          }
+        },
+        err => {
+          console.warn('Live team sync notice (operating with cached/local dataset):', err?.message || err);
+        }
+      );
+    } catch (err) {
+      console.warn('Initial teams subscription error:', err);
+    }
+
+    // Verify backend connectivity asynchronously and seed if necessary
+    testConnection()
+      .then(connected => {
+        if (connected) {
+          setIsFirebaseConnected(true);
+          seedInitialTeamsIfEmpty(SAF_FORM_RESPONSES_TEAMS).catch(err => {
+            console.warn('Seeding check notice:', err);
+          });
+        }
+      })
+      .catch(() => {
+        // Quietly maintain local offline state
+      });
 
     return () => {
       if (unsubscribe) unsubscribe();
     };
   }, []);
-
-  // Auto-generate Certificate records & unique verification codes for every enrolled participant
-  useEffect(() => {
-    setCertDatabase(prev => {
-      const existingNames = new Set(prev.map(c => c.recipientName.trim().toLowerCase()));
-      const newRecords: CertificateRecord[] = [];
-
-      teamParticipations.forEach(tp => {
-        // Leader
-        if (tp.teamLeader && tp.teamLeader.trim()) {
-          const leaderName = tp.teamLeader.trim();
-          if (!existingNames.has(leaderName.toLowerCase())) {
-            existingNames.add(leaderName.toLowerCase());
-            let hash = 0;
-            const str = `${leaderName.toLowerCase()}-${tp.id}`;
-            for (let i = 0; i < str.length; i++) {
-              hash = (hash << 5) - hash + str.charCodeAt(i);
-              hash |= 0;
-            }
-            const codeNum = 100 + (Math.abs(hash) % 899);
-            newRecords.push({
-              id: `CLB-2026-${codeNum}`,
-              recipientName: leaderName,
-              achievementType: 'Certificate of Participation',
-              eventName: 'Science, Arts & Food Exhibition 2026',
-              issueDate: 'October 31, 2026',
-              verified: true,
-              issuer: 'Collabs, Naveed-e-Falah, Jenabai Awards & District Youth Office',
-              school: tp.school,
-              project: tp.projectName
-            });
-          }
-        }
-
-        // Members
-        tp.members?.forEach(mem => {
-          if (mem.name && mem.name.trim()) {
-            const cleanName = mem.name.trim();
-            if (!existingNames.has(cleanName.toLowerCase())) {
-              existingNames.add(cleanName.toLowerCase());
-              let hash = 0;
-              const str = `${cleanName.toLowerCase()}-${tp.id}`;
-              for (let i = 0; i < str.length; i++) {
-                hash = (hash << 5) - hash + str.charCodeAt(i);
-                hash |= 0;
-              }
-              const codeNum = 100 + (Math.abs(hash) % 899);
-              newRecords.push({
-                id: `CLB-2026-${codeNum}`,
-                recipientName: cleanName,
-                achievementType: 'Certificate of Participation',
-                eventName: 'Science, Arts & Food Exhibition 2026',
-                issueDate: 'October 31, 2026',
-                verified: true,
-                issuer: 'Collabs, Naveed-e-Falah, Jenabai Awards & District Youth Office',
-                school: mem.school || tp.school,
-                project: tp.projectName
-              });
-            }
-          }
-        });
-      });
-
-      if (newRecords.length === 0) return prev;
-      return [...prev, ...newRecords];
-    });
-  }, [teamParticipations]);
 
   // Auto-generate QR codes for team participations
   useEffect(() => {
@@ -1522,6 +1467,16 @@ export default function App() {
 
             <div className="flex items-center gap-2 sm:gap-3">
               <button
+                onClick={() => {
+                  setQuickDownloadCertId(undefined);
+                  setIsQuickDownloadModalOpen(true);
+                }}
+                className="px-3.5 py-1.5 text-xs font-black rounded-xl text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 transition-all cursor-pointer shadow-sm flex items-center gap-1.5 active:scale-95"
+              >
+                <Award size={14} />
+                <span>Download Certificate</span>
+              </button>
+              <button
                 onClick={() => navigate('/volunteer')}
                 className="px-3 py-1.5 text-xs font-bold rounded-xl text-slate-700 hover:text-blue-600 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
               >
@@ -1573,7 +1528,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                   <a
                     href="https://docs.google.com/forms/d/e/1FAIpQLSdUwKtlCvMl4JJBpsa6e7xMJ7KirLBU5_B6ram88WUwza-p-g/viewform"
                     target="_blank"
@@ -1583,6 +1538,16 @@ export default function App() {
                     <CheckCircle2 size={16} />
                     <span>Register Now</span>
                   </a>
+                  <button
+                    onClick={() => {
+                      setQuickDownloadCertId(undefined);
+                      setIsQuickDownloadModalOpen(true);
+                    }}
+                    className="px-4 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-2 active:scale-95"
+                  >
+                    <Award size={16} />
+                    <span>Download Certificate</span>
+                  </button>
                   <button
                     onClick={() => setIsRulesModalOpen(true)}
                     className="px-4 py-2.5 bg-slate-900/80 hover:bg-slate-800 text-slate-200 border border-slate-700 font-bold text-xs rounded-xl transition-all cursor-pointer"
@@ -1750,6 +1715,21 @@ export default function App() {
             <p className="text-slate-500 mt-1">31 October 2026 · Booni, Upper Chitral</p>
           </div>
         </footer>
+
+        {/* Certificate Quick Download Modal */}
+        <CertificateQuickDownloadModal
+          isOpen={isQuickDownloadModalOpen}
+          onClose={() => {
+            setIsQuickDownloadModalOpen(false);
+            setQuickDownloadCertId(undefined);
+          }}
+          certDatabase={certDatabase}
+          initialCertId={quickDownloadCertId}
+          onNavigateToPortal={() => {
+            setIsQuickDownloadModalOpen(false);
+            navigate('/certificate');
+          }}
+        />
       </div>
     );
   }
@@ -1786,6 +1766,16 @@ export default function App() {
 
             <div className="flex items-center gap-2 sm:gap-3">
               <button
+                onClick={() => {
+                  setQuickDownloadCertId(undefined);
+                  setIsQuickDownloadModalOpen(true);
+                }}
+                className="px-3.5 py-1.5 text-xs font-black rounded-xl text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 transition-all cursor-pointer shadow-sm flex items-center gap-1.5 active:scale-95"
+              >
+                <Award size={14} />
+                <span>Download Certificate</span>
+              </button>
+              <button
                 onClick={() => navigate('/certificate')}
                 className="px-3 py-1.5 text-xs font-bold rounded-xl text-slate-700 hover:text-blue-600 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
               >
@@ -1816,12 +1806,23 @@ export default function App() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-3 text-xs text-slate-500 shrink-0">
-                <span className="font-semibold text-slate-800">{volunteers.length} Active Crew</span>
-                <span aria-hidden="true">·</span>
-                <span>4 Key Teams</span>
-                <span aria-hidden="true">·</span>
-                <span className="text-blue-600 font-bold">31 Oct 2026 Booni</span>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQuickDownloadCertId(undefined);
+                    setIsQuickDownloadModalOpen(true);
+                  }}
+                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-2 active:scale-95"
+                >
+                  <Award size={16} />
+                  <span>Download Volunteer Certificate</span>
+                </button>
+                <div className="flex items-center gap-2 text-xs text-slate-500">
+                  <span className="font-semibold text-slate-800">{volunteers.length} Active Crew</span>
+                  <span aria-hidden="true">·</span>
+                  <span className="text-blue-600 font-bold">31 Oct 2026 Booni</span>
+                </div>
               </div>
             </div>
 
@@ -2457,6 +2458,21 @@ export default function App() {
             <p className="text-slate-500 mt-1">31 October 2026 · Booni, Upper Chitral</p>
           </div>
         </footer>
+
+        {/* Certificate Quick Download Modal */}
+        <CertificateQuickDownloadModal
+          isOpen={isQuickDownloadModalOpen}
+          onClose={() => {
+            setIsQuickDownloadModalOpen(false);
+            setQuickDownloadCertId(undefined);
+          }}
+          certDatabase={certDatabase}
+          initialCertId={quickDownloadCertId}
+          onNavigateToPortal={() => {
+            setIsQuickDownloadModalOpen(false);
+            navigate('/certificate');
+          }}
+        />
       </div>
     );
   }
@@ -2492,6 +2508,16 @@ export default function App() {
             </div>
 
             <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                onClick={() => {
+                  setQuickDownloadCertId(undefined);
+                  setIsQuickDownloadModalOpen(true);
+                }}
+                className="px-3.5 py-1.5 text-xs font-black rounded-xl text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 transition-all cursor-pointer shadow-sm flex items-center gap-1.5 active:scale-95"
+              >
+                <Award size={14} />
+                <span>Quick Download</span>
+              </button>
               <button
                 onClick={() => navigate('/volunteer')}
                 className="px-3 py-1.5 text-xs font-bold rounded-xl text-slate-700 hover:text-blue-600 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
@@ -2533,6 +2559,20 @@ export default function App() {
             <p className="text-slate-500 mt-1">First Mega Event of Collabs 2026 · Booni, Upper Chitral</p>
           </div>
         </footer>
+
+        {/* Certificate Quick Download Modal */}
+        <CertificateQuickDownloadModal
+          isOpen={isQuickDownloadModalOpen}
+          onClose={() => {
+            setIsQuickDownloadModalOpen(false);
+            setQuickDownloadCertId(undefined);
+          }}
+          certDatabase={certDatabase}
+          initialCertId={quickDownloadCertId}
+          onNavigateToPortal={() => {
+            setIsQuickDownloadModalOpen(false);
+          }}
+        />
       </div>
     );
   }
@@ -2680,13 +2720,22 @@ export default function App() {
             Empowering Youth. Building Tomorrow. Part of the Global Summit on Digital Literacy & Leadership.
           </p>
 
-          <button
-            onClick={handleGetCertificateClick}
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black px-6 py-2.5 rounded-full text-xs sm:text-sm mb-3.5 shadow-lg shadow-purple-600/30 transition-all cursor-pointer active:scale-95"
-          >
-            <Award size={18} />
-            <span>Get Your Certificate</span>
-          </button>
+          <div className="flex flex-wrap items-center justify-center gap-2.5 mb-3.5">
+            <button
+              onClick={handleGetCertificateClick}
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black px-6 py-2.5 rounded-full text-xs sm:text-sm shadow-lg shadow-purple-600/30 transition-all cursor-pointer active:scale-95"
+            >
+              <Award size={18} />
+              <span>Download Official Certificate</span>
+            </button>
+            <button
+              onClick={() => navigate('/certificate')}
+              className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-purple-700 border border-purple-200 font-bold px-4 py-2.5 rounded-full text-xs sm:text-sm shadow-xs transition-all cursor-pointer"
+            >
+              <span>Explore Certificate Portal</span>
+              <ExternalLink size={14} />
+            </button>
+          </div>
 
           {/* Functional Countdown Timer for 31 October 2026 - Compact & Clear */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 max-w-md mx-auto mb-2.5">
@@ -2764,12 +2813,69 @@ export default function App() {
         </div>
       </section>
 
+      {/* Certificate Download & Verification Quick Banner on Home Page */}
+      <section className="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 via-purple-950 to-indigo-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-purple-900/50">
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 text-left">
+            <div className="space-y-2 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-400/30 text-[11px] font-black uppercase tracking-wider">
+                <Sparkles size={13} className="text-purple-400" />
+                <span>Official Digital Credentials Active</span>
+              </div>
+              <h2 className="font-heading text-2xl sm:text-3xl font-black text-white tracking-tight">
+                Download Your Official Event Certificate
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+                All registered participants, team leaders, and volunteers can instantly download their high-resolution official certificates in PDF (print-ready A4 landscape) and PNG with tamper-proof QR verification codes.
+              </p>
 
+              {/* Sample Participant Quick Chips */}
+              <div className="pt-2 flex items-center gap-1.5 flex-wrap text-xs">
+                <span className="text-[11px] text-slate-400 font-semibold mr-1">Quick Select:</span>
+                {[
+                  { name: 'Fatima Zahra', id: 'CLB-2026-892' },
+                  { name: 'Muhammad Ali', id: 'CLB-2026-401' },
+                  { name: 'Inam Ullah', id: 'CLB-2026-105' },
+                  { name: 'Salman Ali', id: 'vol-1' }
+                ].map(chip => (
+                  <button
+                    key={chip.id}
+                    onClick={() => {
+                      setQuickDownloadCertId(chip.id);
+                      setIsQuickDownloadModalOpen(true);
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-purple-200 border border-purple-400/30 font-medium text-xs transition-colors cursor-pointer"
+                  >
+                    {chip.name}
+                  </button>
+                ))}
+              </div>
+            </div>
 
+            <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0">
+              <button
+                onClick={() => {
+                  setQuickDownloadCertId(undefined);
+                  setIsQuickDownloadModalOpen(true);
+                }}
+                className="px-6 py-3.5 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 text-white font-black text-xs sm:text-sm rounded-2xl shadow-xl shadow-purple-600/30 transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-95"
+              >
+                <Download size={18} />
+                <span>Download Certificate (PDF / PNG)</span>
+              </button>
+              <button
+                onClick={() => navigate('/certificate')}
+                className="px-5 py-3 bg-white/10 hover:bg-white/20 text-slate-200 border border-white/20 font-bold text-xs rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-2"
+              >
+                <FileCheck2 size={16} />
+                <span>Open Full Certificate Registry</span>
+              </button>
+            </div>
+          </div>
 
-
-
-      {/* 5. Team Members & Volunteers Section */}
+          <div className="absolute -right-10 -bottom-10 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+        </div>
+      </section>
       <section id="team" className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto scroll-mt-24 text-left space-y-5">
         {/* Core Team Header & Single-Line Scroll Track */}
         <div>
@@ -3871,51 +3977,20 @@ export default function App() {
         }}
       />
 
-      {/* MODAL: Certificates Not Ready */}
-      {isCertNotReadyModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200 text-center relative overflow-hidden">
-            <button
-              onClick={() => setIsCertNotReadyModalOpen(false)}
-              className="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 text-slate-500 hover:text-slate-900 flex items-center justify-center cursor-pointer transition-colors"
-              aria-label="Close"
-            >
-              <X size={18} />
-            </button>
-
-            <div className="w-16 h-16 rounded-3xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-4 border border-amber-200 shadow-inner">
-              <Clock size={32} />
-            </div>
-
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 text-amber-800 text-[11px] font-extrabold uppercase tracking-widest rounded-full mb-2 border border-amber-200">
-              <AlertTriangle size={13} className="text-amber-600" />
-              Notice
-            </span>
-
-            <h3 className="font-heading text-2xl font-black text-slate-900 mb-2 leading-tight">
-              Certificates Not Ready
-            </h3>
-
-            <p className="text-base font-extrabold text-slate-800 mb-2">
-              They all are not ready, wait till tomorrow.
-            </p>
-
-            <p className="text-xs text-slate-500 leading-relaxed mb-6">
-              The official certificates for the Science, Arts & Food Exhibition 2026 are currently undergoing final processing and district verification. Please check back tomorrow!
-            </p>
-
-            <div className="flex items-center justify-center pt-2">
-              <button
-                type="button"
-                onClick={() => setIsCertNotReadyModalOpen(false)}
-                className="w-full sm:w-auto px-8 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl transition-all cursor-pointer shadow-md shadow-purple-600/20 active:scale-95"
-              >
-                Understood
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* MODAL: Full-Featured Certificate Quick Download Modal */}
+      <CertificateQuickDownloadModal
+        isOpen={isQuickDownloadModalOpen}
+        onClose={() => {
+          setIsQuickDownloadModalOpen(false);
+          setQuickDownloadCertId(undefined);
+        }}
+        certDatabase={certDatabase}
+        initialCertId={quickDownloadCertId}
+        onNavigateToPortal={() => {
+          setIsQuickDownloadModalOpen(false);
+          navigate('/certificate');
+        }}
+      />
 
     </div>
   );

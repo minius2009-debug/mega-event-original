@@ -22,9 +22,13 @@ import {
   MapPin,
   ClipboardList,
   BadgeCheck,
-  RotateCcw
+  RotateCcw,
+  Award,
+  Download,
+  Loader2
 } from 'lucide-react';
 import { VolunteerLog } from '../App';
+import { downloadCertificateAsPdf, downloadCertificateAsImage } from '../services/certificateDownloadService';
 
 interface VolunteerDutyTrackerProps {
   volunteers: VolunteerLog[];
@@ -66,6 +70,45 @@ export const VolunteerDutyTracker: React.FC<VolunteerDutyTrackerProps> = ({
 
   // Upload file state
   const [uploadNotice, setUploadNotice] = useState<string | null>(null);
+
+  // Certificate Download State
+  const [downloadingCertPdf, setDownloadingCertPdf] = useState(false);
+  const [downloadingCertPng, setDownloadingCertPng] = useState(false);
+  const [certDownloadNotice, setCertDownloadNotice] = useState<string | null>(null);
+
+  const handleDownloadVolunteerCert = async (format: 'pdf' | 'png') => {
+    if (!activeVolunteer) return;
+    const certRecord = {
+      id: `CLB-VOL-${activeVolunteer.id.toUpperCase().replace(/^VOL-?/, '')}`,
+      recipientName: activeVolunteer.name,
+      achievementType: 'Certificate of Volunteerism',
+      eventName: 'Science, Arts & Food Exhibition 2026',
+      issueDate: '31 October 2026',
+      verified: true,
+      issuer: 'District Youth Office & Collabs Management',
+      school: activeVolunteer.school || 'Collabs Volunteer Network',
+      project: `${activeVolunteer.department} Operations`
+    };
+
+    try {
+      if (format === 'pdf') {
+        setDownloadingCertPdf(true);
+        await downloadCertificateAsPdf(certRecord);
+        setCertDownloadNotice(`Downloaded Certificate of Volunteerism (PDF) for ${activeVolunteer.name}!`);
+      } else {
+        setDownloadingCertPng(true);
+        await downloadCertificateAsImage(certRecord);
+        setCertDownloadNotice(`Downloaded Certificate of Volunteerism (PNG) for ${activeVolunteer.name}!`);
+      }
+      setTimeout(() => setCertDownloadNotice(null), 4000);
+    } catch (err) {
+      console.error('Failed to download volunteer certificate:', err);
+      setCertDownloadNotice('Failed to generate certificate download. Please try again.');
+    } finally {
+      setDownloadingCertPdf(false);
+      setDownloadingCertPng(false);
+    }
+  };
 
   // Listen for global custom event to lookup volunteer from anywhere
   useEffect(() => {
@@ -469,25 +512,69 @@ export const VolunteerDutyTracker: React.FC<VolunteerDutyTrackerProps> = ({
               </div>
             </div>
 
-            {/* Completion Progress Metric Bar */}
-            <div className="lg:w-64 bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs shrink-0">
-              <div className="flex items-center justify-between text-xs mb-1.5">
-                <span className="font-bold text-slate-700">Completion Status:</span>
-                <span className="font-black text-blue-700">{completedCount} of {totalTasks} ({progressPercent}%)</span>
+            <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0">
+              {/* Completion Progress Metric Bar */}
+              <div className="lg:w-64 bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="font-bold text-slate-700">Completion Status:</span>
+                  <span className="font-black text-blue-700">{completedCount} of {totalTasks} ({progressPercent}%)</span>
+                </div>
+                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full transition-all duration-500 rounded-full ${
+                      isFullyCleared ? 'bg-emerald-500' : 'bg-blue-600'
+                    }`}
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+                <div className="text-[10px] text-slate-500 mt-1 text-center font-medium">
+                  {isFullyCleared ? 'All tasks verified & signed off!' : 'Active duty in progress'}
+                </div>
               </div>
-              <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                <div
-                  className={`h-full transition-all duration-500 rounded-full ${
-                    isFullyCleared ? 'bg-emerald-500' : 'bg-blue-600'
-                  }`}
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
-              <div className="text-[10px] text-slate-500 mt-1.5 text-center font-medium">
-                {isFullyCleared ? 'All specific assigned tasks verified!' : 'Awaiting admin verification & sign-off'}
+
+              {/* Volunteer Official Certificate Action Box */}
+              <div className="lg:w-64 bg-gradient-to-br from-purple-50 to-indigo-50 p-3 rounded-xl border border-purple-200 shadow-2xs flex flex-col justify-between">
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-1.5 text-purple-950 font-extrabold text-xs">
+                    <Award size={14} className="text-purple-600" />
+                    <span>Volunteer Certificate</span>
+                  </div>
+                  <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                    Ready
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadVolunteerCert('pdf')}
+                    disabled={downloadingCertPdf}
+                    className="flex-1 py-1.5 px-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-[11px] rounded-lg shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95 disabled:opacity-50"
+                    title="Download Print-Ready A4 PDF"
+                  >
+                    {downloadingCertPdf ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+                    <span>PDF</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadVolunteerCert('png')}
+                    disabled={downloadingCertPng}
+                    className="flex-1 py-1.5 px-2 bg-white hover:bg-purple-100 text-purple-800 border border-purple-300 font-bold text-[11px] rounded-lg shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1 active:scale-95 disabled:opacity-50"
+                    title="Download High-Resolution PNG"
+                  >
+                    {downloadingCertPng ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+                    <span>PNG</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
+
+          {certDownloadNotice && (
+            <div className="p-3 bg-emerald-50 border border-emerald-300 rounded-xl text-xs font-semibold text-emerald-800 flex items-center gap-2 animate-fadeIn">
+              <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+              <span>{certDownloadNotice}</span>
+            </div>
+          )}
 
           {/* Primary Specific Work & Responsibility Spotlight Card */}
           <div className="p-5 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border border-blue-200 rounded-2xl mb-6 shadow-2xs">
